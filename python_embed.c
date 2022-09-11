@@ -1965,6 +1965,7 @@ static PyObject* PyMinqlx_InitModule(void) {
     PyModule_AddObject(module, "Vector3", (PyObject*)&vector3_type);
     PyModule_AddObject(module, "Weapons", (PyObject*)&weapons_type);
     PyModule_AddObject(module, "Powerups", (PyObject*)&powerups_type);
+    PyModule_AddObject(module, "Flight", (PyObject*)&flight_type);
     PyModule_AddObject(module, "Keys", (PyObject*)&keys_type);
 
     return module;
