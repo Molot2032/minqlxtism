@@ -468,8 +468,7 @@ class Player():
         gold = k.gold if "gold" not in kwargs else bool(kwargs["gold"])
         master = k.master if "master" not in kwargs else bool(kwargs["master"])
 
-        return minqlx.set_keys(self.id,
-            minqlx.Keys((silver, gold, master)))
+        return minqlx.set_keys(self.id, minqlx.Keys((silver, gold, master)))
 
     @property
     def holdable(self):

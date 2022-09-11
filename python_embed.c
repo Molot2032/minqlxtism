@@ -779,7 +779,7 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
 
     PyObject* keys = PyStructSequence_New(&keys_type);
     for (int i = 0; i < keys_desc.n_in_sequence; i++) {
-        if (g_entities[client_id].client->ps.stats[STAT_KEY] & (1 << (i - 1)))
+        if (g_entities[client_id].client->ps.stats[STAT_KEY] & (1 << i))
             PyStructSequence_SetItem(keys, i, Py_True);
         else
             PyStructSequence_SetItem(keys, i, Py_False);
@@ -1276,7 +1276,7 @@ static PyObject* PyMinqlx_SetKeys(PyObject* self, PyObject* args) {
             return NULL;
         }
 
-        key_flags |= k == Py_True ? (1 << (i - 1)) : 0;
+        key_flags |= k == Py_True ? (1 << i) : 0;
     }
 
     g_entities[client_id].client->ps.stats[STAT_KEY] = key_flags;
