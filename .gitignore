@@ -33,3 +33,6 @@ bin/minqlx.zip
 /.vs/ProjectSettings.json
 /.vs/slnx.sqlite
 /.vs/minqlx/v16/ipch/AutoPCH
+.vs/VSWorkspaceState.json
+.gitignore
+.vs/minqlx/v16/.suo
