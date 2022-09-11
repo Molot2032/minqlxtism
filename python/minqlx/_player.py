@@ -455,6 +455,22 @@ class Player():
         return minqlx.set_powerups(self.id,
             minqlx.Powerups((quad, bs, haste, invis, regen, invul)))
 
+    def keys(self, reset=False, **kwargs):
+        if reset:
+            k = minqlx.Keys(((False,)*3))
+        else:
+            k = self.state.keys
+
+        if not kwargs:
+            return k
+
+        silver = k.silver if "silver" not in kwargs else bool(kwargs["silver"])
+        gold = k.gold if "gold" not in kwargs else bool(kwargs["gold"])
+        master = k.master if "master" not in kwargs else bool(kwargs["master"])
+
+        return minqlx.set_keys(self.id,
+            minqlx.Keys((silver, gold, master)))
+
     @property
     def holdable(self):
         return self.state.holdable

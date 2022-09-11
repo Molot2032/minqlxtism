@@ -1269,7 +1269,7 @@ static PyObject* PyMinqlx_SetKeys(PyObject* self, PyObject* args) {
             return NULL;
         }
 
-        key_flags |= k == Py_True ? (1 << (i + 1)) : 0;
+        key_flags |= k == Py_True ? (1 << (i - 1)) : 0;
     }
 
     g_entities[client_id].client->ps.stats[STAT_KEY] = key_flags;
