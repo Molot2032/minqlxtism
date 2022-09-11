@@ -28,3 +28,8 @@
 *.app
 
 bin/minqlx.zip
+/.vs/minqlx/v16/Browse.VC.db
+/.vs/minqlx/v16/Browse.VC.opendb
+/.vs/ProjectSettings.json
+/.vs/slnx.sqlite
+/.vs/minqlx/v16/ipch/AutoPCH

@@ -118,6 +118,7 @@ static PyStructSequence_Field player_state_fields[] = {
     {"holdable", "The player's holdable item."},
     {"flight", "A struct sequence with flight parameters."},
     {"is_frozen", "Whether the player is frozen(freezetag)."},
+    {"keys", "The player's keys."}
     {NULL}
 };
 
@@ -218,6 +219,23 @@ static PyStructSequence_Desc flight_desc = {
     "A struct sequence containing parameters for the flight holdable item.",
     flight_fields,
     (sizeof(flight_fields)/sizeof(PyStructSequence_Field)) - 1
+};
+
+// Keys
+static PyTypeObject keys_type = {0};
+
+static PyStructSequence_Field keys_fields[] = {
+    {"silver", NULL},
+    {"gold", NULL},
+    {"master", NULL},
+    {NULL}
+};
+
+static PyStructSequence_Desc keys_desc = {
+    "Keys",
+    "A struct sequence containing all the keys in the game.",
+    keys_fields,
+    (sizeof(keys_fields)/sizeof(PyStructSequence_Field)) - 1
 };
 
 /*
@@ -759,6 +777,8 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
 
     PyStructSequence_SetItem(state, 12, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 4));
 
+    PyStructSequence_SetItem(state, 13, PyLong_FromLongLong(g_entities[client_id].client->keys);
+
     return state;
 }
 
@@ -1214,6 +1234,45 @@ static PyObject* PyMinqlx_SetFlight(PyObject* self, PyObject* args) {
     g_entities[client_id].client->ps.stats[STAT_MAX_FLIGHT_FUEL] = PyLong_AsLong(PyStructSequence_GetItem(flight, 1));
     g_entities[client_id].client->ps.stats[STAT_FLIGHT_THRUST] = PyLong_AsLong(PyStructSequence_GetItem(flight, 2));
     g_entities[client_id].client->ps.stats[STAT_FLIGHT_REFUEL] = PyLong_AsLong(PyStructSequence_GetItem(flight, 3));
+    Py_RETURN_TRUE;
+}
+
+
+/*
+* ================================================================
+*                            set_keys
+* ================================================================
+*/
+static PyObject* PyMinqlx_SetKeys(PyObject* self, PyObject* args) {
+    int client_id, key_flags = 0;
+    PyObject* keys;
+    if (!PyArg_ParseTuple(args, "iO:set_keys", &client_id, &keys))
+        return NULL;
+    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+        PyErr_Format(PyExc_ValueError,
+            "client_id needs to be a number from 0 to %d.",
+            sv_maxclients->integer);
+        return NULL;
+    }
+    else if (!g_entities[client_id].client)
+        Py_RETURN_FALSE;
+    else if (!PyObject_TypeCheck(weapons, &weapons_type)) {
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Keys.");
+        return NULL;
+    }
+
+    PyObject* k;
+    for (int i = 0; i < keys_desc.n_in_sequence; i++) {
+        w = PyStructSequence_GetItem(keys, i);
+        if (!PyBool_Check(k)) {
+            PyErr_Format(PyExc_ValueError, "Tuple argument %d is not a boolean.", i);
+            return NULL;
+        }
+
+        key_flags |= w == Py_True ? (1 << (i + 1)) : 0;
+    }
+
+    g_entities[client_id].client->keys = key_flags;
     Py_RETURN_TRUE;
 }
 
@@ -1744,6 +1803,8 @@ static PyMethodDef minqlxMethods[] = {
      "Drops player's holdable item."},
     {"set_flight", PyMinqlx_SetFlight, METH_VARARGS,
      "Sets a player's flight parameters, such as current fuel, max fuel and, so on."},
+    {"set_keys", PyMinqlx_SetKeys, METH_VARARGS,
+     "Sets a player's keys."},
     {"set_invulnerability", PyMinqlx_SetInvulnerability, METH_VARARGS,
      "Makes player invulnerable for limited time."},
     {"set_score", PyMinqlx_SetScore, METH_VARARGS,
@@ -1881,6 +1942,7 @@ static PyObject* PyMinqlx_InitModule(void) {
     PyStructSequence_InitType(&weapons_type, &weapons_desc);
     PyStructSequence_InitType(&powerups_type, &powerups_desc);
     PyStructSequence_InitType(&flight_type, &flight_desc);
+    PyStructSequence_InitType(&keys_type, &keys_desc);
     Py_INCREF((PyObject*)&player_info_type);
     Py_INCREF((PyObject*)&player_state_type);
     Py_INCREF((PyObject*)&player_stats_type);
@@ -1888,6 +1950,7 @@ static PyObject* PyMinqlx_InitModule(void) {
     Py_INCREF((PyObject*)&weapons_type);
     Py_INCREF((PyObject*)&powerups_type);
     Py_INCREF((PyObject*)&flight_type);
+    Py_INCREF((PyObject*)&keys_type);
     // Add new types.
     PyModule_AddObject(module, "PlayerInfo", (PyObject*)&player_info_type);
     PyModule_AddObject(module, "PlayerState", (PyObject*)&player_state_type);
@@ -1895,7 +1958,7 @@ static PyObject* PyMinqlx_InitModule(void) {
     PyModule_AddObject(module, "Vector3", (PyObject*)&vector3_type);
     PyModule_AddObject(module, "Weapons", (PyObject*)&weapons_type);
     PyModule_AddObject(module, "Powerups", (PyObject*)&powerups_type);
-    PyModule_AddObject(module, "Flight", (PyObject*)&flight_type);
+    PyModule_AddObject(module, "Keys", (PyObject*)&keys_type);
 
     return module;
 }
