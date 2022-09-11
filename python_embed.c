@@ -118,7 +118,7 @@ static PyStructSequence_Field player_state_fields[] = {
     {"holdable", "The player's holdable item."},
     {"flight", "A struct sequence with flight parameters."},
     {"is_frozen", "Whether the player is frozen(freezetag)."},
-    {"keys", "The player's keys."}
+    {"keys", "The player's keys."},
     {NULL}
 };
 
