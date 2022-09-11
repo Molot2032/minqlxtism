@@ -777,7 +777,7 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
 
     PyStructSequence_SetItem(state, 12, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 4));
 
-    PyStructSequence_SetItem(state, 13, PyLong_FromLongLong(g_entities[client_id].client->keys);
+    PyStructSequence_SetItem(state, 13, PyLong_FromLongLong(g_entities[client_id].client->key);
 
     return state;
 }
@@ -1256,23 +1256,23 @@ static PyObject* PyMinqlx_SetKeys(PyObject* self, PyObject* args) {
     }
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(weapons, &weapons_type)) {
+    else if (!PyObject_TypeCheck(keys, &keys_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Keys.");
         return NULL;
     }
 
     PyObject* k;
     for (int i = 0; i < keys_desc.n_in_sequence; i++) {
-        w = PyStructSequence_GetItem(keys, i);
+        k = PyStructSequence_GetItem(keys, i);
         if (!PyBool_Check(k)) {
             PyErr_Format(PyExc_ValueError, "Tuple argument %d is not a boolean.", i);
             return NULL;
         }
 
-        key_flags |= w == Py_True ? (1 << (i + 1)) : 0;
+        key_flags |= k == Py_True ? (1 << (i + 1)) : 0;
     }
 
-    g_entities[client_id].client->keys = key_flags;
+    g_entities[client_id].client->key = key_flags;
     Py_RETURN_TRUE;
 }
 
