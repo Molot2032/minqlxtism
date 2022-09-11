@@ -777,7 +777,7 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
 
     PyStructSequence_SetItem(state, 12, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 4));
 
-    PyStructSequence_SetItem(state, 13, PyLong_FromLongLong(g_entities[client_id].client->ps.keys);
+    PyStructSequence_SetItem(state, 13, PyLong_FromLongLong(g_entities[client_id].client->ps.keys));
 
     return state;
 }
