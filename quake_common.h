@@ -431,7 +431,7 @@ typedef enum {
     KEY_SILVER = 0x0,
     KEY_GOLD = 0x1,
     KEY_MASTER = 0x2,
-} key_t;
+} keys_t;
 
 typedef enum {
 	TEAM_BEGIN,		// Beginning a team game, spawn at base
