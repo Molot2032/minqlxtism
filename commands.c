@@ -10,7 +10,7 @@
 #include "common.h"
 
 #ifndef NOPY
-#include "pyminqlx.h"
+#include "pyminqlxtended.h"
 #endif
 
 void __cdecl SendServerCommand(void) {
@@ -82,7 +82,7 @@ void __cdecl Slay(void) {
 }
 
 #ifndef NOPY
-// Execute a pyminqlx command as if it were the owner executing it.
+// Execute a pyminqlxtended command as if it were the owner executing it.
 // Output will appear in the console.
 void __cdecl PyRcon(void) {
     RconDispatcher(Cmd_Args());
@@ -96,7 +96,7 @@ void __cdecl PyCommand(void) {
 
 	PyObject* result = PyObject_CallFunction(custom_command_handler, "s", Cmd_Args());
 	if (result == Py_False) {
-		Com_Printf("The command failed to be executed. pyminqlx found no handler.\n");
+		Com_Printf("The command failed to be executed. pyminqlxtended found no handler.\n");
 	}
 
 	Py_XDECREF(result);
@@ -108,7 +108,7 @@ void __cdecl RestartPython(void) {
     if (PyMinqlx_IsInitialized())
     	PyMinqlx_Finalize();
     PyMinqlx_Initialize();
-    // minqlx initializes after the first new game starts, but since the game already
+    // minqlxtended initializes after the first new game starts, but since the game already
     // start, we manually trigger the event to make it initialize properly.
     NewGameDispatcher(0);
 }

@@ -20,30 +20,30 @@ SOURCES_NOPY += dllmain.c commands.c simple_hook.c hooks.c misc.c maps_parser.c 
 SOURCES += dllmain.c commands.c python_embed.c python_dispatchers.c simple_hook.c hooks.c misc.c maps_parser.c trampoline.c patches.c
 OBJS = $(SOURCES:.c=.o)
 OBJS_NOPY = $(SOURCES_NOPY:.c=.o)
-OUTPUT = $(BINDIR)/minqlx$(SUFFIX).so
-OUTPUT_NOPY = $(BINDIR)/minqlx_nopy.so
-PYMODULE = $(BINDIR)/minqlx.zip
-PYFILES = $(wildcard python/minqlx/*.py)
+OUTPUT = $(BINDIR)/minqlxtended$(SUFFIX).so
+OUTPUT_NOPY = $(BINDIR)/minqlxtended_nopy.so
+PYMODULE = $(BINDIR)/minqlxtended.zip
+PYFILES = $(wildcard python/minqlxtended/*.py)
 
 .PHONY: depend clean
 
 all: CFLAGS += $(shell python3-config --includes)
-all: VERSION := MINQLX_VERSION=\"$(shell python3 python/version.py)\"
+all: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py)\"
 all: $(OUTPUT) $(PYMODULE)
 	@echo Done!
 
 debug: CFLAGS += $(shell python3-config --includes) -gdwarf-2 -Wall -O0 -fvar-tracking
-debug: VERSION := MINQLX_VERSION=\"$(shell python3 python/version.py -d)\"
+debug: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py -d)\"
 debug: $(OUTPUT) $(PYMODULE)
 	@echo Done!
 
 nopy: CFLAGS += -Wall -DNOPY
-nopy: VERSION := MINQLX_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
+nopy: VERSION := MINQLXTENDED_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
 nopy: $(OUTPUT_NOPY)
 	@echo Done!
 
 nopy_debug: CFLAGS +=  -gdwarf-2 -Wall -O0 -DNOPY
-nopy_debug: VERSION := MINQLX_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
+nopy_debug: VERSION := MINQLXTENDED_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
 nopy_debug: $(OUTPUT_NOPY)
 	@echo Done!
 
@@ -54,7 +54,7 @@ $(OUTPUT_NOPY): $(OBJS_NOPY)
 	$(CC) $(CFLAGS) -D$(VERSION) -o $(OUTPUT_NOPY) $(OBJS_NOPY) $(LDFLAGS_NOPY)
 
 $(PYMODULE): $(PYFILES)
-	@python3 -m zipfile -c $(PYMODULE) python/minqlx
+	@python3 -m zipfile -c $(PYMODULE) python/minqlxtended
 
 .c.o:
 	$(CC) $(CFLAGS) -D$(VERSION) -c $< -o $@

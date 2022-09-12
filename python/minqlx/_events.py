@@ -1,22 +1,22 @@
-# minqlx - Extends Quake Live's dedicated server with extra functionality and scripting.
+# minqlxtended - Extends Quake Live's dedicated server with extra functionality and scripting.
 # Copyright (C) 2015 Mino <mino@minomino.org>
 
-# This file is part of minqlx.
+# This file is part of minqlxtended.
 
-# minqlx is free software: you can redistribute it and/or modify
+# minqlxtended is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# minqlx is distributed in the hope that it will be useful,
+# minqlxtended is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with minqlx. If not, see <http://www.gnu.org/licenses/>.
+# along with minqlxtended. If not, see <http://www.gnu.org/licenses/>.
 
-import minqlx
+import minqlxtended
 import re
 
 _re_vote = re.compile(r"^(?P<cmd>[^ ]+)(?: \"?(?P<args>.*?)\"?)?$")
@@ -45,11 +45,11 @@ class EventDispatcher:
         and call this method by using ``super().dispatch()``.
 
         Handlers have several options for return values that can affect the flow:
-            - minqlx.RET_NONE or None -- Continue execution normally.
-            - minqlx.RET_STOP -- Stop any further handlers from being called.
-            - minqlx.RET_STOP_EVENT -- Let handlers process it, but stop the event
+            - minqlxtended.RET_NONE or None -- Continue execution normally.
+            - minqlxtended.RET_STOP -- Stop any further handlers from being called.
+            - minqlxtended.RET_STOP_EVENT -- Let handlers process it, but stop the event
                 at the engine-level.
-            - minqlx.RET_STOP_ALL -- Stop handlers **and** the event.
+            - minqlxtended.RET_STOP_ALL -- Stop handlers **and** the event.
             - Any other value -- Passed on to :func:`self.handle_return`, which will
                 by default simply send a warning to the logger about an unknown value
                 being returned. Can be overridden so that events can have their own
@@ -64,7 +64,7 @@ class EventDispatcher:
         # is returned, we pass it on to handle_return.
         self.args = args
         self.kwargs = kwargs
-        logger = minqlx.get_logger()
+        logger = minqlxtended.get_logger()
         # Log the events as they come in.
         if self.name not in self.no_debug:
             dbgstr = "{}{}".format(self.name, args)
@@ -79,20 +79,20 @@ class EventDispatcher:
                 for handler in plugins[plugin][i]:
                     try:
                         res = handler(*self.args, **self.kwargs)
-                        if res == minqlx.RET_NONE or res is None:
+                        if res == minqlxtended.RET_NONE or res is None:
                             continue
-                        elif res == minqlx.RET_STOP:
+                        elif res == minqlxtended.RET_STOP:
                             return True
-                        elif res == minqlx.RET_STOP_EVENT:
+                        elif res == minqlxtended.RET_STOP_EVENT:
                             self.return_value = False
-                        elif res == minqlx.RET_STOP_ALL:
+                        elif res == minqlxtended.RET_STOP_ALL:
                             return False
                         else: # Got an unknown return value.
                             return_handler = self.handle_return(handler, res)
                             if return_handler is not None:
                                 return return_handler
                     except:
-                        minqlx.log_exception(plugin)
+                        minqlxtended.log_exception(plugin)
                         continue
 
         return self.return_value
@@ -107,27 +107,27 @@ class EventDispatcher:
         is the return value that will be sent to the C-level handler if the
         event isn't stopped later along the road.
         """
-        logger = minqlx.get_logger()
+        logger = minqlxtended.get_logger()
         logger.warning("Handler '{}' returned unknown value '{}' for event '{}'"
             .format(handler.__name__, value, self.name))
 
-    def add_hook(self, plugin, handler, priority=minqlx.PRI_NORMAL):
+    def add_hook(self, plugin, handler, priority=minqlxtended.PRI_NORMAL):
         """Hook the event, making the handler get called with relevant arguments
         whenever the event is takes place.
 
         :param plugin: The plugin that's hooking the event.
-        :type plugin: minqlx.Plugin
+        :type plugin: minqlxtended.Plugin
         :param handler: The handler to be called when the event takes place.
         :type handler: callable
         :param priority: The priority of the hook. Determines the order the handlers are called in.
-        :type priority: minqlx.PRI_LOWEST, minqlx.PRI_LOW, minqlx.PRI_NORMAL, minqlx.PRI_HIGH or minqlx.PRI_HIGHEST
+        :type priority: minqlxtended.PRI_LOWEST, minqlxtended.PRI_LOW, minqlxtended.PRI_NORMAL, minqlxtended.PRI_HIGH or minqlxtended.PRI_HIGHEST
         :raises: ValueError
 
         """
-        if not (minqlx.PRI_HIGHEST <= priority <= minqlx.PRI_LOWEST):
+        if not (minqlxtended.PRI_HIGHEST <= priority <= minqlxtended.PRI_LOWEST):
             raise ValueError("'{}' is an invalid priority level.".format(priority))
 
-        if self.need_zmq_stats_enabled and not bool(int(minqlx.get_cvar("zmq_stats_enable"))):
+        if self.need_zmq_stats_enabled and not bool(int(minqlxtended.get_cvar("zmq_stats_enable"))):
             raise AssertionError("{} hook requires zmq_stats_enabled cvar to have nonzero value".format(self.name))
 
         if plugin not in self.plugins:
@@ -142,15 +142,15 @@ class EventDispatcher:
 
         self.plugins[plugin][priority].append(handler)
 
-    def remove_hook(self, plugin, handler, priority=minqlx.PRI_NORMAL):
+    def remove_hook(self, plugin, handler, priority=minqlxtended.PRI_NORMAL):
         """Removes a previously hooked event.
 
         :param plugin: The plugin that hooked the event.
-        :type plugin: minqlx.Plugin
+        :type plugin: minqlxtended.Plugin
         :param handler: The handler used when hooked.
         :type handler: callable
         :param priority: The priority of the hook when hooked.
-        :type priority: minqlx.PRI_LOWEST, minqlx.PRI_LOW, minqlx.PRI_NORMAL, minqlx.PRI_HIGH or minqlx.PRI_HIGHEST
+        :type priority: minqlxtended.PRI_LOWEST, minqlxtended.PRI_LOW, minqlxtended.PRI_NORMAL, minqlxtended.PRI_HIGH or minqlxtended.PRI_HIGHEST
         :raises: ValueError
 
         """
@@ -202,7 +202,7 @@ class EventDispatcherManager:
 
 class ConsolePrintDispatcher(EventDispatcher):
     """Event that goes off whenever the console prints something, including
-    those with :func:`minqlx.console_print`.
+    those with :func:`minqlxtended.console_print`.
 
     """
     name = "console_print"
@@ -243,7 +243,7 @@ class ClientCommandDispatcher(EventDispatcher):
         if ret is False:
             return False
 
-        ret = minqlx.COMMANDS.handle_input(player, cmd, minqlx.ClientCommandChannel(player))
+        ret = minqlxtended.COMMANDS.handle_input(player, cmd, minqlxtended.ClientCommandChannel(player))
         if ret is False:
             return False
 
@@ -263,7 +263,7 @@ class ClientCommandDispatcher(EventDispatcher):
 
 class ServerCommandDispatcher(EventDispatcher):
     """Event that triggers with any server command sent by the server,
-    including :func:`minqlx.send_server_command`. Can be cancelled.
+    including :func:`minqlxtended.send_server_command`. Can be cancelled.
 
     """
     name = "server_command"
@@ -294,7 +294,7 @@ class FrameEventDispatcher(EventDispatcher):
 
 class SetConfigstringDispatcher(EventDispatcher):
     """Event that triggers when the server tries to set a configstring. You can
-    stop this event and use :func:`minqlx.set_configstring` to modify it, but a
+    stop this event and use :func:`minqlxtended.set_configstring` to modify it, but a
     more elegant way to do it is simply returning the new configstring in
     the handler, and the modified one will go down the plugin chain instead.
 
@@ -326,7 +326,7 @@ class ChatEventDispatcher(EventDispatcher):
     name = "chat"
 
     def dispatch(self, player, msg, channel):
-        ret = minqlx.COMMANDS.handle_input(player, msg, channel)
+        ret = minqlxtended.COMMANDS.handle_input(player, msg, channel)
         if ret is False: # Stop event if told to.
             return False
 
@@ -430,15 +430,15 @@ class VoteEndedDispatcher(EventDispatcher):
 
     def dispatch(self, passed):
         # Check if there's a current vote in the first place.
-        cs = minqlx.get_configstring(9)
+        cs = minqlxtended.get_configstring(9)
         if not cs:
-            minqlx.get_logger().warning("vote_ended went off without configstring 9.")
+            minqlxtended.get_logger().warning("vote_ended went off without configstring 9.")
             return
 
         res = _re_vote.match(cs)
         vote = res.group("cmd")
         args = res.group("args") if res.group("args") else ""
-        votes = (int(minqlx.get_configstring(10)), int(minqlx.get_configstring(11)))
+        votes = (int(minqlxtended.get_configstring(10)), int(minqlxtended.get_configstring(11)))
         super().dispatch(votes, vote, args, passed)
 
 class VoteDispatcher(EventDispatcher):

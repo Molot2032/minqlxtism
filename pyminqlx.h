@@ -1,8 +1,8 @@
-#ifndef PYMINQLX_H
-#define PYMINQLX_H
+#ifndef PYMINQLXTENDED_H
+#define PYMINQLXTENDED_H
 
 #define PYTHON_FILENAME L"python3"
-#define CORE_MODULE "minqlx.zip"
+#define CORE_MODULE "minqlxtended.zip"
 
 #include <Python.h>
 
@@ -92,4 +92,4 @@ void ClientSpawnDispatcher(int client_id);
 void KamikazeUseDispatcher(int client_id);
 void KamikazeExplodeDispatcher(int client_id, int is_used_on_demand);
 
-#endif /* PYMINQLX_H */
+#endif /* PYMINQLXTENDED_H */

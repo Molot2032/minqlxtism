@@ -1,22 +1,22 @@
-# minqlx - Extends Quake Live's dedicated server with extra functionality and scripting.
+# minqlxtended - Extends Quake Live's dedicated server with extra functionality and scripting.
 # Copyright (C) 2015 Mino <mino@minomino.org>
 
-# This file is part of minqlx.
+# This file is part of minqlxtended.
 
-# minqlx is free software: you can redistribute it and/or modify
+# minqlxtended is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# minqlx is distributed in the hope that it will be useful,
+# minqlxtended is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with minqlx. If not, see <http://www.gnu.org/licenses/>.
+# along with minqlxtended. If not, see <http://www.gnu.org/licenses/>.
 
-import minqlx
+import minqlxtended
 import redis
 
 # ====================================================================
@@ -35,7 +35,7 @@ class AbstractDatabase:
 
     @property
     def logger(self):
-        return minqlx.get_logger(self.plugin)
+        return minqlxtended.get_logger(self.plugin)
 
     def set_permission(self, player):
         """Abstract method. Should set the permission of a player.
@@ -91,7 +91,7 @@ class AbstractDatabase:
         "connection" obviously depends on the database, so the specifics will be up
         to the implementation.
 
-        A :class:`minqlx.Plugin` subclass can set
+        A :class:`minqlxtended.Plugin` subclass can set
 
         :raises: NotImplementedError
 
@@ -112,7 +112,7 @@ class AbstractDatabase:
 # ====================================================================
 
 class Redis(AbstractDatabase):
-    """A subclass of :class:`minqlx.AbstractDatabase` providing support for Redis."""
+    """A subclass of :class:`minqlxtended.AbstractDatabase` providing support for Redis."""
 
     # We only use the instance-level ones if we override the URI from the config.
     _conn = None
@@ -154,13 +154,13 @@ class Redis(AbstractDatabase):
         """Sets the permission of a player.
 
         :param player: The player in question.
-        :type player: minqlx.Player
+        :type player: minqlxtended.Player
 
         """
-        if isinstance(player, minqlx.Player):
-            key = "minqlx:players:{}:permission".format(player.steam_id)
+        if isinstance(player, minqlxtended.Player):
+            key = "minqlxtended:players:{}:permission".format(player.steam_id)
         else:
-            key = "minqlx:players:{}:permission".format(player)
+            key = "minqlxtended:players:{}:permission".format(player)
 
         self[key] = level
 
@@ -168,24 +168,24 @@ class Redis(AbstractDatabase):
         """Gets the permission of a player.
 
         :param player: The player in question.
-        :type player: minqlx.Player, int
+        :type player: minqlxtended.Player, int
         :returns: int
 
         """
-        if isinstance(player, minqlx.Player):
+        if isinstance(player, minqlxtended.Player):
             steam_id = player.steam_id
         elif isinstance(player, int):
             steam_id = player
         elif isinstance(player, str):
             steam_id = int(player)
         else:
-            raise ValueError("Invalid player. Use either a minqlx.Player instance or a SteamID64.")
+            raise ValueError("Invalid player. Use either a minqlxtended.Player instance or a SteamID64.")
 
         # If it's the owner, treat it like a 5.
-        if steam_id == minqlx.owner():
+        if steam_id == minqlxtended.owner():
             return 5
 
-        key = "minqlx:players:{}:permission".format(steam_id)
+        key = "minqlxtended:players:{}:permission".format(steam_id)
         try:
             perm = self[key]
         except KeyError:
@@ -197,7 +197,7 @@ class Redis(AbstractDatabase):
         """Checks if the player has higher than or equal to *level*.
 
         :param player: The player in question.
-        :type player: minqlx.Player
+        :type player: minqlxtended.Player
         :param level: The permission level to check for.
         :type level: int
         :returns: bool
@@ -209,17 +209,17 @@ class Redis(AbstractDatabase):
         """Sets specified player flag
 
         :param player: The player in question.
-        :type player: minqlx.Player
+        :type player: minqlxtended.Player
         :param flag: The flag to set.
         :type flag: string
         :param value: (optional, default=True) Value to set
         :type value: bool
 
         """
-        if isinstance(player, minqlx.Player):
-            key = "minqlx:players:{0}:flags:{1}".format(player.steam_id, flag)
+        if isinstance(player, minqlxtended.Player):
+            key = "minqlxtended:players:{0}:flags:{1}".format(player.steam_id, flag)
         else:
-            key = "minqlx:players:{0}:flags:{1}".format(player, flag)
+            key = "minqlxtended:players:{0}:flags:{1}".format(player, flag)
 
         self[key] = 1 if value else 0
 
@@ -227,17 +227,17 @@ class Redis(AbstractDatabase):
         """Clears the specified player flag
 
         :param player: The player in question.
-        :type player: minqlx.Player
+        :type player: minqlxtended.Player
         :param flag: The flag to get
         :type flag: string
         :param default: (optional, default=False) The value to return if the flag is unknown
         :type default: bool
 
         """
-        if isinstance(player, minqlx.Player):
-            key = "minqlx:players:{0}:flags:{1}".format(player.steam_id, flag)
+        if isinstance(player, minqlxtended.Player):
+            key = "minqlxtended:players:{0}:flags:{1}".format(player.steam_id, flag)
         else:
-            key = "minqlx:players:{0}:flags:{1}".format(player, flag)
+            key = "minqlxtended:players:{0}:flags:{1}".format(player, flag)
 
         try:
             return bool(int(self[key]))
@@ -263,10 +263,10 @@ class Redis(AbstractDatabase):
         """
         if not host and not self._conn: # Resort to default settings in config?
             if not Redis._conn:
-                cvar_host = minqlx.get_cvar("qlx_redisAddress")
-                cvar_db = int(minqlx.get_cvar("qlx_redisDatabase"))
-                cvar_unixsocket = bool(int(minqlx.get_cvar("qlx_redisUnixSocket")))
-                Redis._pass = minqlx.get_cvar("qlx_redisPassword")
+                cvar_host = minqlxtended.get_cvar("qlx_redisAddress")
+                cvar_db = int(minqlxtended.get_cvar("qlx_redisDatabase"))
+                cvar_unixsocket = bool(int(minqlxtended.get_cvar("qlx_redisUnixSocket")))
+                Redis._pass = minqlxtended.get_cvar("qlx_redisPassword")
                 if cvar_unixsocket:
                     Redis._conn = redis.StrictRedis(unix_socket_path=cvar_host,
                         db=cvar_db, password=Redis._pass, decode_responses=True)

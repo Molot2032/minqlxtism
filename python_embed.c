@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "pyminqlx.h"
+#include "pyminqlxtended.h"
 #include "quake_common.h"
 #include "patterns.h"
 #include "common.h"
@@ -41,8 +41,8 @@ static const char loader[] = "import traceback\n" \
     "  import sys\n" \
 	"  sys.path.append('" CORE_MODULE "')\n" \
     "  sys.path.append('.')\n" \
-	"  import minqlx\n" \
-	"  minqlx.initialize()\n" \
+	"  import minqlxtended\n" \
+	"  minqlxtended.initialize()\n" \
     "  ret = True\n" \
     "except Exception as e:\n" \
     "  e = traceback.format_exc().rstrip('\\n')\n" \
@@ -844,7 +844,7 @@ static PyObject* PyMinqlx_SetPosition(PyObject* self, PyObject* args) {
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
     else if (!PyObject_TypeCheck(new_position, &vector3_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Vector3.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Vector3.");
         return NULL;
     }
 
@@ -879,7 +879,7 @@ static PyObject* PyMinqlx_SetVelocity(PyObject* self, PyObject* args) {
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
     else if (!PyObject_TypeCheck(new_velocity, &vector3_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Vector3.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Vector3.");
         return NULL;
     }
 
@@ -987,7 +987,7 @@ static PyObject* PyMinqlx_SetWeapons(PyObject* self, PyObject* args) {
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
     else if (!PyObject_TypeCheck(weapons, &weapons_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Weapons.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Weapons.");
         return NULL;
     }
 
@@ -1053,7 +1053,7 @@ static PyObject* PyMinqlx_SetAmmo(PyObject* self, PyObject* args) {
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
     else if (!PyObject_TypeCheck(ammos, &weapons_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Weapons.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Weapons.");
         return NULL;
     }
 
@@ -1091,7 +1091,7 @@ static PyObject* PyMinqlx_SetPowerups(PyObject* self, PyObject* args) {
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
     else if (!PyObject_TypeCheck(powerups, &powerups_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Powerups.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Powerups.");
         return NULL;
     }
 
@@ -1227,7 +1227,7 @@ static PyObject* PyMinqlx_SetFlight(PyObject* self, PyObject* args) {
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
     else if (!PyObject_TypeCheck(flight, &flight_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Flight.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Flight.");
         return NULL;
     }
 
@@ -1264,7 +1264,7 @@ static PyObject* PyMinqlx_SetKeys(PyObject* self, PyObject* args) {
     else if (!g_entities[client_id].client)
         Py_RETURN_FALSE;
     else if (!PyObject_TypeCheck(keys, &keys_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlx.Keys.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Keys.");
         return NULL;
     }
 
@@ -1749,7 +1749,7 @@ static PyObject* PyMinqlx_ForceWeaponRespawnTime(PyObject* self, PyObject* args)
  * ================================================================
 */
 
-static PyMethodDef minqlxMethods[] = {
+static PyMethodDef minqlxtendedMethods[] = {
     {"player_info", PyMinqlx_PlayerInfo, METH_VARARGS,
      "Returns a dictionary with information about a player by ID."},
 	{"players_info", PyMinqlx_PlayersInfo, METH_NOARGS,
@@ -1841,16 +1841,16 @@ static PyMethodDef minqlxMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-static PyModuleDef minqlxModule = {
-    PyModuleDef_HEAD_INIT, "minqlx", NULL, -1, minqlxMethods,
+static PyModuleDef minqlxtendedModule = {
+    PyModuleDef_HEAD_INIT, "minqlxtended", NULL, -1, minqlxtendedMethods,
     NULL, NULL, NULL, NULL
 };
 
 static PyObject* PyMinqlx_InitModule(void) {
-    PyObject* module = PyModule_Create(&minqlxModule);
+    PyObject* module = PyModule_Create(&minqlxtendedModule);
 
-    // Set minqlx version.
-    PyModule_AddStringConstant(module, "__version__", MINQLX_VERSION);
+    // Set minqlxtended version.
+    PyModule_AddStringConstant(module, "__version__", MINQLXTENDED_VERSION);
 
     // Set IS_DEBUG.
     #ifndef NDEBUG
@@ -1983,14 +1983,14 @@ PyMinqlx_InitStatus_t PyMinqlx_Initialize(void) {
 
     DebugPrint("Initializing Python...\n");
     Py_SetProgramName(PYTHON_FILENAME);
-    PyImport_AppendInittab("_minqlx", &PyMinqlx_InitModule);
+    PyImport_AppendInittab("_minqlxtended", &PyMinqlx_InitModule);
     Py_Initialize();
     PyEval_InitThreads();
 
     // Add the main module.
     PyObject* main_module = PyImport_AddModule("__main__");
     PyObject* main_dict = PyModule_GetDict(main_module);
-    // Run script to load pyminqlx.
+    // Run script to load pyminqlxtended.
     PyObject* res = PyRun_String(loader, Py_file_input, main_dict, main_dict);
     if (res == NULL) {
 		DebugPrint("PyRun_String() returned NULL. Did you modify the loader?\n");

@@ -1,6 +1,6 @@
 #include <Python.h>
 
-#include "pyminqlx.h"
+#include "pyminqlxtended.h"
 #include "quake_common.h"
 
 int allow_free_client = -1;

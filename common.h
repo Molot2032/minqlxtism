@@ -1,20 +1,20 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#ifndef MINQLX_VERSION
-#define MINQLX_VERSION "NOT_SET"
+#ifndef MINQLXTENDED_VERSION
+#define MINQLXTENDED_VERSION "NOT_SET"
 #endif
 
-#define DEBUG_PRINT_PREFIX "[minqlx] "
-#define DEBUG_ERROR_FORMAT "[minqlx] ERROR @ %s:%d in %s:\n" DEBUG_PRINT_PREFIX
+#define DEBUG_PRINT_PREFIX "[minqlxtended] "
+#define DEBUG_ERROR_FORMAT "[minqlxtended] ERROR @ %s:%d in %s:\n" DEBUG_PRINT_PREFIX
 
 #ifndef NOPY
-#define SV_TAGS_PREFIX "minqlx"
+#define SV_TAGS_PREFIX "minqlxtended"
 #else
-#define SV_TAGS_PREFIX "minqlx-nopy"
+#define SV_TAGS_PREFIX "minqlxtended-nopy"
 #endif
 
-// TODO: Add minqlx version to serverinfo.
+// TODO: Add minqlxtended version to serverinfo.
 
 #include <stdint.h>
 

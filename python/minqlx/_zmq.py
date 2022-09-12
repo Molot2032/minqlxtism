@@ -1,40 +1,40 @@
-# minqlx - Extends Quake Live's dedicated server with extra functionality and scripting.
+# minqlxtended - Extends Quake Live's dedicated server with extra functionality and scripting.
 # Copyright (C) 2015 Mino <mino@minomino.org>
 
-# This file is part of minqlx.
+# This file is part of minqlxtended.
 
-# minqlx is free software: you can redistribute it and/or modify
+# minqlxtended is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# minqlx is distributed in the hope that it will be useful,
+# minqlxtended is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with minqlx. If not, see <http://www.gnu.org/licenses/>.
+# along with minqlxtended. If not, see <http://www.gnu.org/licenses/>.
 
 """Subscribes to the ZMQ stats protocol and calls the stats event dispatcher when
 we get stats from it. It polls the ZMQ socket approx. every 0.25 seconds."""
 
-import minqlx
+import minqlxtended
 import json
 import zmq
 
 class StatsListener():
     def __init__(self):
-        if not bool(int(minqlx.get_cvar("zmq_stats_enable"))):
+        if not bool(int(minqlxtended.get_cvar("zmq_stats_enable"))):
             self.done = True
             return
 
-        stats = minqlx.get_cvar("zmq_stats_ip")
-        port = minqlx.get_cvar("zmq_stats_port")
+        stats = minqlxtended.get_cvar("zmq_stats_ip")
+        port = minqlxtended.get_cvar("zmq_stats_port")
         if not port:
-            port = minqlx.get_cvar("net_port")
+            port = minqlxtended.get_cvar("net_port")
         self.address = "tcp://{}:{}".format("127.0.0.1" if not stats else stats, port)
-        self.password = minqlx.get_cvar("zmq_stats_password")
+        self.password = minqlxtended.get_cvar("zmq_stats_password")
 
         # Initialize socket, connect, and subscribe.
         self.context = zmq.Context()
@@ -49,7 +49,7 @@ class StatsListener():
         self.done = False
         self._in_progress = False
 
-    @minqlx.delay(0.25)
+    @minqlxtended.delay(0.25)
     def keep_receiving(self):
         """Receives until self.done is set to True. Works by scheduling this
         to be called every 0.25 seconds. If we get an exception, we try
@@ -61,28 +61,28 @@ class StatsListener():
                 return
             while True: # Will throw an expcetion if no more data to get.
                 stats = json.loads(self.socket.recv(zmq.NOBLOCK).decode(errors="ignore"))
-                minqlx.EVENT_DISPATCHERS["stats"].dispatch(stats)
+                minqlxtended.EVENT_DISPATCHERS["stats"].dispatch(stats)
 
                 if stats["TYPE"] == "MATCH_STARTED":
                     self._in_progress = True
-                    minqlx.EVENT_DISPATCHERS["game_start"].dispatch(stats["DATA"])
+                    minqlxtended.EVENT_DISPATCHERS["game_start"].dispatch(stats["DATA"])
                 elif stats["TYPE"] == "ROUND_OVER":
-                    minqlx.EVENT_DISPATCHERS["round_end"].dispatch(stats["DATA"])
+                    minqlxtended.EVENT_DISPATCHERS["round_end"].dispatch(stats["DATA"])
                 elif stats["TYPE"] == "MATCH_REPORT":
                     # MATCH_REPORT event goes off with a map change and map_restart,
                     # but we really only want it for when the game actually ends.
                     # We use a variable instead of Game().state because by the
                     # time we get the event, the game is probably gone.
                     if self._in_progress:
-                        minqlx.EVENT_DISPATCHERS["game_end"].dispatch(stats["DATA"])
+                        minqlxtended.EVENT_DISPATCHERS["game_end"].dispatch(stats["DATA"])
                     self._in_progress = False
                 elif stats["TYPE"] == "PLAYER_DEATH":
                     # Dead player.
                     sid = int(stats["DATA"]["VICTIM"]["STEAM_ID"])
                     if sid:
-                        player = minqlx.Plugin.player(sid)
+                        player = minqlxtended.Plugin.player(sid)
                     else: # It's a bot. Forced to use name as an identifier.
-                        player = minqlx.Plugin.player(stats["DATA"]["VICTIM"]["NAME"])
+                        player = minqlxtended.Plugin.player(stats["DATA"]["VICTIM"]["NAME"])
 
                     # Killer player.
                     if not stats["DATA"]["KILLER"]:
@@ -90,31 +90,31 @@ class StatsListener():
                     else:
                         sid_killer = int(stats["DATA"]["KILLER"]["STEAM_ID"])
                         if sid_killer:
-                            player_killer = minqlx.Plugin.player(sid_killer)
+                            player_killer = minqlxtended.Plugin.player(sid_killer)
                         else: # It's a bot. Forced to use name as an identifier.
-                            player_killer = minqlx.Plugin.player(stats["DATA"]["KILLER"]["NAME"])
+                            player_killer = minqlxtended.Plugin.player(stats["DATA"]["KILLER"]["NAME"])
 
-                    minqlx.EVENT_DISPATCHERS["death"].dispatch(player, player_killer, stats["DATA"])
+                    minqlxtended.EVENT_DISPATCHERS["death"].dispatch(player, player_killer, stats["DATA"])
                     if player_killer:
-                        minqlx.EVENT_DISPATCHERS["kill"].dispatch(player, player_killer, stats["DATA"])
+                        minqlxtended.EVENT_DISPATCHERS["kill"].dispatch(player, player_killer, stats["DATA"])
                 elif stats["TYPE"] == "PLAYER_SWITCHTEAM":
                     # No idea why they named it "KILLER" here, but whatever.
                     sid = int(stats["DATA"]["KILLER"]["STEAM_ID"])
                     if sid:
-                        player = minqlx.Plugin.player(sid)
+                        player = minqlxtended.Plugin.player(sid)
                     else: # It's a bot. Forced to use name as an identifier.
-                        player = minqlx.Plugin.player(stats["DATA"]["KILLER"]["NAME"])
+                        player = minqlxtended.Plugin.player(stats["DATA"]["KILLER"]["NAME"])
                     old_team = stats["DATA"]["KILLER"]["OLD_TEAM"].lower()
                     new_team = stats["DATA"]["KILLER"]["TEAM"].lower()
                     if old_team != new_team:
-                        res = minqlx.EVENT_DISPATCHERS["team_switch"].dispatch(player, old_team, new_team)
+                        res = minqlxtended.EVENT_DISPATCHERS["team_switch"].dispatch(player, old_team, new_team)
                         if res is False:
                             player.put(old_team)
 
         except zmq.error.Again:
             pass
         except Exception:
-            minqlx.log_exception()
+            minqlxtended.log_exception()
             # Reconnect, just in case. GC will clean up for us.
             self.__init__()
 
