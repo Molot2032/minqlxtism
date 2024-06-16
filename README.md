@@ -48,7 +48,7 @@ python3 -m pip install -r minqlxtended-plugins/requirements.txt
 Configuration
 =============
 minqlxtended is configured using CVARs, like you would configure `qzeroded`. All minqlxtended CVARs should be prefixed with `qlx_`. The following CVARs are referenced by the core directly during initialisation and ongoing operation. 
-For plugin configuration see the [plugins repository](https://github.com/MinoMino/minqlxtended-plugins).
+For plugin configuration see the [plugins repository](https://github.com/tjone270/minqlxtended-plugins).
 
 - `qlx_owner`: The SteamID64 of the server owner. This is should be set, otherwise minqlxtended can't tell who the owner is and will refuse to execute admin commands, unless permission levels are pre-defined in the database.
 - `qlx_plugins`: A comma-separated list of plugins that should be loaded at launch.
