@@ -57,7 +57,7 @@ void __cdecl My_Sys_SetModuleOffset(char* moduleName, void* offset) {
     	SearchVmFunctions();
     	HookVm();
     	InitializeVm();
-    	patch_vm(offset);
+    	patch_vm();
     }
 }
 
