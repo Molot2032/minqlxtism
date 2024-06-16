@@ -1984,7 +1984,7 @@ static PyObject* PyMinqlx_InitModule(void) {
     PyModule_AddIntMacro(module, DAMAGE_NO_KNOCKBACK);
     PyModule_AddIntMacro(module, DAMAGE_NO_PROTECTION);
     PyModule_AddIntMacro(module, DAMAGE_NO_TEAM_PROTECTION);
-    
+
     // Initialize struct sequence types.
     PyStructSequence_InitType(&player_info_type, &player_info_desc);
     PyStructSequence_InitType(&player_state_type, &player_state_desc);
@@ -2002,6 +2002,7 @@ static PyObject* PyMinqlx_InitModule(void) {
     Py_INCREF((PyObject*)&powerups_type);
     Py_INCREF((PyObject*)&flight_type);
     Py_INCREF((PyObject*)&keys_type);
+
     // Add new types.
     PyModule_AddObject(module, "PlayerInfo", (PyObject*)&player_info_type);
     PyModule_AddObject(module, "PlayerState", (PyObject*)&player_state_type);
@@ -2026,7 +2027,6 @@ PyMinqlx_InitStatus_t PyMinqlx_Initialize(void) {
     }
 
     DebugPrint("Initializing Python...\n");
-    Py_SetProgramName(PYTHON_FILENAME);
     PyImport_AppendInittab("_minqlxtended", &PyMinqlx_InitModule);
     Py_Initialize();
     #if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
