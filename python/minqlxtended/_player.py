@@ -569,6 +569,14 @@ class Player():
         return minqlxtended.set_score(self.id, value)
 
     @property
+    def air_control(self):
+        return self.state.air_control
+
+    @air_control.setter
+    def air_control(self, value):
+        minqlx.set_air_control(self.id, value)
+
+    @property
     def channel(self):
         return minqlxtended.TellChannel(self)
 

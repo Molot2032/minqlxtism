@@ -186,6 +186,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define FL_DROPPED_ITEM       0x00001000
 
+// player movement flags
+#define PMF_AIRCONTROL   0x10000
+
 // damage flags
 #define DAMAGE_RADIUS             0x00000001  // damage was indirect
 #define DAMAGE_NO_ARMOR           0x00000002  // armor does not protect from this damage
