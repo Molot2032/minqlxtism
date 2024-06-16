@@ -30,7 +30,7 @@ class EventDispatcher:
     to hook into events by registering an event handler.
 
     """
-    no_debug = ("frame", "client_think", "set_configstring", "stats", "server_command", "death", "kill", "command", "console_print", "damage")
+    no_debug = ("frame", "set_configstring", "stats", "server_command", "death", "kill", "command", "console_print")
     need_zmq_stats_enabled = False
 
     def __init__(self):
@@ -374,7 +374,7 @@ class PlayerLoadedDispatcher(EventDispatcher):
     def dispatch(self, player):
         return super().dispatch(player)
 
-class PlayerDisconnectDispatcher(EventDispatcher):
+class PlayerDisonnectDispatcher(EventDispatcher):
     """Event that triggers whenever a player disconnects. Cannot be cancelled."""
     name = "player_disconnect"
 
@@ -387,19 +387,6 @@ class PlayerSpawnDispatcher(EventDispatcher):
 
     def dispatch(self, player):
         return super().dispatch(player)
-
-class ClientThinkDispatcher(EventDispatcher):
-    """Event that triggers when a client thinks.
-    Cannot be cancelled but client_cmd can be modified.
-    """
-    name = "client_think"
-
-    def dispatch(self, player, client_cmd):
-        return super().dispatch(player, client_cmd)
-
-    def handle_return(self, handler, value):
-        """Pass straight to C handlers"""
-        return value
 
 class StatsDispatcher(EventDispatcher):
     """Event that triggers whenever the server sends stats over ZMQ."""
@@ -594,35 +581,6 @@ class KamikazeExplodeDispatcher(EventDispatcher):
     def dispatch(self, player, is_used_on_demand):
         return super().dispatch(player, is_used_on_demand)
 
-class DamageDispatcher(EventDispatcher):
-    """Event that goes off when someone is inflicted with damage."""
-
-    name = "damage"
-    need_zmq_stats_enabled = False
-
-    def dispatch(self, target, attacker, damage, dflags, mod):
-        return super().dispatch(target, attacker, damage, dflags, mod)
-
-class LaunchItemDispatcher(EventDispatcher):
-    name = "launch_item"
-    need_zmq_stats_enabled = False
-
-    def dispatch(self, item, origin, velocity):
-        return super().dispatch(item, origin, velocity)
-
-class TouchOurFlagDispatcher(EventDispatcher):
-    name = "touch_our_flag"
-    need_zmq_stats_enabled = False
-
-    def dispatch(self, player1, player2, team):
-        return super().dispatch(player1, player2, team)
-
-class TouchEnemyFlagDispatcher(EventDispatcher):
-    name = "touch_enemy_flag"
-    need_zmq_stats_enabled = False
-
-    def dispatch(self, player1, player2, team):
-        return super().dispatch(player1, player2, team)
 
 EVENT_DISPATCHERS = EventDispatcherManager()
 EVENT_DISPATCHERS.add_dispatcher(ConsolePrintDispatcher)
@@ -635,8 +593,7 @@ EVENT_DISPATCHERS.add_dispatcher(ChatEventDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(UnloadDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(PlayerConnectDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(PlayerLoadedDispatcher)
-EVENT_DISPATCHERS.add_dispatcher(PlayerDisconnectDispatcher)
-EVENT_DISPATCHERS.add_dispatcher(ClientThinkDispatcher)
+EVENT_DISPATCHERS.add_dispatcher(PlayerDisonnectDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(PlayerSpawnDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(KamikazeUseDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(KamikazeExplodeDispatcher)
@@ -658,4 +615,3 @@ EVENT_DISPATCHERS.add_dispatcher(NewGameDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(KillDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(DeathDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(UserinfoDispatcher)
-EVENT_DISPATCHERS.add_dispatcher(DamageDispatcher)

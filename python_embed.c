@@ -17,7 +17,6 @@ PyObject* server_command_handler = NULL;
 PyObject* client_connect_handler = NULL;
 PyObject* client_loaded_handler = NULL;
 PyObject* client_disconnect_handler = NULL;
-PyObject* client_think_handler = NULL;
 PyObject* frame_handler = NULL;
 PyObject* custom_command_handler = NULL;
 PyObject* new_game_handler = NULL;
@@ -25,11 +24,9 @@ PyObject* set_configstring_handler = NULL;
 PyObject* rcon_handler = NULL;
 PyObject* console_print_handler = NULL;
 PyObject* client_spawn_handler = NULL;
-PyObject* launch_item_handler = NULL;
 
 PyObject* kamikaze_use_handler = NULL;
 PyObject* kamikaze_explode_handler = NULL;
-PyObject* damage_handler = NULL;
 
 static PyThreadState* mainstate;
 static int initialized = 0;
@@ -43,10 +40,10 @@ static int initialized = 0;
 static const char loader[] = "import traceback\n" \
     "try:\n" \
     "  import sys\n" \
-    "  sys.path.append('" CORE_MODULE "')\n" \
+	"  sys.path.append('" CORE_MODULE "')\n" \
     "  sys.path.append('.')\n" \
-    "  import minqlxtended\n" \
-    "  minqlxtended.initialize()\n" \
+	"  import minqlxtended\n" \
+	"  minqlxtended.initialize()\n" \
     "  ret = True\n" \
     "except Exception as e:\n" \
     "  e = traceback.format_exc().rstrip('\\n')\n" \
@@ -59,16 +56,15 @@ static const char loader[] = "import traceback\n" \
  * pairs and iterate over them instead.
  */
 static handler_t handlers[] = {
-        {"client_command", 		&client_command_handler},
-        {"server_command", 		&server_command_handler},
-        {"frame", 				&frame_handler},
-        {"player_connect", 		&client_connect_handler},
-        {"player_loaded", 		&client_loaded_handler},
-        {"player_disconnect", 	&client_disconnect_handler},
-        {"client_think", 	    &client_think_handler},
-        {"custom_command", 		&custom_command_handler},
-        {"new_game",			&new_game_handler},
-        {"set_configstring", 	&set_configstring_handler},
+		{"client_command", 		&client_command_handler},
+		{"server_command", 		&server_command_handler},
+		{"frame", 				&frame_handler},
+		{"player_connect", 		&client_connect_handler},
+		{"player_loaded", 		&client_loaded_handler},
+		{"player_disconnect", 	&client_disconnect_handler},
+		{"custom_command", 		&custom_command_handler},
+		{"new_game",			&new_game_handler},
+		{"set_configstring", 	&set_configstring_handler},
         {"rcon",                &rcon_handler},
         {"console_print",       &console_print_handler},
         {"player_spawn",        &client_spawn_handler},
@@ -76,11 +72,7 @@ static handler_t handlers[] = {
         {"kamikaze_use",        &kamikaze_use_handler},
         {"kamikaze_explode",    &kamikaze_explode_handler},
 
-        {"damage",              &damage_handler},
-
-        {"launch_item",         &launch_item_handler},
-
-        {NULL, NULL}
+		{NULL, NULL}
 };
 
 /*
@@ -126,8 +118,7 @@ static PyStructSequence_Field player_state_fields[] = {
     {"powerups", "The player's powerups."},
     {"holdable", "The player's holdable item."},
     {"flight", "A struct sequence with flight parameters."},
-    {"is_frozen", "Whether the player is frozen (freeze tag.)"},
-    {"air_control", "Whether the player's air control is enabled."},
+    {"is_frozen", "Whether the player is frozen(freezetag)."},
     {"keys", "The player's keys."},
     {NULL}
 };
@@ -317,19 +308,19 @@ static PyObject* PyMinqlx_PlayerInfo(PyObject* self, PyObject* args) {
 }
 
 static PyObject* PyMinqlx_PlayersInfo(PyObject* self, PyObject* args) {
-    PyObject* ret = PyList_New(sv_maxclients->integer);
+	PyObject* ret = PyList_New(sv_maxclients->integer);
 
-    for (int i = 0; i < sv_maxclients->integer; i++) {
-        if (svs->clients[i].state == CS_FREE) {
-            if (PyList_SetItem(ret, i, Py_None) == -1)
+	for (int i = 0; i < sv_maxclients->integer; i++) {
+		if (svs->clients[i].state == CS_FREE) {
+			if (PyList_SetItem(ret, i, Py_None) == -1)
                         return NULL;
             Py_INCREF(Py_None);
             continue;
-        }
+		}
 
-        if (PyList_SetItem(ret, i, makePlayerTuple(i)) == -1)
-            return NULL;
-    }
+		if (PyList_SetItem(ret, i, makePlayerTuple(i)) == -1)
+			return NULL;
+	}
 
     return ret;
 }
@@ -405,14 +396,14 @@ static PyObject* PyMinqlx_ClientCommand(PyObject* self, PyObject* args) {
     if (!PyArg_ParseTuple(args, "is:client_command", &i, &cmd))
         return NULL;
 
-    if (i >= 0 && i < sv_maxclients->integer) {
-        if (svs->clients[i].state == CS_FREE || svs->clients[i].state == CS_ZOMBIE)
-            Py_RETURN_FALSE;
-        else {
-            My_SV_ExecuteClientCommand(&svs->clients[i], cmd, qtrue);
-            Py_RETURN_TRUE;
-        }
-    }
+	if (i >= 0 && i < sv_maxclients->integer) {
+		if (svs->clients[i].state == CS_FREE || svs->clients[i].state == CS_ZOMBIE)
+			Py_RETURN_FALSE;
+		else {
+			My_SV_ExecuteClientCommand(&svs->clients[i], cmd, qtrue);
+			Py_RETURN_TRUE;
+		}
+	}
 
     PyErr_Format(PyExc_ValueError,
                  "client_id needs to be a number from 0 to %d, or None.",
@@ -449,7 +440,7 @@ static PyObject* PyMinqlx_GetCvar(PyObject* self, PyObject* args) {
 
     cvar_t* cvar = Cvar_FindVar(name);
     if (cvar) {
-        return PyUnicode_FromString(cvar->string);
+    	return PyUnicode_FromString(cvar->string);
     }
 
     Py_RETURN_NONE;
@@ -509,26 +500,26 @@ static PyObject* PyMinqlx_Kick(PyObject* self, PyObject* args) {
     if (!PyArg_ParseTuple(args, "iO:kick", &i, &reason))
         return NULL;
 
-    if (i >= 0 && i < sv_maxclients->integer) {
-        if (svs->clients[i].state != CS_ACTIVE) {
-            PyErr_Format(PyExc_ValueError,
-                    "client_id must be None or the ID of an active player.");
-            return NULL;
-        }
-        else if (reason == Py_None || (PyUnicode_Check(reason) && PyUnicode_AsUTF8(reason)[0] == 0)) {
-            // Default kick message for None or empty strings.
-            My_SV_DropClient(&svs->clients[i], "was kicked.");
-        }
-        else if (PyUnicode_Check(reason)) {
-            My_SV_DropClient(&svs->clients[i], PyUnicode_AsUTF8(reason));
-        }
-    }
-    else {
-        PyErr_Format(PyExc_ValueError,
-                "client_id needs to be a number from 0 to %d, or None.",
-                sv_maxclients->integer);
-        return NULL;
-    }
+	if (i >= 0 && i < sv_maxclients->integer) {
+		if (svs->clients[i].state != CS_ACTIVE) {
+			PyErr_Format(PyExc_ValueError,
+					"client_id must be None or the ID of an active player.");
+			return NULL;
+		}
+		else if (reason == Py_None || (PyUnicode_Check(reason) && PyUnicode_AsUTF8(reason)[0] == 0)) {
+			// Default kick message for None or empty strings.
+			My_SV_DropClient(&svs->clients[i], "was kicked.");
+		}
+		else if (PyUnicode_Check(reason)) {
+			My_SV_DropClient(&svs->clients[i], PyUnicode_AsUTF8(reason));
+		}
+	}
+	else {
+		PyErr_Format(PyExc_ValueError,
+				"client_id needs to be a number from 0 to %d, or None.",
+				sv_maxclients->integer);
+		return NULL;
+	}
 
     Py_RETURN_NONE;
 }
@@ -561,11 +552,11 @@ static PyObject* PyMinqlx_GetConfigstring(PyObject* self, PyObject* args) {
     if (!PyArg_ParseTuple(args, "i:get_configstring", &i))
         return NULL;
     else if (i < 0 || i > MAX_CONFIGSTRINGS) {
-        PyErr_Format(PyExc_ValueError,
-                         "index needs to be a number from 0 to %d.",
-                         MAX_CONFIGSTRINGS);
-        return NULL;
-    }
+		PyErr_Format(PyExc_ValueError,
+						 "index needs to be a number from 0 to %d.",
+						 MAX_CONFIGSTRINGS);
+		return NULL;
+	}
 
     SV_GetConfigstring(i, csbuffer, sizeof(csbuffer));
     return PyUnicode_DecodeUTF8(csbuffer, strlen(csbuffer), "ignore");
@@ -583,10 +574,10 @@ static PyObject* PyMinqlx_SetConfigstring(PyObject* self, PyObject* args) {
     if (!PyArg_ParseTuple(args, "is:set_configstring", &i, &cs))
         return NULL;
     else if (i < 0 || i > MAX_CONFIGSTRINGS) {
-        PyErr_Format(PyExc_ValueError,
-                         "index needs to be a number from 0 to %d.",
-                         MAX_CONFIGSTRINGS);
-        return NULL;
+    	PyErr_Format(PyExc_ValueError,
+    	                 "index needs to be a number from 0 to %d.",
+						 MAX_CONFIGSTRINGS);
+		return NULL;
     }
 
     My_SV_SetConfigstring(i, cs);
@@ -601,24 +592,24 @@ static PyObject* PyMinqlx_SetConfigstring(PyObject* self, PyObject* args) {
 */
 
 static PyObject* PyMinqlx_ForceVote(PyObject* self, PyObject* args) {
-    int pass;
+	int pass;
     if (!PyArg_ParseTuple(args, "p:force_vote", &pass))
         return NULL;
 
     if (!level->voteTime) {
-        // No active vote.
-        Py_RETURN_FALSE;
+    	// No active vote.
+    	Py_RETURN_FALSE;
     }
     else if (pass && level->voteTime) {
-        // We tell the server every single client voted yes, making it pass in the next G_RunFrame.
-        for (int i = 0; i < sv_maxclients->integer; i++) {
-            if (svs->clients[i].state == CS_ACTIVE)
-                g_entities[i].client->pers.voteState = VOTE_YES;
-        }
+    	// We tell the server every single client voted yes, making it pass in the next G_RunFrame.
+		for (int i = 0; i < sv_maxclients->integer; i++) {
+			if (svs->clients[i].state == CS_ACTIVE)
+				g_entities[i].client->pers.voteState = VOTE_YES;
+		}
     }
     else if (!pass && level->voteTime) {
-        // If we tell the server the vote is over, it'll fail it right away.
-        level->voteTime -= 30000;
+    	// If we tell the server the vote is over, it'll fail it right away.
+		level->voteTime -= 30000;
     }
 
     Py_RETURN_TRUE;
@@ -651,29 +642,29 @@ static PyObject* PyMinqlx_RegisterHandler(PyObject* self, PyObject* args) {
     PyObject* new_handler;
 
     if (!PyArg_ParseTuple(args, "sO:register_handler", &event, &new_handler)) {
-        return NULL;
+    	return NULL;
     }
     else if (new_handler != Py_None && !PyCallable_Check(new_handler)) {
-        PyErr_SetString(PyExc_TypeError, "The handler must be callable.");
-        return NULL;
-    }
+		PyErr_SetString(PyExc_TypeError, "The handler must be callable.");
+		return NULL;
+	}
 
-    for (handler_t* h = handlers; h->name; h++) {
-        if (!strcmp(h->name, event)) {
-            Py_XDECREF(*h->handler);
-            if (new_handler == Py_None)
-                *h->handler = NULL;
-            else {
-                *h->handler = new_handler;
-                Py_INCREF(new_handler);
-            }
+	for (handler_t* h = handlers; h->name; h++) {
+		if (!strcmp(h->name, event)) {
+			Py_XDECREF(*h->handler);
+			if (new_handler == Py_None)
+				*h->handler = NULL;
+			else {
+				*h->handler = new_handler;
+				Py_INCREF(new_handler);
+			}
 
-            Py_RETURN_NONE;
-        }
-    }
+			Py_RETURN_NONE;
+		}
+	}
 
-    PyErr_SetString(PyExc_ValueError, "Invalid event.");
-    return NULL;
+	PyErr_SetString(PyExc_ValueError, "Invalid event.");
+	return NULL;
 }
 
 /*
@@ -787,8 +778,6 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
 
     PyStructSequence_SetItem(state, 12, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 4));
 
-    PyStructSequence_SetItem(state, 13, PyBool_FromLong(g_entities[client_id].client->ps.pm_flags & PMF_AIRCONTROL));
-
     PyObject* keys = PyStructSequence_New(&keys_type);
     for (int i = 0; i < keys_desc.n_in_sequence; i++) {
         if (g_entities[client_id].client->ps.stats[STAT_KEY] & (1 << i))
@@ -796,7 +785,7 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
         else
             PyStructSequence_SetItem(keys, i, Py_False);
     }
-    PyStructSequence_SetItem(state, 14, keys);
+    PyStructSequence_SetItem(state, 13, keys);
 
     return state;
 }
@@ -1347,40 +1336,6 @@ static PyObject* PyMinqlx_SetScore(PyObject* self, PyObject* args) {
 
 /*
 * ================================================================
-*                         set_air_control
-* ================================================================
-*/
-
-static PyObject* PyMinqlx_SetAirControl(PyObject* self, PyObject* args) {
-    int client_id;
-    PyObject* obj;
-    if (!PyArg_ParseTuple(args, "iO:set_air_control", &client_id, &obj))
-        return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
-        PyErr_Format(PyExc_ValueError,
-                     "client_id needs to be a number from 0 to %d.",
-                     sv_maxclients->integer);
-        return NULL;
-    }
-    else if (!g_entities[client_id].client)
-        Py_RETURN_FALSE;
-    else if (!PyBool_Check(obj)) {
-        PyErr_Format(PyExc_ValueError,
-                     "second argument needs to be a boolean.");
-        return NULL;
-    }
-
-    if (obj == Py_True) {
-        g_entities[client_id].client->ps.pm_flags |= PMF_AIRCONTROL;
-    } else {
-        g_entities[client_id].client->ps.pm_flags &= ~PMF_AIRCONTROL;
-    }
-
-    Py_RETURN_TRUE;
-}
-
-/*
-* ================================================================
 *                           callvote
 * ================================================================
 */
@@ -1759,49 +1714,18 @@ static PyObject* PyMinqlx_DevPrintItems(PyObject* self, PyObject* args) {
 
 /*
 * ================================================================
-*                         force_weapon_wait
-* ================================================================
-*/
-
-static PyObject* PyMinqlx_ForceWeaponWait(PyObject* self, PyObject* args) {
-    float wait_time;
-    gentity_t* ent;
-
-    if (!PyArg_ParseTuple(args, "f:force_weapon_wait", &wait_time))
-        return NULL;
-
-    for (int i=0; i<MAX_GENTITIES; i++) {
-        ent = &g_entities[i];
-
-        if (!ent->inuse)
-            continue;
-
-        if (ent->s.eType != ET_ITEM || ent->item == NULL)
-            continue;		
-
-        if (ent->item->giType != IT_WEAPON)
-            continue;
-
-        g_entities[i].wait = wait_time;
-    }
-
-    Py_RETURN_NONE;
-}
-
-/*
-* ================================================================
 *                         force_weapon_respawn_time
 * ================================================================
 */
 
 static PyObject* PyMinqlx_ForceWeaponRespawnTime(PyObject* self, PyObject* args) {
-    int respawn_time;
+	int respawn_time;
     gentity_t* ent;
-    
-    if (!PyArg_ParseTuple(args, "i:force_weapon_respawn_time", &respawn_time))
-        return NULL;
-    
-    if (respawn_time < 0) {    
+	
+	if (!PyArg_ParseTuple(args, "i:force_weapon_respawn_time", &respawn_time))
+		return NULL;
+	
+	if (respawn_time < 0) {    
         PyErr_Format(PyExc_ValueError, "respawn time needs to be an integer 0 or greater");
         return NULL;
     }	
@@ -1812,13 +1736,13 @@ static PyObject* PyMinqlx_ForceWeaponRespawnTime(PyObject* self, PyObject* args)
         if (!ent->inuse)
             continue;
 
-        if (ent->s.eType != ET_ITEM || ent->item == NULL)
+		if (ent->s.eType != ET_ITEM || ent->item == NULL)
             continue;		
-        
-        if (ent->item->giType != IT_WEAPON)
-            continue;
-                
-        ent->wait = respawn_time;
+		
+		if (ent->item->giType != IT_WEAPON)
+			continue;
+				
+		ent->wait = respawn_time;
     }
 
     Py_RETURN_TRUE;
@@ -1833,34 +1757,34 @@ static PyObject* PyMinqlx_ForceWeaponRespawnTime(PyObject* self, PyObject* args)
 static PyMethodDef minqlxtendedMethods[] = {
     {"player_info", PyMinqlx_PlayerInfo, METH_VARARGS,
      "Returns a dictionary with information about a player by ID."},
-    {"players_info", PyMinqlx_PlayersInfo, METH_NOARGS,
-     "Returns a list with dictionaries with information about all the players on the server."},
-    {"get_userinfo", PyMinqlx_GetUserinfo, METH_VARARGS,
-     "Returns a string with a player's userinfo."},
+	{"players_info", PyMinqlx_PlayersInfo, METH_NOARGS,
+	 "Returns a list with dictionaries with information about all the players on the server."},
+	{"get_userinfo", PyMinqlx_GetUserinfo, METH_VARARGS,
+	 "Returns a string with a player's userinfo."},
     {"send_server_command", PyMinqlx_SendServerCommand, METH_VARARGS,
      "Sends a server command to either one specific client or all the clients."},
-    {"client_command", PyMinqlx_ClientCommand, METH_VARARGS,
-     "Tells the server to process a command from a specific client."},
-    {"console_command", PyMinqlx_ConsoleCommand, METH_VARARGS,
-     "Executes a command as if it was executed from the server console."},
-    {"get_cvar", PyMinqlx_GetCvar, METH_VARARGS,
-     "Gets a cvar."},
-    {"set_cvar", PyMinqlx_SetCvar, METH_VARARGS,
-     "Sets a cvar."},
+	{"client_command", PyMinqlx_ClientCommand, METH_VARARGS,
+	 "Tells the server to process a command from a specific client."},
+	{"console_command", PyMinqlx_ConsoleCommand, METH_VARARGS,
+	 "Executes a command as if it was executed from the server console."},
+	{"get_cvar", PyMinqlx_GetCvar, METH_VARARGS,
+	 "Gets a cvar."},
+	{"set_cvar", PyMinqlx_SetCvar, METH_VARARGS,
+	 "Sets a cvar."},
     {"set_cvar_limit", PyMinqlx_SetCvarLimit, METH_VARARGS,
      "Sets a non-string cvar with a minimum and maximum value."},
-    {"kick", PyMinqlx_Kick, METH_VARARGS,
-     "Kick a player and allowing the admin to supply a reason for it."},
-    {"console_print", PyMinqlx_ConsolePrint, METH_VARARGS,
-     "Prints text on the console. If used during an RCON command, it will be printed in the player's console."},
-    {"get_configstring", PyMinqlx_GetConfigstring, METH_VARARGS,
-     "Get a configstring."},
-    {"set_configstring", PyMinqlx_SetConfigstring, METH_VARARGS,
-     "Sets a configstring and sends it to all the players on the server."},
-    {"force_vote", PyMinqlx_ForceVote, METH_VARARGS,
-     "Forces the current vote to either fail or pass."},
-    {"add_console_command", PyMinqlx_AddConsoleCommand, METH_VARARGS,
-     "Adds a console command that will be handled by Python code."},
+	{"kick", PyMinqlx_Kick, METH_VARARGS,
+	 "Kick a player and allowing the admin to supply a reason for it."},
+	{"console_print", PyMinqlx_ConsolePrint, METH_VARARGS,
+	 "Prints text on the console. If used during an RCON command, it will be printed in the player's console."},
+	{"get_configstring", PyMinqlx_GetConfigstring, METH_VARARGS,
+	 "Get a configstring."},
+	{"set_configstring", PyMinqlx_SetConfigstring, METH_VARARGS,
+	 "Sets a configstring and sends it to all the players on the server."},
+	{"force_vote", PyMinqlx_ForceVote, METH_VARARGS,
+	 "Forces the current vote to either fail or pass."},
+	{"add_console_command", PyMinqlx_AddConsoleCommand, METH_VARARGS,
+	 "Adds a console command that will be handled by Python code."},
     {"register_handler", PyMinqlx_RegisterHandler, METH_VARARGS,
      "Register an event handler. Can be called more than once per event, but only the last one will work."},
     {"player_state", PyMinqlx_PlayerState, METH_VARARGS,
@@ -1897,14 +1821,12 @@ static PyMethodDef minqlxtendedMethods[] = {
      "Makes player invulnerable for limited time."},
     {"set_score", PyMinqlx_SetScore, METH_VARARGS,
      "Sets a player's score."},
-    {"set_air_control", PyMinqlx_SetAirControl, METH_VARARGS,
-     "Sets player's air control."},
     {"callvote", PyMinqlx_Callvote, METH_VARARGS,
      "Calls a vote as if started by the server and not a player."},
     {"allow_single_player", PyMinqlx_AllowSinglePlayer, METH_VARARGS,
      "Allows or disallows a game with only a single player in it to go on without forfeiting. Useful for race."},
     {"player_spawn", PyMinqlx_PlayerSpawn, METH_VARARGS,
-     "Spawns a player."},
+     "Allows or disallows a game with only a single player in it to go on without forfeiting. Useful for race."},
     {"set_privileges", PyMinqlx_SetPrivileges, METH_VARARGS,
      "Sets a player's privileges. Does not persist."},
     {"destroy_kamikaze_timers", PyMinqlx_DestroyKamikazeTimers, METH_NOARGS,
@@ -1914,13 +1836,11 @@ static PyMethodDef minqlxtendedMethods[] = {
     {"remove_dropped_items", PyMinqlx_RemoveDroppedItems, METH_NOARGS,
      "Removes all dropped items."},
     {"slay_with_mod", PyMinqlx_SlayWithMod, METH_VARARGS,
-     "Slay player with means of death."},
+     "Slay player with mean of death."},
     {"replace_items", PyMinqlx_ReplaceItems, METH_VARARGS,
      "Replaces target entity's item with specified one."},
     {"dev_print_items", PyMinqlx_DevPrintItems, METH_NOARGS,
      "Prints all items and entity numbers to server console."},
-    {"force_weapon_wait", PyMinqlx_ForceWeaponWait, METH_VARARGS,
-     "Force all weapons to have a specified spawn wait time."},
     {"force_weapon_respawn_time", PyMinqlx_ForceWeaponRespawnTime, METH_VARARGS,
      "Force all weapons to have a specified respawn time, overriding custom map respawn times set for them."},
     {NULL, NULL, 0, NULL}
@@ -2026,13 +1946,6 @@ static PyObject* PyMinqlx_InitModule(void) {
     PyModule_AddIntMacro(module, MOD_HMG);
     PyModule_AddIntMacro(module, MOD_RAILGUN_HEADSHOT);
 
-    // damage flags
-    PyModule_AddIntMacro(module, DAMAGE_RADIUS);
-    PyModule_AddIntMacro(module, DAMAGE_NO_ARMOR);
-    PyModule_AddIntMacro(module, DAMAGE_NO_KNOCKBACK);
-    PyModule_AddIntMacro(module, DAMAGE_NO_PROTECTION);
-    PyModule_AddIntMacro(module, DAMAGE_NO_TEAM_PROTECTION);
-
     // Initialize struct sequence types.
     PyStructSequence_InitType(&player_info_type, &player_info_desc);
     PyStructSequence_InitType(&player_state_type, &player_state_desc);
@@ -2050,7 +1963,6 @@ static PyObject* PyMinqlx_InitModule(void) {
     Py_INCREF((PyObject*)&powerups_type);
     Py_INCREF((PyObject*)&flight_type);
     Py_INCREF((PyObject*)&keys_type);
-
     // Add new types.
     PyModule_AddObject(module, "PlayerInfo", (PyObject*)&player_info_type);
     PyModule_AddObject(module, "PlayerState", (PyObject*)&player_state_type);
@@ -2075,6 +1987,7 @@ PyMinqlx_InitStatus_t PyMinqlx_Initialize(void) {
     }
 
     DebugPrint("Initializing Python...\n");
+    Py_SetProgramName(PYTHON_FILENAME);
     PyImport_AppendInittab("_minqlxtended", &PyMinqlx_InitModule);
     Py_Initialize();
     #if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
@@ -2087,20 +2000,20 @@ PyMinqlx_InitStatus_t PyMinqlx_Initialize(void) {
     // Run script to load pyminqlxtended.
     PyObject* res = PyRun_String(loader, Py_file_input, main_dict, main_dict);
     if (res == NULL) {
-        DebugPrint("PyRun_String() returned NULL. Did you modify the loader?\n");
-        return PYM_MAIN_SCRIPT_ERROR;
-    }
+		DebugPrint("PyRun_String() returned NULL. Did you modify the loader?\n");
+		return PYM_MAIN_SCRIPT_ERROR;
+	}
     PyObject* ret = PyDict_GetItemString(main_dict, "ret");
     Py_XDECREF(ret);
     Py_DECREF(res);
     if (ret == NULL) {
-        DebugPrint("The loader script return value doesn't exist?\n");
-        return PYM_MAIN_SCRIPT_ERROR;
-    }
-    else if (ret != Py_True) {
-        // No need to print anything, since the traceback should be printed already.
-        return PYM_MAIN_SCRIPT_ERROR;
-    }
+		DebugPrint("The loader script return value doesn't exist?\n");
+		return PYM_MAIN_SCRIPT_ERROR;
+	}
+	else if (ret != Py_True) {
+		// No need to print anything, since the traceback should be printed already.
+		return PYM_MAIN_SCRIPT_ERROR;
+	}
 
     mainstate = PyEval_SaveThread();
     initialized = 1;
@@ -2115,8 +2028,8 @@ PyMinqlx_InitStatus_t PyMinqlx_Finalize(void) {
     }
 
     for (handler_t* h = handlers; h->name; h++) {
-        *h->handler = NULL;
-    }
+		*h->handler = NULL;
+	}
 
     PyEval_RestoreThread(mainstate);
     Py_Finalize();

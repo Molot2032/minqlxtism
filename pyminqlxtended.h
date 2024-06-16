@@ -52,18 +52,15 @@ extern PyObject* server_command_handler;
 extern PyObject* client_connect_handler;
 extern PyObject* client_loaded_handler;
 extern PyObject* client_disconnect_handler;
-extern PyObject* client_think_handler;
 extern PyObject* frame_handler;
 extern PyObject* new_game_handler;
 extern PyObject* set_configstring_handler;
 extern PyObject* rcon_handler;
 extern PyObject* console_print_handler;
 extern PyObject* client_spawn_handler;
-extern PyObject* launch_item_handler;
 
 extern PyObject* kamikaze_use_handler;
 extern PyObject* kamikaze_explode_handler;
-extern PyObject* damage_handler;
 
 // Custom console command handler. These are commands added through Python that can be used
 // from the console or using RCON.
@@ -86,15 +83,13 @@ void FrameDispatcher(void);
 char* ClientConnectDispatcher(int client_id, int is_bot);
 int ClientLoadedDispatcher(int client_id);
 void ClientDisconnectDispatcher(int client_id, const char* reason);
-void ClientThinkDispatcher(int client_id, usercmd_t* cmd);
 void NewGameDispatcher(int restart);
 char* SetConfigstringDispatcher(int index, char* value);
 void RconDispatcher(const char* cmd);
 char* ConsolePrintDispatcher(char* cmd);
 void ClientSpawnDispatcher(int client_id);
-void LaunchItemDispatcher(gitem_t *item, vec3_t origin, vec3_t velocity);
 
 void KamikazeUseDispatcher(int client_id);
 void KamikazeExplodeDispatcher(int client_id, int is_used_on_demand);
-void DamageDispatcher(int target_id, int attacker_id, int damage, int dflags, int mod);
+
 #endif /* PYMINQLXTENDED_H */

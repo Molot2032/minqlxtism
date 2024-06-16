@@ -74,8 +74,8 @@ void __cdecl Slay(void) {
         Com_Printf("Slaying player...\n");
         SV_SendServerCommand(NULL, "print \"%s^7 was slain!\n\"\n", svs->clients[i].name);
         DebugPrint("Slaying '%s'!\n", svs->clients[i].name);
-        g_entities[i].health = -40;
-        G_AddEvent(&g_entities[i], EV_GIB_PLAYER, g_entities[i].s.number);
+		g_entities[i].health = -40;
+		G_AddEvent(&g_entities[i], EV_GIB_PLAYER, g_entities[i].s.number);
     }
     else
         Com_Printf("The player is currently not active.\n");
@@ -89,24 +89,24 @@ void __cdecl PyRcon(void) {
 }
 
 void __cdecl PyCommand(void) {
-    if (!custom_command_handler) {
-            return; // No registered handler.
-    }
-    PyGILState_STATE gstate = PyGILState_Ensure();
+	if (!custom_command_handler) {
+	        return; // No registered handler.
+	}
+	PyGILState_STATE gstate = PyGILState_Ensure();
 
-    PyObject* result = PyObject_CallFunction(custom_command_handler, "s", Cmd_Args());
-    if (result == Py_False) {
-        Com_Printf("The command failed to be executed. pyminqlxtended found no handler.\n");
-    }
+	PyObject* result = PyObject_CallFunction(custom_command_handler, "s", Cmd_Args());
+	if (result == Py_False) {
+		Com_Printf("The command failed to be executed. pyminqlxtended found no handler.\n");
+	}
 
-    Py_XDECREF(result);
-    PyGILState_Release(gstate);
+	Py_XDECREF(result);
+	PyGILState_Release(gstate);
 }
 
 void __cdecl RestartPython(void) {
     Com_Printf("Restarting Python...\n");
     if (PyMinqlx_IsInitialized())
-        PyMinqlx_Finalize();
+    	PyMinqlx_Finalize();
     PyMinqlx_Initialize();
     // minqlxtended initializes after the first new game starts, but since the game already
     // start, we manually trigger the event to make it initialize properly.

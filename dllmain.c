@@ -45,7 +45,6 @@ Cvar_Set2_ptr Cvar_Set2;
 SV_SendServerCommand_ptr SV_SendServerCommand;
 SV_ExecuteClientCommand_ptr SV_ExecuteClientCommand;
 SV_ClientEnterWorld_ptr SV_ClientEnterWorld;
-SV_ClientThink_ptr SV_ClientThink;
 SV_Shutdown_ptr SV_Shutdown;
 SV_Map_f_ptr SV_Map_f;
 SV_SetConfigstring_ptr SV_SetConfigstring;
@@ -62,9 +61,6 @@ G_InitGame_ptr G_InitGame;
 CheckPrivileges_ptr CheckPrivileges;
 ClientConnect_ptr ClientConnect;
 ClientSpawn_ptr ClientSpawn;
-ClientUserinfoChanged_ptr ClientUserinfoChanged;
-ClientBegin_ptr ClientBegin;
-ClientEndFrame_ptr ClientEndFrame;
 G_Damage_ptr G_Damage;
 Touch_Item_ptr Touch_Item;
 LaunchItem_ptr LaunchItem;
@@ -128,7 +124,6 @@ static void SearchFunctions(void) {
 	STATIC_SEARCH(SV_Shutdown, PTRN_SV_SHUTDOWN, MASK_SV_SHUTDOWN);
 	STATIC_SEARCH(SV_Map_f, PTRN_SV_MAP_F, MASK_SV_MAP_F);
 	STATIC_SEARCH(SV_ClientEnterWorld, PTRN_SV_CLIENTENTERWORLD, MASK_SV_CLIENTENTERWORLD);
-	STATIC_SEARCH(SV_ClientThink, PTRN_SV_CLIENTTHINK, MASK_SV_CLIENTTHINK);
 	STATIC_SEARCH(SV_SetConfigstring, PTRN_SV_SETCONFIGSTRING, MASK_SV_SETCONFIGSTRING);
 	STATIC_SEARCH(SV_GetConfigstring, PTRN_SV_GETCONFIGSTRING, MASK_SV_GETCONFIGSTRING);
 	STATIC_SEARCH(SV_DropClient, PTRN_SV_DROPCLIENT, MASK_SV_DROPCLIENT);
@@ -210,8 +205,7 @@ void InitializeStatic(void) {
 // Initialize VM stuff. Needs to be called whenever Sys_SetModuleOffset is called,
 // after qagame pointer has been initialized.
 void InitializeVm(void) {
-    DebugPrint("Initializing VM pointers... ");
-
+    DebugPrint("Initializing VM pointers...\n");
 #if defined(__x86_64__) || defined(_M_X64)
     g_entities = (gentity_t*)(*(int32_t*)OFFSET_RELP_G_ENTITIES + OFFSET_RELP_G_ENTITIES + 4);
     level = (level_locals_t*)(*(int32_t*)OFFSET_RELP_LEVEL + OFFSET_RELP_LEVEL + 4);
@@ -221,7 +215,6 @@ void InitializeVm(void) {
     level = (level_locals_t*)(*(int32_t*)OFFSET_RELP_LEVEL + 0xCEFF4 + (pint)qagame);
     bg_itemlist = (gitem_t*)*(int32_t*)((*(int32_t*)OFFSET_RELP_BG_ITEMLIST + 0xCEFF4 + (pint)qagame));
 #endif
-	
     for (bg_numItems = 1; bg_itemlist[ bg_numItems ].classname; bg_numItems++);
 }
 
