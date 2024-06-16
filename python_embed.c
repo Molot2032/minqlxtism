@@ -1721,8 +1721,12 @@ static PyObject* PyMinqlx_DevPrintItems(PyObject* self, PyObject* args) {
 * ================================================================
 */
 
-static PyObject* PyMinqlx_ForceWeaponWait(float wait_time) {
+static PyObject* PyMinqlx_ForceWeaponWait(PyObject* self, PyObject* args) {
+    float wait_time;
     gentity_t* ent;
+
+    if (!PyArg_ParseTuple(args, "f:force_weapon_wait", &wait_time))
+        return NULL;
 
     for (int i=0; i<MAX_GENTITIES; i++) {
         ent = &g_entities[i];
