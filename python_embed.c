@@ -1714,6 +1714,33 @@ static PyObject* PyMinqlx_DevPrintItems(PyObject* self, PyObject* args) {
 
 /*
 * ================================================================
+*                         force_weapon_wait
+* ================================================================
+*/
+
+static PyObject* PyMinqlx_ForceWeaponWait(float wait_time) {
+    gentity_t* ent;
+
+    for (int i=0; i<MAX_GENTITIES; i++) {
+        ent = &g_entities[i];
+
+        if (!ent->inuse)
+            continue;
+
+		if (ent->s.eType != ET_ITEM || ent->item == NULL)
+            continue;		
+
+		if (ent->item->giType != IT_WEAPON)
+			continue;
+
+		g_entities[i].wait = wait_time;
+    }
+
+    Py_RETURN_NONE;
+}
+
+/*
+* ================================================================
 *                         force_weapon_respawn_time
 * ================================================================
 */
@@ -1826,7 +1853,7 @@ static PyMethodDef minqlxtendedMethods[] = {
     {"allow_single_player", PyMinqlx_AllowSinglePlayer, METH_VARARGS,
      "Allows or disallows a game with only a single player in it to go on without forfeiting. Useful for race."},
     {"player_spawn", PyMinqlx_PlayerSpawn, METH_VARARGS,
-     "Allows or disallows a game with only a single player in it to go on without forfeiting. Useful for race."},
+     "Spawns a player."},
     {"set_privileges", PyMinqlx_SetPrivileges, METH_VARARGS,
      "Sets a player's privileges. Does not persist."},
     {"destroy_kamikaze_timers", PyMinqlx_DestroyKamikazeTimers, METH_NOARGS,
@@ -1836,11 +1863,13 @@ static PyMethodDef minqlxtendedMethods[] = {
     {"remove_dropped_items", PyMinqlx_RemoveDroppedItems, METH_NOARGS,
      "Removes all dropped items."},
     {"slay_with_mod", PyMinqlx_SlayWithMod, METH_VARARGS,
-     "Slay player with mean of death."},
+     "Slay player with means of death."},
     {"replace_items", PyMinqlx_ReplaceItems, METH_VARARGS,
      "Replaces target entity's item with specified one."},
     {"dev_print_items", PyMinqlx_DevPrintItems, METH_NOARGS,
      "Prints all items and entity numbers to server console."},
+    {"force_weapon_wait", PyMinqlx_ForceWeaponWait, METH_VARARGS,
+     "Force all weapons to have a specified spawn wait time."},
     {"force_weapon_respawn_time", PyMinqlx_ForceWeaponRespawnTime, METH_VARARGS,
      "Force all weapons to have a specified respawn time, overriding custom map respawn times set for them."},
     {NULL, NULL, 0, NULL}
