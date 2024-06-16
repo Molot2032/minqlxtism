@@ -335,6 +335,35 @@ void DamageDispatcher(int target_id, int attacker_id, int damage, int dflags, in
     PyGILState_Release(gstate);
 }
 
+void LaunchItemDispatcher(gitem_t *item, vec3_t origin, vec3_t velocity) {
+	if (!launch_item_handler)
+		return; // No registered handler.
+
+	PyGILState_STATE gstate = PyGILState_Ensure();
+
+    static PyTypeObject vector3_type = {0};
+
+    PyObject* pyOrigin = PyStructSequence_New(&vector3_type);
+    PyStructSequence_SetItem(pyOrigin, 0, PyFloat_FromDouble(origin[0]));
+    PyStructSequence_SetItem(pyOrigin, 1, PyFloat_FromDouble(origin[1]));
+    PyStructSequence_SetItem(pyOrigin, 2, PyFloat_FromDouble(origin[2]));
+
+    PyObject* pyVelocity = PyStructSequence_New(&vector3_type);
+    PyStructSequence_SetItem(pyVelocity, 0, PyFloat_FromDouble(velocity[0]));
+    PyStructSequence_SetItem(pyVelocity, 1, PyFloat_FromDouble(velocity[1]));
+    PyStructSequence_SetItem(pyVelocity, 2, PyFloat_FromDouble(velocity[2]));
+
+	PyObject* result = PyObject_CallFunction(launch_item_handler, "bOO", item->classname, pyOrigin, pyVelocity);
+
+	if (result == NULL)
+		DebugError("PyObject_CallFunction() returned NULL.\n", __FILE__, __LINE__, __func__);
+
+	Py_XDECREF(result);
+
+	PyGILState_Release(gstate);
+	return;
+}
+
 void KamikazeUseDispatcher(int client_id) {
     if (!kamikaze_use_handler)
         return; // No registered handler.

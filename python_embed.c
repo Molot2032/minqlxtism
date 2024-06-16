@@ -24,6 +24,7 @@ PyObject* set_configstring_handler = NULL;
 PyObject* rcon_handler = NULL;
 PyObject* console_print_handler = NULL;
 PyObject* client_spawn_handler = NULL;
+PyObject* launch_item_handler = NULL;
 
 PyObject* kamikaze_use_handler = NULL;
 PyObject* kamikaze_explode_handler = NULL;
@@ -74,6 +75,8 @@ static handler_t handlers[] = {
         {"kamikaze_explode",    &kamikaze_explode_handler},
 
         {"damage",              &damage_handler},
+
+        {"launch_item",         &launch_item_handler},
 
 		{NULL, NULL}
 };
