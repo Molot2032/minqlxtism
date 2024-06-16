@@ -456,17 +456,17 @@ def handle_kamikaze_explode(client_id, is_used_on_demand):
         return True
 
 def handle_damage(target_id, attacker_id, damage, dflags, mod):
-    target_player = minqlx.Player(target_id) if target_id in range(0, 64) else target_id
+    target_player = minqlxtended.Player(target_id) if target_id in range(0, 64) else target_id
     attacker_player = (
-        minqlx.Player(attacker_id) if attacker_id in range(0, 64) else attacker_id
+        minqlxtended.Player(attacker_id) if attacker_id in range(0, 64) else attacker_id
     )
 
     try:
-        minqlx.EVENT_DISPATCHERS["damage"].dispatch(
+        minqlxtended.EVENT_DISPATCHERS["damage"].dispatch(
             target_player, attacker_player, damage, dflags, mod
         )
     except:
-        minqlx.log_exception()
+        minqlxtended.log_exception()
         return True
         
 def handle_console_print(text):
