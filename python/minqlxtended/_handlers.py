@@ -468,7 +468,17 @@ def handle_damage(target_id, attacker_id, damage, dflags, mod):
     except:
         minqlxtended.log_exception()
         return True
-        
+
+def handle_launch_item(item, origin, velocity):
+    """Called whenever an item is launched."""
+    try:
+        minqlx.EVENT_DISPATCHERS["launch_item"].dispatch(
+            item, origin, velocity
+        )
+    except:
+        minqlx.log_exception()
+        return True
+
 def handle_console_print(text):
     """Called whenever the server prints something to the console and when rcon is used."""
     try:
@@ -547,3 +557,4 @@ def register_handlers():
     minqlxtended.register_handler("console_print", handle_console_print)
     minqlxtended.register_handler("kamikaze_use", handle_kamikaze_use)
     minqlxtended.register_handler("kamikaze_explode", handle_kamikaze_explode)
+    minqlxtended.register_handler("launch_item", handle_launch_item)

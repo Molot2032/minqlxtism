@@ -603,6 +603,27 @@ class DamageDispatcher(EventDispatcher):
     def dispatch(self, target, attacker, damage, dflags, mod):
         return super().dispatch(target, attacker, damage, dflags, mod)
 
+class LaunchItemDispatcher(EventDispatcher):
+    name = "launch_item"
+    need_zmq_stats_enabled = False
+
+    def dispatch(self, item, origin, velocity):
+        return super().dispatch(item, origin, velocity)
+
+class TouchOurFlagDispatcher(EventDispatcher):
+    name = "touch_our_flag"
+    need_zmq_stats_enabled = False
+
+    def dispatch(self, player1, player2, team):
+        return super().dispatch(player1, player2, team)
+
+class TouchEnemyFlagDispatcher(EventDispatcher):
+    name = "touch_enemy_flag"
+    need_zmq_stats_enabled = False
+
+    def dispatch(self, player1, player2, team):
+        return super().dispatch(player1, player2, team)
+
 EVENT_DISPATCHERS = EventDispatcherManager()
 EVENT_DISPATCHERS.add_dispatcher(ConsolePrintDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(CommandDispatcher)

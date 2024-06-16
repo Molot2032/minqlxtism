@@ -59,6 +59,7 @@ extern PyObject* set_configstring_handler;
 extern PyObject* rcon_handler;
 extern PyObject* console_print_handler;
 extern PyObject* client_spawn_handler;
+extern PyObject* launch_item_handler;
 
 extern PyObject* kamikaze_use_handler;
 extern PyObject* kamikaze_explode_handler;
@@ -91,6 +92,7 @@ char* SetConfigstringDispatcher(int index, char* value);
 void RconDispatcher(const char* cmd);
 char* ConsolePrintDispatcher(char* cmd);
 void ClientSpawnDispatcher(int client_id);
+void LaunchItemDispatcher(gitem_t *item, vec3_t origin, vec3_t velocity);
 
 void KamikazeUseDispatcher(int client_id);
 void KamikazeExplodeDispatcher(int client_id, int is_used_on_demand);

@@ -331,6 +331,12 @@ void __cdecl My_ClientSpawn(gentity_t* ent) {
     ClientSpawnDispatcher(ent - g_entities);
 }
 
+gentity_t* __cdecl My_LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity ) {
+    gentity_t* r = LaunchItem(item, origin, velocity);
+    LaunchItemDispatcher(item, origin, velocity);
+    return r;
+}
+
 void __cdecl My_G_StartKamikaze(gentity_t* ent) {
     int client_id, is_used_on_demand;
 
@@ -505,6 +511,13 @@ void HookVm(void) {
     res = Hook((void*)G_StartKamikaze, My_G_StartKamikaze, (void*)&G_StartKamikaze);
     if (res) {
         DebugPrint("ERROR: Failed to hook G_StartKamikaze: %d\n", res);
+        failed = 1;
+    }
+    count++;
+
+    res = Hook((void*)LaunchItem, My_LaunchItem, (void*)&LaunchItem);
+    if (res) {
+        DebugPrint("ERROR: Failed to hook LaunchItem: %d\n", res);
         failed = 1;
     }
     count++;
