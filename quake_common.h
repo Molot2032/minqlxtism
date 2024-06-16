@@ -548,6 +548,14 @@ typedef enum {
   TEAM_NUM_TEAMS
 } team_t;
 
+typedef enum _flag_status {
+  FLAG_ATBASE = 0,
+  FLAG_TAKEN,     // CTF
+  FLAG_TAKEN_RED,   // One Flag CTF
+  FLAG_TAKEN_BLUE,  // One Flag CTF
+  FLAG_DROPPED
+} flagStatus_t;
+
 // https://github.com/brugal/wolfcamql/blob/73e2d707e5dd1fb0fc50d4ad9f00940909c4b3ec/code/game/bg_public.h#L1142-L1188
 // means of death
 typedef enum {
@@ -1581,6 +1589,9 @@ typedef struct {
   char* description; // Command description that gets printed when you do "?".
 } adminCmd_t;
 
+// vector macros
+#define VectorCopy(a,b) ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
+
 // A pointer to the qagame module in memory and its entry point.
 extern void* qagame;
 extern void* qagame_dllentry;
@@ -1636,9 +1647,11 @@ typedef void (__cdecl *ClientBegin_ptr)(int clientNum);
 typedef void (__cdecl *ClientEndFrame_ptr)(gentity_t *ent);
 typedef void (__cdecl *Cmd_CallVote_f_ptr)(gentity_t *ent);
 typedef void (__cdecl *G_Damage_ptr)(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod);
+typedef void (__cdecl *RespawnItem_ptr)( gentity_t *ent );
 typedef void (__cdecl *Touch_Item_ptr)(gentity_t *ent, gentity_t *other, trace_t *trace);
 typedef gentity_t* (__cdecl *LaunchItem_ptr)(gitem_t *item, vec3_t origin, vec3_t velocity);
 typedef gentity_t* (__cdecl *Drop_Item_ptr)(gentity_t *ent, gitem_t *item, float angle);
+typedef void (__cdecl *Team_DroppedFlagThink_ptr)(gentity_t *ent);
 typedef void (__cdecl *G_StartKamikaze_ptr)(gentity_t *ent);
 typedef void (__cdecl *G_FreeEntity_ptr)(gentity_t *ed);
 typedef void (__cdecl *SetTeam_ptr)(gentity_t *ent, char* team);
@@ -1682,9 +1695,11 @@ extern ClientBegin_ptr ClientBegin;
 extern ClientEndFrame_ptr ClientEndFrame;
 extern Cmd_CallVote_f_ptr Cmd_CallVote_f;
 extern G_Damage_ptr G_Damage;
+extern RespawnItem_ptr RespawnItem;
 extern Touch_Item_ptr Touch_Item;
 extern LaunchItem_ptr LaunchItem;
 extern Drop_Item_ptr Drop_Item;
+extern Team_DroppedFlagThink_ptr Team_DroppedFlagThink;
 extern G_StartKamikaze_ptr G_StartKamikaze;
 extern G_FreeEntity_ptr G_FreeEntity;
 extern SetTeam_ptr SetTeam;
