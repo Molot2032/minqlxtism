@@ -341,6 +341,8 @@ void LaunchItemDispatcher(gitem_t *item, vec3_t origin, vec3_t velocity) {
 
 	PyGILState_STATE gstate = PyGILState_Ensure();
 
+    static PyTypeObject vector3_type = {0};
+
     PyObject* pyOrigin = PyStructSequence_New(&vector3_type);
     PyStructSequence_SetItem(pyOrigin, 0, PyFloat_FromDouble(origin[0]));
     PyStructSequence_SetItem(pyOrigin, 1, PyFloat_FromDouble(origin[1]));
