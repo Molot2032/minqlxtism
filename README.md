@@ -41,7 +41,7 @@ python3 -m pip install -r minqlxtended-plugins/requirements.txt
 
 **IMPORTANT**: Don't be running the above using `sudo` or within the system context. Follow best practices and install these under the service account user you'll be executing `qzeroded` with, these packages will be local to that user and won't interfere with Ubuntu's built-in Python packages.
 
-- Redis should work right off the bat, but you might want to edit the config and make it use UNIX sockets instead for the sake of speed. minqlxtended is configured through CVARs, just like you would configure `qzeroded`. This means you can use `server.cfg` or by passing the CVARs as command line arguments with `+set`. All the cvars have default values, except for `qlx_owner`, which must contain your SteamID64. Note that the listed owner operates outside of the built-in permission system and can execute any command (and even raw Python).
+- Redis should work right off the bat, but you might want to edit the config and make it use UNIX sockets instead for the sake of speed. minqlxtended is configured through CVARs, just like you would configure `qzeroded`. This means you can use `server.cfg` or by passing the CVARs as command line arguments with `+set`. All the CVARs have default values, except for `qlx_owner`, which must contain your SteamID64. Note that the listed owner operates outside of the built-in permission system and can execute any command (and even raw Python).
 
 - You're almost there. Now simply edit the scripts you use to launch the server, but make it point to `run_server_x64_minqlxtended.sh` instead of `run_server_x64.sh`.
 
@@ -74,7 +74,7 @@ For plugin configuration see the [plugins repository](https://github.com/MinoMin
 
 Usage
 =====
-Once you've configured the above cvars and launched the server, you will quickly recognize if for instance your database configuration is wrong, as it will start printing a bunch of errors in the server console when someone connects. If you only see stuff like the following, then you know it's working like it should:
+Once you've configured the above CVARs and launched the server, you will quickly recognize if for instance your database configuration is wrong, as it will start printing a bunch of errors in the server console when someone connects. If you only see stuff like the following, then you know it's working like it should:
 ```
 [minqlxtended.late_init] INFO: Loading preset plugins...
 [minqlxtended.load_plugin] INFO: Loading plugin 'xxx'...
@@ -85,6 +85,6 @@ Once you've configured the above cvars and launched the server, you will quickly
 ```
 
 To confirm minqlxtended recognizes you as the owner, try connecting to the server and type `!myperm` in chat.
-If it tells you that you have permission level 0, the `qlx_owner` cvar has not been set correctly (must use the SteamID64 number beginning with 765). Otherwise you should be good to go. As the owner, you are allowed to type commands directly into the console instead of having to use chat. You can now go ahead and add other admins too with `!setperm`.
+If it tells you that you have permission level 0, the `qlx_owner` CVAR has not been set correctly (must use the SteamID64 number beginning with 765). Otherwise you should be good to go. As the owner, you are allowed to type commands directly into the console instead of having to use chat. You can now go ahead and add other admins too with `!setperm`.
 
 [See here for a full command list.](https://github.com/tjone270/minqlxtended/wiki/Command-List)
