@@ -44,6 +44,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define	PACKET_MASK	          (PACKET_BACKUP-1)
 #define MAX_ENT_CLUSTERS      16
 #define MAX_MODELS            256 // these are sent over the net as 8 bits
+#define MAX_SOUNDS            256
+#define MAX_LOCATIONS         64
 #define MAX_CONFIGSTRINGS     1024
 #define GENTITYNUM_BITS       10      // don't need to send any more
 #define MAX_GENTITIES         (1<<GENTITYNUM_BITS)
@@ -55,6 +57,84 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_SPAWN_VARS_CHARS  4096
 #define BODY_QUEUE_SIZE       8
 
+// configstrings
+#define CS_MUSIC                        2
+#define CS_MESSAGE                      3    // from the map worldspawn's message field
+#define CS_MOTD                         4    // g_motd string for server message of the day (not used in QL)
+#define CS_WARMUP                       5    // server time when the match will be restarted
+#define	CS_SCORES1				              6    // 1st place score
+#define	CS_SCORES2				              7    // 2nd place score
+#define CS_VOTE_TIME			              8
+#define CS_VOTE_STRING			            9
+#define	CS_VOTE_YES				              10
+#define	CS_VOTE_NO				              11
+#define CS_GAME_VERSION                 12
+#define CS_LEVEL_START_TIME             13   // so the timer only shows the current level
+#define CS_INTERMISSION                 14   // when 1, fraglimit/timelimit has been hit and intermission will start in a second or two
+#define CS_ITEMS                        15   // string of 0's and 1's that tell the client which items are present/to load.
+#define CS_BOTINFO                      16   // internal debugging stuff
+#define CS_MODELS                       17
+#define CS_SOUNDS                       (CS_MODELS + MAX_MODELS)        // 273
+#define CS_PLAYERS                      (CS_SOUNDS + MAX_SOUNDS)        // 529
+#define CS_LOCATIONS                    (CS_PLAYERS + MAX_CLIENTS)      // 593
+#define CS_LAST_GENERIC                 (CS_LOCATIONS + MAX_LOCATIONS)  // 657
+#define CS_FLAGSTATUS                   658
+#define CS_SCORES1PLAYER                659  // 1st place player's name
+#define CS_SCORES2PLAYER                660  // 2nd place player's name
+#define CS_ROUND_WARMUP                 661
+#define CS_ROUND_START_TIME             662
+#define CS_TEAMCOUNT_RED                663
+#define CS_TEAMCOUNT_BLUE               664
+#define CS_SHADERSTATE                  665
+#define CS_NEXTMAP                      666
+#define CS_PRACTICE                     667
+#define CS_FREECAM                      668
+#define CS_PAUSE_START_TIME             669  // if this is non-zero, the game is paused
+#define CS_PAUSE_END_TIME               670  // 0 = pause, !0 = timeout
+#define CS_TIMEOUTS_RED                 671  // TOs REMAINING
+#define CS_TIMEOUTS_BLUE                672 
+#define CS_MODEL_OVERRIDE               673
+#define CS_PLAYER_CYLINDERS             674
+#define CS_DEBUGFLAGS                   675
+#define CS_ENABLEBREATH                 676
+#define CS_DMGTHROUGHDEPTH              677
+#define CS_AUTHOR                       678  // from the map worldspawn's author field
+#define CS_AUTHOR2                      679
+#define CS_ADVERT_DELAY                 680
+#define CS_PMOVEINFO                    681
+#define CS_ARMORINFO                    682
+#define CS_WEAPONINFO                   683
+#define CS_PLAYERINFO                   684
+#define CS_SCORE1STPLAYER               685  // Score of the duel player on the left
+#define CS_SCORE2NDPLAYER               686  // Score of the duel player on the right
+#define CS_CLIENTNUM1STPLAYER           687  // ClientNum of the duel player on the left
+#define CS_CLIENTNUM2NDPLAYER           688  // ClientNum of the duel player on the right
+#define CS_ATMOSEFFECT                  689  // unused, was per-map rain/snow effects
+#define CS_MOST_DAMAGEDEALT_PLYR        690
+#define CS_MOST_ACCURATE_PLYR           691
+#define CS_REDTEAMBASE                  692
+#define CS_BLUETEAMBASE                 693
+#define CS_BEST_ITEMCONTROL_PLYR        694
+#define CS_MOST_VALUABLE_OFFENSIVE_PLYR 695
+#define CS_MOST_VALUABLE_DEFENSIVE_PLYR 696
+#define CS_MOST_VALUABLE_PLYR           697
+#define CS_GENERIC_COUNT_RED            698
+#define CS_GENERIC_COUNT_BLUE           699
+#define CS_AD_SCORES                    700
+#define CS_ROUND_WINNER                 701
+#define CS_CUSTOM_SETTINGS              702
+#define CS_ROTATIONMAPS                 703
+#define CS_ROTATIONVOTES                704
+#define CS_DISABLE_VOTE_UI              705
+#define CS_ALLREADY_TIME                706
+#define CS_INFECTED_SURVIVOR_MINSPEED   707
+#define CS_RACE_POINTS                  708
+#define CS_DISABLE_LOADOUT              709
+#define CS_MATCH_GUID                   710
+#define CS_STARTING_WEAPONS             711
+#define CS_STEAM_ID                     712
+#define CS_STEAM_WORKSHOP_IDS           713
+#define CS_MAX                          714
 
 // bit field limits
 #define MAX_STATS             16
@@ -79,7 +159,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define	BUTTON_UPMOVE		      2048  // Mino: Not in Q3. I'm guessing it's for cg_autohop.
 #define	BUTTON_ANY			      4096  // any key whatsoever
 #define BUTTON_IS_ACTIVE 	    65536 // Mino: No idea what it is, but it goes off after a while of being
-								                    //   AFK, then goes on after being active for a while.
+                                    //   AFK, then goes on after being active for a while.
 
 // eflags
 #define	EF_DEAD				        0x00000001		// don't draw a foe marker over players with EF_DEAD
@@ -122,14 +202,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define	SVF_BROADCAST          0x00000020	// send to all connected clients
 #define	SVF_PORTAL             0x00000040	// merge a second pvs at origin2 into snapshots
 #define	SVF_USE_CURRENT_ORIGIN 0x00000080	// entity->r.currentOrigin instead of entity->s.origin
-											                    // for link position (missiles and movers)
+                                          // for link position (missiles and movers)
 #define SVF_SINGLECLIENT		   0x00000100	// only send to a single client (entityShared_t->singleClient)
 #define SVF_NOSERVERINFO		   0x00000200	// don't send CS_SERVERINFO updates to this client
-											                    // so that it can be updated for ping tools without
-											                    // lagging clients
+                                          // so that it can be updated for ping tools without
+                                          // lagging clients
 #define SVF_CAPSULE				     0x00000400	// use capsule for collision detection instead of bbox
 #define SVF_NOTSINGLECLIENT		 0x00000800	// send entity to everyone but one client
-											                    // (entityShared_t->singleClient)
+                                          // (entityShared_t->singleClient)
 
 
 typedef enum {qfalse, qtrue} qboolean;
@@ -157,12 +237,12 @@ typedef enum {
 
 // Vote type. As opposed to in Q3, votes are counted every frame.
 typedef enum {
-	VOTE_NONE,
-	VOTE_PENDING,
-	VOTE_YES,
-	VOTE_NO,
-	VOTE_FORCE_PASS,
-	VOTE_FORCE_FAIL,
+  VOTE_NONE,
+  VOTE_PENDING,
+  VOTE_YES,
+  VOTE_NO,
+  VOTE_FORCE_PASS,
+  VOTE_FORCE_FAIL,
     VOTE_EXPIRED
 } voteState_t;
 
@@ -206,36 +286,36 @@ typedef enum {
 } statIndex_t;
 
 typedef enum {
-	GAME_INIT,	// ( int levelTime, int randomSeed, int restart );
-	// init and shutdown will be called every single level
-	// The game should call G_GET_ENTITY_TOKEN to parse through all the
-	// entity configuration text and spawn gentities.
+  GAME_INIT,	// ( int levelTime, int randomSeed, int restart );
+  // init and shutdown will be called every single level
+  // The game should call G_GET_ENTITY_TOKEN to parse through all the
+  // entity configuration text and spawn gentities.
 
-	GAME_SHUTDOWN,	// (void);
+  GAME_SHUTDOWN,	// (void);
 
-	GAME_CLIENT_CONNECT,	// ( int clientNum, qboolean firstTime, qboolean isBot );
-	// return NULL if the client is allowed to connect, otherwise return
-	// a text string with the reason for denial
+  GAME_CLIENT_CONNECT,	// ( int clientNum, qboolean firstTime, qboolean isBot );
+  // return NULL if the client is allowed to connect, otherwise return
+  // a text string with the reason for denial
 
-	GAME_CLIENT_BEGIN,				// ( int clientNum );
+  GAME_CLIENT_BEGIN,				// ( int clientNum );
 
-	GAME_CLIENT_USERINFO_CHANGED,	// ( int clientNum );
+  GAME_CLIENT_USERINFO_CHANGED,	// ( int clientNum );
 
-	GAME_CLIENT_DISCONNECT,			// ( int clientNum );
+  GAME_CLIENT_DISCONNECT,			// ( int clientNum );
 
-	GAME_CLIENT_COMMAND,			// ( int clientNum );
+  GAME_CLIENT_COMMAND,			// ( int clientNum );
 
-	GAME_CLIENT_THINK,				// ( int clientNum );
+  GAME_CLIENT_THINK,				// ( int clientNum );
 
-	GAME_RUN_FRAME,					// ( int levelTime );
+  GAME_RUN_FRAME,					// ( int levelTime );
 
-	GAME_CONSOLE_COMMAND,			// ( void );
-	// ConsoleCommand will be called when a command has been issued
-	// that is not recognized as a builtin function.
-	// The game can issue trap_argc() / trap_argv() commands to get the command
-	// and parameters.  Return qfalse if the game doesn't recognize it as a command.
+  GAME_CONSOLE_COMMAND,			// ( void );
+  // ConsoleCommand will be called when a command has been issued
+  // that is not recognized as a builtin function.
+  // The game can issue trap_argc() / trap_argv() commands to get the command
+  // and parameters.  Return qfalse if the game doesn't recognize it as a command.
 
-	BOTAI_START_FRAME				// ( int time );
+  BOTAI_START_FRAME				// ( int time );
 } gameExport_t;
 
 typedef enum {
@@ -353,17 +433,17 @@ typedef enum {
 } entity_event_t;
 
 typedef enum {
-	IT_BAD,
-	IT_WEAPON,				// EFX: rotate + upscale + minlight
-	IT_AMMO,				// EFX: rotate
-	IT_ARMOR,				// EFX: rotate + minlight
-	IT_HEALTH,				// EFX: static external sphere + rotating internal
-	IT_POWERUP,				// instant on, timer based
-							// EFX: rotate + external ring that rotates
-	IT_HOLDABLE,			// single use, holdable item
-							// EFX: rotate + bob
-	IT_PERSISTANT_POWERUP,
-	IT_TEAM
+  IT_BAD,
+  IT_WEAPON,				// EFX: rotate + upscale + minlight
+  IT_AMMO,				// EFX: rotate
+  IT_ARMOR,				// EFX: rotate + minlight
+  IT_HEALTH,				// EFX: static external sphere + rotating internal
+  IT_POWERUP,				// instant on, timer based
+              // EFX: rotate + external ring that rotates
+  IT_HOLDABLE,			// single use, holdable item
+              // EFX: rotate + bob
+  IT_PERSISTANT_POWERUP,
+  IT_TEAM
 } itemType_t;
 
 typedef enum {
@@ -450,17 +530,17 @@ typedef enum {
 } keys_t;
 
 typedef enum {
-	TEAM_BEGIN,		// Beginning a team game, spawn at base
-	TEAM_ACTIVE		// Now actively playing
+  TEAM_BEGIN,		// Beginning a team game, spawn at base
+  TEAM_ACTIVE		// Now actively playing
 } playerTeamStateState_t;
 
 typedef enum {
-	TEAM_FREE,
-	TEAM_RED,
-	TEAM_BLUE,
-	TEAM_SPECTATOR,
+  TEAM_FREE,
+  TEAM_RED,
+  TEAM_BLUE,
+  TEAM_SPECTATOR,
 
-	TEAM_NUM_TEAMS
+  TEAM_NUM_TEAMS
 } team_t;
 
 // https://github.com/brugal/wolfcamql/blob/73e2d707e5dd1fb0fc50d4ad9f00940909c4b3ec/code/game/bg_public.h#L1142-L1188
@@ -503,24 +583,24 @@ typedef enum {
 } meansOfDeath_t;
 
 typedef enum {
-	SPECTATOR_NOT,
-	SPECTATOR_FREE,
-	SPECTATOR_FOLLOW,
-	SPECTATOR_SCOREBOARD
+  SPECTATOR_NOT,
+  SPECTATOR_FREE,
+  SPECTATOR_FOLLOW,
+  SPECTATOR_SCOREBOARD
 } spectatorState_t;
 
 typedef enum {
-	CON_DISCONNECTED,
-	CON_CONNECTING,
-	CON_CONNECTED
+  CON_DISCONNECTED,
+  CON_CONNECTING,
+  CON_CONNECTED
 } clientConnected_t;
 
 // movers are things like doors, plats, buttons, etc
 typedef enum {
-	MOVER_POS1,
-	MOVER_POS2,
-	MOVER_1TO2,
-	MOVER_2TO1
+  MOVER_POS1,
+  MOVER_POS2,
+  MOVER_1TO2,
+  MOVER_2TO1
 } moverState_t;
 
 enum {
@@ -563,30 +643,30 @@ enum cvar_flags {
 
 // paramters for command buffer stuffing
 typedef enum {
-	EXEC_NOW,			// don't return until completed, a VM should NEVER use this,
-						// because some commands might cause the VM to be unloaded...
-	EXEC_INSERT,		// insert at current position, but don't run yet
-	EXEC_APPEND			// add to end of the command buffer (normal case)
+  EXEC_NOW,			// don't return until completed, a VM should NEVER use this,
+            // because some commands might cause the VM to be unloaded...
+  EXEC_INSERT,		// insert at current position, but don't run yet
+  EXEC_APPEND			// add to end of the command buffer (normal case)
 } cbufExec_t;
 
 // Mino: Quite different from Q3. Not sure on everything.
 typedef struct cvar_s {
-	char		*name;
-	char		*string;
-	char		*resetString;		// cvar_restart will reset to this value
-	char		*latchedString;		// for CVAR_LATCH vars
+  char		*name;
+  char		*string;
+  char		*resetString;		// cvar_restart will reset to this value
+  char		*latchedString;		// for CVAR_LATCH vars
     char        *defaultString;
     char		*minimumString;
     char		*maximumString;
-	int			flags;
-	qboolean	modified;
+  int			flags;
+  qboolean	modified;
     uint8_t     _unknown2[4];
-	int			modificationCount;	// incremented each time the cvar is changed
-	float		value;				// atof( string )
-	int			integer;			// atoi( string )
+  int			modificationCount;	// incremented each time the cvar is changed
+  float		value;				// atof( string )
+  int			integer;			// atoi( string )
     uint8_t     _unknown3[8];
-	struct cvar_s *next;
-	struct cvar_s *hashNext;
+  struct cvar_s *next;
+  struct cvar_s *hashNext;
 } cvar_t;
 
 typedef struct {
@@ -1487,13 +1567,13 @@ typedef struct __attribute__((aligned(8))) {
 // get when you type ? in the console. The array has a sentinel struct, so
 // check "cmd" == NULL.
 typedef struct {
-	privileges_t needed_privileges;
-	int unknown1;
-	char* cmd; // The command name, e.g. "tempban".
-	void (*admin_func)(gentity_t* ent);
-	int unknown2;
-	int unknown3;
-	char* description; // Command description that gets printed when you do "?".
+  privileges_t needed_privileges;
+  int unknown1;
+  char* cmd; // The command name, e.g. "tempban".
+  void (*admin_func)(gentity_t* ent);
+  int unknown2;
+  int unknown3;
+  char* description; // Command description that gets printed when you do "?".
 } adminCmd_t;
 
 // A pointer to the qagame module in memory and its entry point.
