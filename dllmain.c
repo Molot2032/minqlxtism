@@ -219,17 +219,26 @@ void InitializeStatic(void) {
 // Initialize VM stuff. Needs to be called whenever Sys_SetModuleOffset is called,
 // after qagame pointer has been initialized.
 void InitializeVm(void) {
-    DebugPrint("Initializing VM pointers...\n");
+    DebugPrint("Initializing VM pointers... ");
+
 #if defined(__x86_64__) || defined(_M_X64)
     g_entities = (gentity_t*)(*(int32_t*)OFFSET_RELP_G_ENTITIES + OFFSET_RELP_G_ENTITIES + 4);
+	DebugPrint("g_entities... ");
     level = (level_locals_t*)(*(int32_t*)OFFSET_RELP_LEVEL + OFFSET_RELP_LEVEL + 4);
+	DebugPrint("level... ");
     bg_itemlist = (gitem_t*)*(int64_t*)((*(int32_t*)OFFSET_RELP_BG_ITEMLIST + OFFSET_RELP_BG_ITEMLIST + 4));
+	DebugPrint("bg_itemlist..");
 #elif defined(__i386) || defined(_M_IX86)
     g_entities = (gentity_t*)(*(int32_t*)OFFSET_RELP_G_ENTITIES + 0xCEFF4 + (pint)qagame);
+	DebugPrint("g_entities... ");
     level = (level_locals_t*)(*(int32_t*)OFFSET_RELP_LEVEL + 0xCEFF4 + (pint)qagame);
+	DebugPrint("level... ");
     bg_itemlist = (gitem_t*)*(int32_t*)((*(int32_t*)OFFSET_RELP_BG_ITEMLIST + 0xCEFF4 + (pint)qagame));
+	DebugPrint("bg_itemlist..");
 #endif
+	
     for (bg_numItems = 1; bg_itemlist[ bg_numItems ].classname; bg_numItems++);
+	DebugPrint(".\n");
 }
 
 // Called after the game is initialized.
