@@ -2,7 +2,8 @@ minqlxtended
 ======
 minqlxtended is a further extension to [MinoMino's](https://github.com/MinoMino) [minqlx](https://github.com/MinoMino/minqlx) modification to the Quake Live Dedicated Server.
 
-minqlxtended is tested on the latest LTS revision of Ubuntu Server.
+minqlxtended is tested on the latest LTS revision of Ubuntu Server. 
+
 minqlxtended powers [The Purgery](https://thepurgery.com).
 
 Installation
