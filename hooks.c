@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #define __STDC_FORMAT_MACROS
 
+#include <inttypes.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,9 +57,66 @@ void __cdecl My_Sys_SetModuleOffset(char* moduleName, void* offset) {
     	SearchVmFunctions();
     	HookVm();
     	InitializeVm();
-    	patch_vm();
+    	patch_vm(offset);
     }
 }
+
+typedef void (__cdecl *race_point_touch_ptr)(gentity_t *a1, gentity_t *a2);
+race_point_touch_ptr race_point_touch;
+
+void __cdecl My_race_point_touch( gentity_t *ent, gentity_t *activator ) {
+	if (activator->client) {
+		if ( ent->spawnflags && activator->client->race.startTime && !ent->targetname )
+			return;  //no more tr
+	}
+
+	activator->client->pers.teamState.flagruntime = level->time - activator->client->race.startTime;
+	race_point_touch(ent, activator);
+}
+
+void __cdecl My_race_point_touch_old( gentity_t *ent, gentity_t *activator ) {
+	if (activator->client) {
+		if (ent->message)
+			if ( !strncmp(ent->message, "notr", 4) && activator->client->race.startTime && !ent->targetname )
+				return;  //no more tr
+	}
+
+	activator->client->pers.teamState.flagruntime = level->time - activator->client->race.startTime;
+	race_point_touch(ent, activator);
+}
+
+void __cdecl My_target_init_touch( gentity_t *ent, gentity_t *activator ) {
+	if (activator->client) {
+		//KEEPARMOR
+		if ( !(ent->spawnflags & 1) )
+			activator->client->ps.stats[STAT_ARMOR] = 0;
+
+		//KEEPHEALTH
+		if ( !(ent->spawnflags & 2) )
+			activator->health = 100;
+
+		//KEEPWEAPONS
+		if ( !(ent->spawnflags & 4) ) {
+			activator->client->ps.stats[STAT_WEAPONS] = 2<<(WP_MACHINEGUN-1);
+			memset( activator->client->ps.ammo, 0, sizeof( activator->client->ps.ammo ) );
+			activator->client->ps.ammo[WP_MACHINEGUN] = 100;
+			activator->client->ps.weapon = WP_MACHINEGUN;
+		}
+
+		//KEEPPOWERUPS
+		if ( !(ent->spawnflags & 8) )
+			memset( activator->client->ps.powerups, 0, sizeof( activator->client->ps.powerups ) );
+
+		//KEEPHOLDABLE
+		if ( !(ent->spawnflags & 16) )
+			activator->client->ps.stats[STAT_HOLDABLE_ITEM] = 0;
+
+		//REMOVEMACHINEGUN
+		if ( ent->spawnflags & 32 && activator->client->ps.stats[STAT_WEAPONS] & (2<<(WP_MACHINEGUN-1))  )
+			activator->client->ps.stats[STAT_WEAPONS] -= 2<<(WP_MACHINEGUN-1);
+	}
+}
+
 
 void __cdecl My_G_InitGame(int levelTime, int randomSeed, int restart) {
     G_InitGame(levelTime, randomSeed, restart);
@@ -72,6 +130,28 @@ void __cdecl My_G_InitGame(int levelTime, int randomSeed, int restart) {
     if (restart)
 	   NewGameDispatcher(restart);
 #endif
+    
+	race_point_touch = (race_point_touch_ptr)qagame_dllentry + 0xEE60;
+
+	gentity_t *z1;
+	int	j1;
+	for ( j1=1, z1=g_entities+j1 ; j1 < level->num_entities ; j1++,z1++ ) {
+        if (!z1->classname) continue;
+
+        if (z1->inuse) {
+			if (strncmp(z1->classname, "trigger_multiple", 16) == 0 && z1->message) {
+				if (strncmp(z1->message, "race_point", 10) == 0 && (z1->target || z1->targetname)) {
+					z1->touch = My_race_point_touch;
+				} else if (strncmp(z1->message, "target_init", 11) == 0) {
+					z1->touch = My_target_init_touch;
+				}
+			}
+		}
+
+		if (strncmp(z1->classname, "race_point", 10) == 0) {
+			z1->touch = My_race_point_touch_old;
+		}
+	}
 }
 
 // USED FOR PYTHON
@@ -97,6 +177,7 @@ void __cdecl My_SV_SendServerCommand(client_t* cl, char* fmt, ...) {
 	va_end(argptr);
 
     char* res = buffer;
+    DebugPrint("SSC: %s\n", res);
 	if (cl && cl->gentity)
 		res = ServerCommandDispatcher(cl - svs->clients, buffer);
 	else if (cl == NULL)
@@ -119,6 +200,59 @@ void __cdecl My_SV_ClientEnterWorld(client_t* client, usercmd_t* cmd) {
 		ClientLoadedDispatcher(client - svs->clients);
 	}
 }
+
+void __cdecl My_SV_ClientThink(client_t *client, usercmd_t *cmd)
+{
+    // Debug client dict
+    /*
+    int i = sizeof(client_t);
+    // 158328 on linux
+    DebugPrint("  ----\nsizeof c: %d\n", i);
+    DebugPrint("\n");
+    DebugPrint("  dl: %s, offset: %d\n", client->downloadName, (char*)&client->downloadName - (char*)client);
+    DebugPrint("  ds: %d, offset: %d\n", client->downloadSize, (char*)&client->downloadSize - (char*)client);
+    DebugPrint("  dc: %d, offset: %d\n", client->downloadCount, (char*)&client->downloadCount - (char*)client);
+    DebugPrint("  dcb: %d, offset: %d\n", client->downloadClientBlock, (char*)&client->downloadClientBlock - (char*)client);
+    DebugPrint("  dcrb: %d, offset: %d\n", client->downloadCurrentBlock, (char*)&client->downloadCurrentBlock - (char*)client);
+    DebugPrint("  dxb: %d, offset: %d\n", client->downloadXmitBlock, (char*)&client->downloadXmitBlock - (char*)client);
+    DebugPrint("  deof: %d, offset: %d\n", client->downloadEOF, (char*)&client->downloadEOF - (char*)client);
+    DebugPrint("  dst: %d, offset: %d\n", client->downloadSendTime, (char*)&client->downloadSendTime - (char*)client);
+    DebugPrint("\n");
+    DebugPrint("  uk0: %d, offset: %d\n", client->_unknown0, (char*)&client->_unknown0 - (char*)client);
+    DebugPrint("  uk1: %d, offset: %d\n", client->_unknown1, (char*)&client->_unknown1 - (char*)client);
+    DebugPrint("  ukt: %d, offset: %d\n", client->_unknownTime, (char*)&client->_unknownTime - (char*)client);
+    DebugPrint("\n");
+    DebugPrint("  dm: %d, offset: %d\n", client->deltaMessage, (char*)&client->deltaMessage - (char*)client);
+    DebugPrint("  nrt: %d, offset: %d\n", client->nextReliableTime, (char*)&client->nextReliableTime - (char*)client);
+    DebugPrint("  uk3: %d, offset: %d\n", client->_unknown3, (char*)&client->_unknown3 - (char*)client);
+    
+    DebugPrint("\n");
+    DebugPrint("  lpt: %d, offset: %d\n", client->lastPacketTime, (char*)&client->lastPacketTime - (char*)client);
+    DebugPrint("  lct: %d, offset: %d\n", client->lastConnectTime, (char*)&client->lastConnectTime - (char*)client);
+    DebugPrint("  nst: %d, offset: %d\n", client->nextSnapshotTime, (char*)&client->nextSnapshotTime - (char*)client);
+    DebugPrint("  rd: %d, offset: %d\n", client->rateDelayed, (char*)&client->rateDelayed - (char*)client);
+    DebugPrint("  toc: %d, offset: %d\n", client->timeoutCount, (char*)&client->timeoutCount - (char*)client);
+    
+    DebugPrint("\n");
+    DebugPrint("  ping: %d, offset: %d\n", client->ping, (char*)&client->ping - (char*)client);
+    DebugPrint("  rate: %d, offset: %d\n", client->rate, (char*)&client->rate - (char*)client);
+    DebugPrint("  snms: %d, offset: %d\n", client->snapshotMsec, (char*)&client->snapshotMsec - (char*)client);
+    DebugPrint("  pure: %d, offset: %d\n", client->pureAuthentic, (char*)&client->pureAuthentic - (char*)client);
+    
+    DebugPrint("\n");
+    DebugPrint("  steamid: %" PRId64 ", offset: %d\n", client->steam_id, (char*)&client->steam_id - (char*)client);
+    // for (size_t i = 0; i < sizeof(client_t) - 3; i++)
+    // {
+    //     int val = *(int*)((char*)client + i);
+    //     if (val != 0)
+    //         DebugPrint("  byte offset %d as int: %d\n", i, val);
+    // }
+    */
+
+    ClientThinkDispatcher(client - svs->clients, cmd);
+    SV_ClientThink(client, cmd);
+}
+
 
 void __cdecl My_SV_SetConfigstring(int index, char* value) {
     // Indices 16 and 66X are spammed a ton every frame for some reason,
@@ -257,6 +391,12 @@ void HookStatic(void) {
 		failed = 1;
 	}
 
+    res = Hook((void*)SV_ClientThink, My_SV_ClientThink, (void*)&SV_ClientThink);
+	if (res) {
+		DebugPrint("ERROR: Failed to hook SV_ClientThink: %d\n", res);
+		failed = 1;
+	}
+
 	res = Hook((void*)SV_SendServerCommand, My_SV_SendServerCommand, (void*)&SV_SendServerCommand);
 	if (res) {
 		DebugPrint("ERROR: Failed to hook SV_SendServerCommand: %d\n", res);
@@ -318,6 +458,8 @@ void HookVm(void) {
 	*(void**)(vm_call_table + RELOFFSET_VM_CALL_INITGAME) = My_G_InitGame;
 
 	G_RunFrame = *(G_RunFrame_ptr*)(vm_call_table + RELOFFSET_VM_CALL_RUNFRAME);
+    ClientUserinfoChanged = *(ClientUserinfoChanged_ptr*)(vm_call_table + RELOFFSET_VM_CALL_CLIENTUSERINFOCHANGED);
+	ClientBegin = *(ClientBegin_ptr*)(vm_call_table + RELOFFSET_VM_CALL_CLIENTBEGIN);
 
 #ifndef NOPY
 	*(void**)(vm_call_table + RELOFFSET_VM_CALL_RUNFRAME) = My_G_RunFrame;
@@ -328,7 +470,7 @@ void HookVm(void) {
 		DebugPrint("ERROR: Failed to hook ClientConnect: %d\n", res);
 		failed = 1;
 	}
-  count++;
+    count++;
 
     res = Hook((void*)G_StartKamikaze, My_G_StartKamikaze, (void*)&G_StartKamikaze);
     if (res) {

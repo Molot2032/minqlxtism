@@ -30,7 +30,7 @@ class EventDispatcher:
     to hook into events by registering an event handler.
 
     """
-    no_debug = ("frame", "set_configstring", "stats", "server_command", "death", "kill", "command", "console_print")
+    no_debug = ("frame", "client_think", "set_configstring", "stats", "server_command", "death", "kill", "command", "console_print")
     need_zmq_stats_enabled = False
 
     def __init__(self):
@@ -374,7 +374,7 @@ class PlayerLoadedDispatcher(EventDispatcher):
     def dispatch(self, player):
         return super().dispatch(player)
 
-class PlayerDisonnectDispatcher(EventDispatcher):
+class PlayerDisconnectDispatcher(EventDispatcher):
     """Event that triggers whenever a player disconnects. Cannot be cancelled."""
     name = "player_disconnect"
 
@@ -387,6 +387,19 @@ class PlayerSpawnDispatcher(EventDispatcher):
 
     def dispatch(self, player):
         return super().dispatch(player)
+
+class ClientThinkDispatcher(EventDispatcher):
+    """Event that triggers when a client thinks.
+    Cannot be cancelled but client_cmd can be modified.
+    """
+    name = "client_think"
+
+    def dispatch(self, player, client_cmd):
+        return super().dispatch(player, client_cmd)
+
+    def handle_return(self, handler, value):
+        """Pass straight to C handlers"""
+        return value
 
 class StatsDispatcher(EventDispatcher):
     """Event that triggers whenever the server sends stats over ZMQ."""
@@ -593,7 +606,8 @@ EVENT_DISPATCHERS.add_dispatcher(ChatEventDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(UnloadDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(PlayerConnectDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(PlayerLoadedDispatcher)
-EVENT_DISPATCHERS.add_dispatcher(PlayerDisonnectDispatcher)
+EVENT_DISPATCHERS.add_dispatcher(PlayerDisconnectDispatcher)
+EVENT_DISPATCHERS.add_dispatcher(ClientThinkDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(PlayerSpawnDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(KamikazeUseDispatcher)
 EVENT_DISPATCHERS.add_dispatcher(KamikazeExplodeDispatcher)

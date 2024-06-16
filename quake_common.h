@@ -16,12 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
- * Mino: A lot of this is from Q3 sources, but obviously the structs aren't
- * exactly the same, so there's a good number of modifications to make it
- * fit QL. The end of the file has a bunch of stuff I added. Might want
- * to refactor it. TODO.
-*/
 
 #ifndef QUAKE_COMMON_H
 #define QUAKE_COMMON_H
@@ -31,90 +25,112 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "patterns.h"
 #include "common.h"
 
-#define	CS_SCORES1				6
-#define	CS_SCORES2				7
-#define CS_VOTE_TIME			8
-#define CS_VOTE_STRING			9
-#define	CS_VOTE_YES				10
-#define	CS_VOTE_NO				11
-#define CS_ITEMS          15
 
-#define MAX_CLIENTS 64
-#define MAX_CHALLENGES  1024
-#define MAX_MSGLEN  16384
-#define MAX_PS_EVENTS   2
-#define MAX_MAP_AREA_BYTES  32  // bit vector of area visibility
-#define MAX_INFO_STRING 1024
-#define MAX_RELIABLE_COMMANDS   64  // max string commands buffered for restransmit
-#define MAX_STRING_CHARS    1024    // max length of a string passed to Cmd_TokenizeString
-#define MAX_NAME_LENGTH 32  // max length of a client name
-#define MAX_QPATH   64  // max length of a quake game pathname
-#define MAX_DOWNLOAD_WINDOW 8   // max of eight download frames
-#define MAX_NETNAME			36
-#define PACKET_BACKUP   32  // number of old messages that must be kept on client and
-                            // server for delta comrpession and ping estimation
-#define	PACKET_MASK	(PACKET_BACKUP-1)
-#define MAX_ENT_CLUSTERS    16
-#define MAX_MODELS  256 // these are sent over the net as 8 bits
-#define MAX_CONFIGSTRINGS   1024
-#define GENTITYNUM_BITS     10      // don't need to send any more
-#define MAX_GENTITIES       (1<<GENTITYNUM_BITS)
-#define MAX_ITEM_MODELS 4
-#define MAX_SPAWN_VARS 64
-#define MAX_SPAWN_VARS_CHARS 4096
-#define BODY_QUEUE_SIZE 8
+
+#define MAX_CLIENTS           64
+#define MAX_CHALLENGES        1024
+#define MAX_MSGLEN            16384
+#define MAX_PS_EVENTS         2
+#define MAX_MAP_AREA_BYTES    32  // bit vector of area visibility
+#define MAX_INFO_STRING       1024
+#define MAX_RELIABLE_COMMANDS 64  // max string commands buffered for restransmit
+#define MAX_STRING_CHARS      1024    // max length of a string passed to Cmd_TokenizeString
+#define MAX_NAME_LENGTH       32  // max length of a client name
+#define MAX_QPATH             64  // max length of a quake game pathname
+#define MAX_DOWNLOAD_WINDOW   8   // max of eight download frames
+#define MAX_NETNAME			      36
+#define PACKET_BACKUP         32  // number of old messages that must be kept on client and
+                                  // server for delta compression and ping estimation
+#define	PACKET_MASK	          (PACKET_BACKUP-1)
+#define MAX_ENT_CLUSTERS      16
+#define MAX_MODELS            256 // these are sent over the net as 8 bits
+#define MAX_CONFIGSTRINGS     1024
+#define GENTITYNUM_BITS       10      // don't need to send any more
+#define MAX_GENTITIES         (1<<GENTITYNUM_BITS)
+#define	ENTITYNUM_NONE		    (MAX_GENTITIES-1)
+#define	ENTITYNUM_WORLD		    (MAX_GENTITIES-2)
+#define	ENTITYNUM_MAX_NORMAL  (MAX_GENTITIES-2)
+#define MAX_ITEM_MODELS       4
+#define MAX_SPAWN_VARS        64
+#define MAX_SPAWN_VARS_CHARS  4096
+#define BODY_QUEUE_SIZE       8
+
 
 // bit field limits
-#define MAX_STATS               16
-#define MAX_PERSISTANT          16
-#define MAX_POWERUPS            16
-#define MAX_WEAPONS             16
+#define MAX_STATS             16
+#define MAX_PERSISTANT        16
+#define MAX_POWERUPS          16
+#define MAX_WEAPONS           16
 
 // Button flags
-#define	BUTTON_ATTACK		1
-#define	BUTTON_TALK			2			// displays talk balloon and disables actions
-#define	BUTTON_USE_HOLDABLE	4			// Mino: +button2
-#define	BUTTON_GESTURE		8			// Mino: +button3
-#define	BUTTON_WALKING		16
+#define	BUTTON_ATTACK		      1
+#define	BUTTON_TALK			      2			// displays talk balloon and disables actions
+#define	BUTTON_USE_HOLDABLE	  4			// Mino: +button2
+#define	BUTTON_GESTURE		    8			// Mino: +button3
+#define	BUTTON_WALKING		    16
 // Block of unused button flags, or at least flags I couldn't trigger.
 // Q3 used them for bot commands, so probably unused in QL.
-#define BUTTON_UNUSED1		32
-#define	BUTTON_UNUSED2		64
-#define BUTTON_UNUSED3		128
-#define BUTTON_UNUSED4		256
-#define BUTTON_UNUSED5		512
-#define BUTTON_UNUSED6		1024
-#define	BUTTON_UPMOVE		2048  // Mino: Not in Q3. I'm guessing it's for cg_autohop.
-#define	BUTTON_ANY			4096  // any key whatsoever
-#define BUTTON_IS_ACTIVE 	65536 // Mino: No idea what it is, but it goes off after a while of being
-								  //       AFK, then goes on after being active for a while.
+#define BUTTON_UNUSED1    		32
+#define	BUTTON_UNUSED2	    	64
+#define BUTTON_UNUSED3		    128
+#define BUTTON_UNUSED4		    256
+#define BUTTON_UNUSED5		    512
+#define BUTTON_UNUSED6		    1024
+#define	BUTTON_UPMOVE		      2048  // Mino: Not in Q3. I'm guessing it's for cg_autohop.
+#define	BUTTON_ANY			      4096  // any key whatsoever
+#define BUTTON_IS_ACTIVE 	    65536 // Mino: No idea what it is, but it goes off after a while of being
+								                    //   AFK, then goes on after being active for a while.
 
 // eflags
-#define	EF_DEAD				0x00000001		// don't draw a foe marker over players with EF_DEAD
-#define EF_TICKING			0x00000002		// used to make players play the prox mine ticking sound
-#define	EF_TELEPORT_BIT		0x00000004		// toggled every time the origin abruptly changes
-#define	EF_AWARD_EXCELLENT	0x00000008		// draw an excellent sprite
-#define EF_PLAYER_EVENT		0x00000010
-#define	EF_BOUNCE			0x00000010		// for missiles
-#define	EF_BOUNCE_HALF		0x00000020		// for missiles
-#define	EF_AWARD_GAUNTLET	0x00000040		// draw a gauntlet sprite
-#define	EF_NODRAW			0x00000080		// may have an event, but no model (unspawned items)
-#define	EF_FIRING			0x00000100		// for lightning gun
-#define	EF_KAMIKAZE			0x00000200
-#define	EF_MOVER_STOP		0x00000400		// will push otherwise
-#define EF_AWARD_CAP		0x00000800		// draw the capture sprite
-#define	EF_TALK				0x00001000		// draw a talk balloon
-#define	EF_CONNECTION		0x00002000		// draw a connection trouble sprite
-#define	EF_VOTED			0x00004000		// already cast a vote
-#define	EF_AWARD_IMPRESSIVE	0x00008000		// draw an impressive sprite
-#define	EF_AWARD_DEFEND		0x00010000		// draw a defend sprite
-#define	EF_AWARD_ASSIST		0x00020000		// draw a assist sprite
-#define EF_AWARD_DENIED		0x00040000		// denied
-#define EF_TEAMVOTED		0x00080000		// already cast a team vote
+#define	EF_DEAD				        0x00000001		// don't draw a foe marker over players with EF_DEAD
+#define EF_TICKING			      0x00000002		// used to make players play the prox mine ticking sound
+#define	EF_TELEPORT_BIT		    0x00000004		// toggled every time the origin abruptly changes
+#define	EF_AWARD_EXCELLENT  	0x00000008		// draw an excellent sprite
+#define EF_PLAYER_EVENT		    0x00000010
+#define	EF_BOUNCE			        0x00000010		// for missiles
+#define	EF_BOUNCE_HALF	      0x00000020		// for missiles
+#define	EF_AWARD_GAUNTLET	    0x00000040		// draw a gauntlet sprite
+#define	EF_NODRAW			        0x00000080		// may have an event, but no model (unspawned items)
+#define	EF_FIRING			        0x00000100		// for lightning gun
+#define	EF_KAMIKAZE		       	0x00000200
+#define	EF_MOVER_STOP		      0x00000400		// will push otherwise
+#define EF_AWARD_CAP		      0x00000800		// draw the capture sprite
+#define	EF_TALK				        0x00001000		// draw a talk balloon
+#define	EF_CONNECTION		      0x00002000		// draw a connection trouble sprite
+#define	EF_VOTED			        0x00004000		// already cast a vote
+#define	EF_AWARD_IMPRESSIVE	  0x00008000		// draw an impressive sprite
+#define	EF_AWARD_DEFEND		    0x00010000		// draw a defend sprite
+#define	EF_AWARD_ASSIST		    0x00020000		// draw a assist sprite
+#define EF_AWARD_DENIED		    0x00040000		// denied
+#define EF_TEAMVOTED		      0x00080000		// already cast a team vote
 
-#define FL_DROPPED_ITEM 0x00001000
+#define FL_DROPPED_ITEM       0x00001000
 
-#define DAMAGE_NO_PROTECTION 0x00000008
+#define DAMAGE_NO_PROTECTION  0x00000008
+
+// angle helpers
+#define	ANGLE2SHORT(x)	      ((int)((x)*65536/360) & 65535)
+#define	SHORT2ANGLE(x)	      ((x)*(360.0/65536))
+
+// entity->svFlags
+// the server does not know how to interpret most of the values
+// in entityStates (level eType), so the game must explicitly flag
+// special server behaviors
+#define	SVF_NOCLIENT		       0x00000001	// don't send entity to clients, even if it has effects
+#define SVF_CLIENTMASK         0x00000002
+#define SVF_BOT                0x00000008	// set if the entity is a bot
+#define	SVF_BROADCAST          0x00000020	// send to all connected clients
+#define	SVF_PORTAL             0x00000040	// merge a second pvs at origin2 into snapshots
+#define	SVF_USE_CURRENT_ORIGIN 0x00000080	// entity->r.currentOrigin instead of entity->s.origin
+											                    // for link position (missiles and movers)
+#define SVF_SINGLECLIENT		   0x00000100	// only send to a single client (entityShared_t->singleClient)
+#define SVF_NOSERVERINFO		   0x00000200	// don't send CS_SERVERINFO updates to this client
+											                    // so that it can be updated for ping tools without
+											                    // lagging clients
+#define SVF_CAPSULE				     0x00000400	// use capsule for collision detection instead of bbox
+#define SVF_NOTSINGLECLIENT		 0x00000800	// send entity to everyone but one client
+											                    // (entityShared_t->singleClient)
+
 
 typedef enum {qfalse, qtrue} qboolean;
 typedef unsigned char byte;
@@ -870,44 +886,63 @@ typedef struct client_s {
     sharedEntity_t  *gentity;           // SV_GentityNum(clientnum)
     char            name[MAX_NAME_LENGTH];          // extracted from userinfo, high bits masked
     
-    // Mino: I think everything above this is correct. Below is a mess.
+    // This may be wrong:
     
     // downloading
-    char            downloadName[MAX_QPATH]; // if not empty string, we are downloading
-    fileHandle_t    download;           // file being downloaded
-    int             downloadSize;       // total bytes (can't use EOF because of paks)
-    int             downloadCount;      // bytes sent
-    int             downloadClientBlock;    // last block we sent to the client, awaiting ack
-    int             downloadCurrentBlock;   // current block number
-    int             downloadXmitBlock;  // last block we xmited
-    unsigned char   *downloadBlocks[MAX_DOWNLOAD_WINDOW];   // the buffers for the download blocks
-    int             downloadBlockSize[MAX_DOWNLOAD_WINDOW];
-    qboolean        downloadEOF;        // We have sent the EOF block
-    int             downloadSendTime;   // time we last got an ack from the client
+    char			    downloadName[MAX_QPATH]; // if not empty string, we are downloading
+    fileHandle_t	download;			// file being downloaded
+    int				    downloadSize;		// total bytes (can't use EOF because of paks)
+    int				    downloadCount;		// bytes sent
+    int				    downloadClientBlock;	// last block we sent to the client, awaiting ack
+    int				    downloadCurrentBlock;	// current block number
+    int				    downloadXmitBlock;	// last block we xmited
+    unsigned char	*downloadBlocks[MAX_DOWNLOAD_WINDOW];	// the buffers for the download blocks
+    int				    downloadBlockSize[MAX_DOWNLOAD_WINDOW];
+    qboolean		  downloadEOF;		// We have sent the EOF block
+    int				    downloadSendTime;	// time we last got an ack from the client
 
-    int             deltaMessage;       // frame last client usercmd message
-    int             nextReliableTime;   // svs.time when another reliable command will be allowed
-    int             lastPacketTime;     // svs.time when packet was last received
-    int             lastConnectTime;    // svs.time when connection started
-    int             nextSnapshotTime;   // send another snapshot when svs.time >= nextSnapshotTime
-    qboolean        rateDelayed;        // true if nextSnapshotTime was set based on rate instead of snapshotMsec
-    int             timeoutCount;       // must timeout a few frames in a row so debugging doesn't break
-    clientSnapshot_t    frames[PACKET_BACKUP];  // updates can be delta'd from here
-    int             ping;
-    int             rate;               // bytes / second
-    int             snapshotMsec;       // requests a snapshot every snapshotMsec unless rate choked
-    int             pureAuthentic;
-    qboolean  gotCP; // TTimo - additional flag to distinguish between a bad pure checksum, and no cp command at all
-    netchan_t       netchan;
-    netchan_buffer_t *netchan_start_queue;
-    netchan_buffer_t **netchan_end_queue;
+    int _unknown0;
+    int _unknown1;
+
+    // 67888
+    int _unknownTime; // svs.time; this is set for bots but not players?
+
+    // uint8_t _unknown2[3968];
+    uint8_t _unknown2[1024 + 1024 + 1024 + 512 + 256 + 128];
+
+    // 71860
+    int				deltaMessage;		  // frame last client usercmd message
+    int				nextReliableTime;	// svs.time when another reliable command will be allowed
+
+    int _unknown3;
+
+    // 71872
+    int               lastPacketTime;         // svs.time when packet was last received
+    int               lastConnectTime;        // svs.time when connection started
+    int               nextSnapshotTime;       // send another snapshot when svs.time >= nextSnapshotTime
+    qboolean          rateDelayed;            // true if nextSnapshotTime was set based on rate instead of snapshotMsec
+    int               timeoutCount;           // must timeout a few frames in a row so debugging doesn't break
+    clientSnapshot_t  frames[PACKET_BACKUP];  // updates can be delta'd from here
+
+    // 92628
+    int               ping;
+    int               rate;               // bytes / second
+    int               snapshotMsec;       // requests a snapshot every snapshotMsec unless rate choked
+    int               pureAuthentic;
+    qboolean          gotCP;              // TTimo - additional flag to distinguish between a bad pure checksum, and no cp command at all
+    netchan_t         netchan;
+    netchan_buffer_t  *netchan_start_queue;
+    netchan_buffer_t  **netchan_end_queue;
     
     // Mino: Holy crap. A bunch of data was added. I have no idea where it actually goes,
     // but this will at least correct sizeof(client_t).
 #if defined(__x86_64__) || defined(_M_X64)
-    uint8_t         _unknown2[36808];
+    // suspiciously close to 32k
+    uint8_t         _unknown5[32768];
+    uint8_t         _unknown6[56];
 #elif defined(__i386) || defined(_M_IX86)
-    uint8_t         _unknown2[36836]; // TODO: Outdated.
+    uint8_t         _unknown5[32768]; // TODO: Outdated.
+    uint8_t         _unknown6[56];
 #endif
 
     // Mino: Woohoo! How nice of them to put the SteamID last.
@@ -1489,6 +1524,7 @@ typedef cvar_t* (__cdecl *Cvar_Set2_ptr)(const char* var_name, const char* value
 typedef void (__cdecl *SV_SendServerCommand_ptr)(client_t* cl, const char* fmt, ...);
 typedef void (__cdecl *SV_ExecuteClientCommand_ptr)(client_t* cl, const char* s, qboolean clientOK);
 typedef void (__cdecl *SV_ClientEnterWorld_ptr)(client_t *client, usercmd_t *cmd);
+typedef void (__cdecl *SV_ClientThink_ptr)(client_t *client, usercmd_t *cmd);
 typedef void (__cdecl *SV_Shutdown_ptr)(char* finalmsg);
 typedef void (__cdecl *SV_Map_f_ptr)(void);
 typedef void (__cdecl *SV_ClientThink_ptr)(client_t* cl, usercmd_t* cmd);
@@ -1500,6 +1536,9 @@ typedef void (__cdecl *Sys_SetModuleOffset_ptr)(char* moduleName, void* offset);
 typedef void (__cdecl *SV_LinkEntity_ptr)(sharedEntity_t* gEnt);
 typedef void (__cdecl *SV_SpawnServer_ptr)(char* server, qboolean killBots);
 typedef void (__cdecl *Cmd_ExecuteString_ptr)(const char* text);
+typedef int (__cdecl *SV_BotAllocateClient_ptr)(void);
+typedef void (__cdecl *SV_BotFreeClient_ptr)(int clientNum);
+typedef void (__cdecl *SV_Frame_ptr)(int msec);
 // VM functions.
 typedef void (__cdecl *G_RunFrame_ptr)(int time);
 typedef void (__cdecl *G_AddEvent_ptr)(gentity_t* ent, int event, int eventParm);
@@ -1507,6 +1546,9 @@ typedef void (__cdecl *G_InitGame_ptr)(int levelTime, int randomSeed, int restar
 typedef int (__cdecl *CheckPrivileges_ptr)(gentity_t* ent, char* cmd);
 typedef char* (__cdecl *ClientConnect_ptr)(int clientNum, qboolean firstTime, qboolean isBot);
 typedef void (__cdecl *ClientSpawn_ptr)(gentity_t* ent);
+typedef void (__cdecl *ClientUserinfoChanged_ptr)(int clientNum);
+typedef void (__cdecl *ClientBegin_ptr)(int clientNum);
+typedef void (__cdecl *ClientEndFrame_ptr)(gentity_t *ent);
 typedef void (__cdecl *Cmd_CallVote_f_ptr)(gentity_t *ent);
 typedef void (__cdecl *G_Damage_ptr)(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod);
 typedef void (__cdecl *Touch_Item_ptr)(gentity_t *ent, gentity_t *other, trace_t *trace);
@@ -1514,6 +1556,7 @@ typedef gentity_t* (__cdecl *LaunchItem_ptr)(gitem_t *item, vec3_t origin, vec3_
 typedef gentity_t* (__cdecl *Drop_Item_ptr)(gentity_t *ent, gitem_t *item, float angle);
 typedef void (__cdecl *G_StartKamikaze_ptr)(gentity_t *ent);
 typedef void (__cdecl *G_FreeEntity_ptr)(gentity_t *ed);
+typedef void (__cdecl *SetTeam_ptr)(gentity_t *ent, char* team);
 
 // Some of them are initialized by Initialize(), but not all of them necessarily.
 extern Com_Printf_ptr Com_Printf;
@@ -1530,6 +1573,7 @@ extern Cvar_Set2_ptr Cvar_Set2;
 extern SV_SendServerCommand_ptr SV_SendServerCommand;
 extern SV_ExecuteClientCommand_ptr SV_ExecuteClientCommand;
 extern SV_ClientEnterWorld_ptr SV_ClientEnterWorld;
+extern SV_ClientThink_ptr SV_ClientThink;
 extern SV_Shutdown_ptr SV_Shutdown; // Used to get svs pointer.
 extern SV_Map_f_ptr SV_Map_f; // Used to get Cmd_Argc
 extern SV_SetConfigstring_ptr SV_SetConfigstring;
@@ -1538,6 +1582,9 @@ extern SV_DropClient_ptr SV_DropClient;
 extern Sys_SetModuleOffset_ptr Sys_SetModuleOffset;
 extern SV_SpawnServer_ptr SV_SpawnServer;
 extern Cmd_ExecuteString_ptr Cmd_ExecuteString;
+extern SV_BotAllocateClient_ptr SV_BotAllocateClient;
+extern SV_BotFreeClient_ptr SV_BotFreeClient;
+extern SV_Frame_ptr SV_Frame;
 // VM functions.
 extern G_RunFrame_ptr G_RunFrame;
 extern G_AddEvent_ptr G_AddEvent;
@@ -1545,6 +1592,9 @@ extern G_InitGame_ptr G_InitGame;
 extern CheckPrivileges_ptr CheckPrivileges;
 extern ClientConnect_ptr ClientConnect;
 extern ClientSpawn_ptr ClientSpawn;
+extern ClientUserinfoChanged_ptr ClientUserinfoChanged;
+extern ClientBegin_ptr ClientBegin;
+extern ClientEndFrame_ptr ClientEndFrame;
 extern Cmd_CallVote_f_ptr Cmd_CallVote_f;
 extern G_Damage_ptr G_Damage;
 extern Touch_Item_ptr Touch_Item;
@@ -1552,6 +1602,7 @@ extern LaunchItem_ptr LaunchItem;
 extern Drop_Item_ptr Drop_Item;
 extern G_StartKamikaze_ptr G_StartKamikaze;
 extern G_FreeEntity_ptr G_FreeEntity;
+extern SetTeam_ptr SetTeam;
 
 // Server replacement functions for hooks.
 void __cdecl My_Cmd_AddCommand(char* cmd, void* func);
@@ -1560,6 +1611,7 @@ void __cdecl My_Sys_SetModuleOffset(char* moduleName, void* offset);
 void __cdecl My_SV_ExecuteClientCommand(client_t *cl, char *s, qboolean clientOK);
 void __cdecl My_SV_SendServerCommand(client_t* cl, char* fmt, ...);
 void __cdecl My_SV_ClientEnterWorld(client_t* client, usercmd_t* cmd);
+void __cdecl My_SV_ClientThink(client_t* client, usercmd_t* cmd);
 void __cdecl My_SV_SetConfigstring(int index, char* value);
 void __cdecl My_SV_DropClient(client_t* drop, const char* reason);
 void __cdecl My_Com_Printf(char* fmt, ...);
