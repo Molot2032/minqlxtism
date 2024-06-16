@@ -36,7 +36,7 @@ void __cdecl My_Sys_SetModuleOffset(char* moduleName, void* offset) {
         // Despite the name, it's not the actual module, but vmMain.
         // We use dlinfo to get the base of the module so we can properly
         // initialize all the pointers relative to the base.
-        qagame_dllentry = offset;
+    	qagame_dllentry = offset;
 
         Dl_info dlinfo;
         int res = dladdr(offset, &dlinfo);
@@ -54,10 +54,10 @@ void __cdecl My_Sys_SetModuleOffset(char* moduleName, void* offset) {
     
     Sys_SetModuleOffset(moduleName, offset);
     if (common_initialized) {
-        SearchVmFunctions();
-        HookVm();
-        InitializeVm();
-        patch_vm();
+    	SearchVmFunctions();
+    	HookVm();
+    	InitializeVm();
+    	patch_vm();
     }
 }
 
@@ -65,56 +65,56 @@ typedef void (__cdecl *race_point_touch_ptr)(gentity_t *a1, gentity_t *a2);
 race_point_touch_ptr race_point_touch;
 
 void __cdecl My_race_point_touch( gentity_t *ent, gentity_t *activator ) {
-    if (activator->client) {
-        if ( ent->spawnflags && activator->client->race.startTime && !ent->targetname )
-            return;  //no more tr
-    }
+	if (activator->client) {
+		if ( ent->spawnflags && activator->client->race.startTime && !ent->targetname )
+			return;  //no more tr
+	}
 
-    activator->client->pers.teamState.flagruntime = level->time - activator->client->race.startTime;
-    race_point_touch(ent, activator);
+	activator->client->pers.teamState.flagruntime = level->time - activator->client->race.startTime;
+	race_point_touch(ent, activator);
 }
 
 void __cdecl My_race_point_touch_old( gentity_t *ent, gentity_t *activator ) {
-    if (activator->client) {
-        if (ent->message)
-            if ( !strncmp(ent->message, "notr", 4) && activator->client->race.startTime && !ent->targetname )
-                return;  //no more tr
-    }
+	if (activator->client) {
+		if (ent->message)
+			if ( !strncmp(ent->message, "notr", 4) && activator->client->race.startTime && !ent->targetname )
+				return;  //no more tr
+	}
 
-    activator->client->pers.teamState.flagruntime = level->time - activator->client->race.startTime;
-    race_point_touch(ent, activator);
+	activator->client->pers.teamState.flagruntime = level->time - activator->client->race.startTime;
+	race_point_touch(ent, activator);
 }
 
 void __cdecl My_target_init_touch( gentity_t *ent, gentity_t *activator ) {
-    if (activator->client) {
-        //KEEPARMOR
-        if ( !(ent->spawnflags & 1) )
-            activator->client->ps.stats[STAT_ARMOR] = 0;
+	if (activator->client) {
+		//KEEPARMOR
+		if ( !(ent->spawnflags & 1) )
+			activator->client->ps.stats[STAT_ARMOR] = 0;
 
-        //KEEPHEALTH
-        if ( !(ent->spawnflags & 2) )
-            activator->health = 100;
+		//KEEPHEALTH
+		if ( !(ent->spawnflags & 2) )
+			activator->health = 100;
 
-        //KEEPWEAPONS
-        if ( !(ent->spawnflags & 4) ) {
-            activator->client->ps.stats[STAT_WEAPONS] = 2<<(WP_MACHINEGUN-1);
-            memset( activator->client->ps.ammo, 0, sizeof( activator->client->ps.ammo ) );
-            activator->client->ps.ammo[WP_MACHINEGUN] = 100;
-            activator->client->ps.weapon = WP_MACHINEGUN;
-        }
+		//KEEPWEAPONS
+		if ( !(ent->spawnflags & 4) ) {
+			activator->client->ps.stats[STAT_WEAPONS] = 2<<(WP_MACHINEGUN-1);
+			memset( activator->client->ps.ammo, 0, sizeof( activator->client->ps.ammo ) );
+			activator->client->ps.ammo[WP_MACHINEGUN] = 100;
+			activator->client->ps.weapon = WP_MACHINEGUN;
+		}
 
-        //KEEPPOWERUPS
-        if ( !(ent->spawnflags & 8) )
-            memset( activator->client->ps.powerups, 0, sizeof( activator->client->ps.powerups ) );
+		//KEEPPOWERUPS
+		if ( !(ent->spawnflags & 8) )
+			memset( activator->client->ps.powerups, 0, sizeof( activator->client->ps.powerups ) );
 
-        //KEEPHOLDABLE
-        if ( !(ent->spawnflags & 16) )
-            activator->client->ps.stats[STAT_HOLDABLE_ITEM] = 0;
+		//KEEPHOLDABLE
+		if ( !(ent->spawnflags & 16) )
+			activator->client->ps.stats[STAT_HOLDABLE_ITEM] = 0;
 
-        //REMOVEMACHINEGUN
-        if ( ent->spawnflags & 32 && activator->client->ps.stats[STAT_WEAPONS] & (2<<(WP_MACHINEGUN-1))  )
-            activator->client->ps.stats[STAT_WEAPONS] -= 2<<(WP_MACHINEGUN-1);
-    }
+		//REMOVEMACHINEGUN
+		if ( ent->spawnflags & 32 && activator->client->ps.stats[STAT_WEAPONS] & (2<<(WP_MACHINEGUN-1))  )
+			activator->client->ps.stats[STAT_WEAPONS] -= 2<<(WP_MACHINEGUN-1);
+	}
 }
 
 
@@ -128,30 +128,30 @@ void __cdecl My_G_InitGame(int levelTime, int randomSeed, int restart) {
 
 #ifndef NOPY
     if (restart)
-       NewGameDispatcher(restart);
+	   NewGameDispatcher(restart);
 #endif
     
-    race_point_touch = (race_point_touch_ptr)qagame_dllentry + 0xEE60;
+	race_point_touch = (race_point_touch_ptr)qagame_dllentry + 0xEE60;
 
-    gentity_t *z1;
-    int	j1;
-    for ( j1=1, z1=g_entities+j1 ; j1 < level->num_entities ; j1++,z1++ ) {
+	gentity_t *z1;
+	int	j1;
+	for ( j1=1, z1=g_entities+j1 ; j1 < level->num_entities ; j1++,z1++ ) {
         if (!z1->classname) continue;
 
         if (z1->inuse) {
-            if (strncmp(z1->classname, "trigger_multiple", 16) == 0 && z1->message) {
-                if (strncmp(z1->message, "race_point", 10) == 0 && (z1->target || z1->targetname)) {
-                    z1->touch = My_race_point_touch;
-                } else if (strncmp(z1->message, "target_init", 11) == 0) {
-                    z1->touch = My_target_init_touch;
-                }
-            }
-        }
+			if (strncmp(z1->classname, "trigger_multiple", 16) == 0 && z1->message) {
+				if (strncmp(z1->message, "race_point", 10) == 0 && (z1->target || z1->targetname)) {
+					z1->touch = My_race_point_touch;
+				} else if (strncmp(z1->message, "target_init", 11) == 0) {
+					z1->touch = My_target_init_touch;
+				}
+			}
+		}
 
-        if (strncmp(z1->classname, "race_point", 10) == 0) {
-            z1->touch = My_race_point_touch_old;
-        }
-    }
+		if (strncmp(z1->classname, "race_point", 10) == 0) {
+			z1->touch = My_race_point_touch_old;
+		}
+	}
 }
 
 // USED FOR PYTHON
@@ -169,36 +169,36 @@ void __cdecl My_SV_ExecuteClientCommand(client_t *cl, char *s, qboolean clientOK
 }
 
 void __cdecl My_SV_SendServerCommand(client_t* cl, char* fmt, ...) {
-    va_list	argptr;
-    char buffer[MAX_MSGLEN];
+	va_list	argptr;
+	char buffer[MAX_MSGLEN];
 
-    va_start(argptr, fmt);
-    vsnprintf((char *)buffer, sizeof(buffer), fmt, argptr);
-    va_end(argptr);
+	va_start(argptr, fmt);
+	vsnprintf((char *)buffer, sizeof(buffer), fmt, argptr);
+	va_end(argptr);
 
     char* res = buffer;
     DebugPrint("SSC: %s\n", res);
-    if (cl && cl->gentity)
-        res = ServerCommandDispatcher(cl - svs->clients, buffer);
-    else if (cl == NULL)
-        res = ServerCommandDispatcher(-1, buffer);
+	if (cl && cl->gentity)
+		res = ServerCommandDispatcher(cl - svs->clients, buffer);
+	else if (cl == NULL)
+		res = ServerCommandDispatcher(-1, buffer);
 
-    if (!res)
-        return;
+	if (!res)
+		return;
 
     SV_SendServerCommand(cl, res);
 }
 
 void __cdecl My_SV_ClientEnterWorld(client_t* client, usercmd_t* cmd) {
-    clientState_t state = client->state; // State before we call real one.
-    SV_ClientEnterWorld(client, cmd);
+	clientState_t state = client->state; // State before we call real one.
+	SV_ClientEnterWorld(client, cmd);
 
-    // gentity is NULL if map changed.
-    // state is CS_PRIMED only if it's the first time they connect to the server,
-    // otherwise the dispatcher would also go off when a game starts and such.
-    if (client->gentity != NULL && state == CS_PRIMED) {
-        ClientLoadedDispatcher(client - svs->clients);
-    }
+	// gentity is NULL if map changed.
+	// state is CS_PRIMED only if it's the first time they connect to the server,
+	// otherwise the dispatcher would also go off when a game starts and such.
+	if (client->gentity != NULL && state == CS_PRIMED) {
+		ClientLoadedDispatcher(client - svs->clients);
+	}
 }
 
 void __cdecl My_SV_ClientThink(client_t *client, usercmd_t *cmd)
@@ -312,14 +312,14 @@ void  __cdecl My_G_RunFrame(int time) {
 }
 
 char* __cdecl My_ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
-    if (firstTime) {
-        char* res = ClientConnectDispatcher(clientNum, isBot);
-        if (res && !isBot) {
-            return res;
-        }
-    }
+	if (firstTime) {
+		char* res = ClientConnectDispatcher(clientNum, isBot);
+		if (res && !isBot) {
+			return res;
+		}
+	}
 
-    return ClientConnect(clientNum, firstTime, isBot);
+	return ClientConnect(clientNum, firstTime, isBot);
 }
 
 void __cdecl My_ClientSpawn(gentity_t* ent) {
@@ -397,19 +397,19 @@ void __cdecl My_G_Damage(
 
 // Hook static functions. Can be done before program even runs.
 void HookStatic(void) {
-    int res, failed = 0;
+	int res, failed = 0;
     DebugPrint("Hooking...\n");
     res = Hook((void*)Cmd_AddCommand, My_Cmd_AddCommand, (void*)&Cmd_AddCommand);
-    if (res) {
-        DebugPrint("ERROR: Failed to hook Cmd_AddCommand: %d\n", res);
-        failed = 1;
-    }
+	if (res) {
+		DebugPrint("ERROR: Failed to hook Cmd_AddCommand: %d\n", res);
+		failed = 1;
+	}
 
     res = Hook((void*)Sys_SetModuleOffset, My_Sys_SetModuleOffset, (void*)&Sys_SetModuleOffset);
     if (res) {
-        DebugPrint("ERROR: Failed to hook Sys_SetModuleOffset: %d\n", res);
-        failed = 1;
-    }
+		DebugPrint("ERROR: Failed to hook Sys_SetModuleOffset: %d\n", res);
+		failed = 1;
+	}
 
     // ==============================
     //    ONLY NEEDED FOR PYTHON
@@ -417,27 +417,27 @@ void HookStatic(void) {
 #ifndef NOPY
     res = Hook((void*)SV_ExecuteClientCommand, My_SV_ExecuteClientCommand, (void*)&SV_ExecuteClientCommand);
     if (res) {
-        DebugPrint("ERROR: Failed to hook SV_ExecuteClientCommand: %d\n", res);
-        failed = 1;
+		DebugPrint("ERROR: Failed to hook SV_ExecuteClientCommand: %d\n", res);
+		failed = 1;
     }
 
     res = Hook((void*)SV_ClientEnterWorld, My_SV_ClientEnterWorld, (void*)&SV_ClientEnterWorld);
-    if (res) {
-        DebugPrint("ERROR: Failed to hook SV_ClientEnterWorld: %d\n", res);
-        failed = 1;
-    }
+	if (res) {
+		DebugPrint("ERROR: Failed to hook SV_ClientEnterWorld: %d\n", res);
+		failed = 1;
+	}
 
     res = Hook((void*)SV_ClientThink, My_SV_ClientThink, (void*)&SV_ClientThink);
-    if (res) {
-        DebugPrint("ERROR: Failed to hook SV_ClientThink: %d\n", res);
-        failed = 1;
-    }
+	if (res) {
+		DebugPrint("ERROR: Failed to hook SV_ClientThink: %d\n", res);
+		failed = 1;
+	}
 
-    res = Hook((void*)SV_SendServerCommand, My_SV_SendServerCommand, (void*)&SV_SendServerCommand);
-    if (res) {
-        DebugPrint("ERROR: Failed to hook SV_SendServerCommand: %d\n", res);
-        failed = 1;
-    }
+	res = Hook((void*)SV_SendServerCommand, My_SV_SendServerCommand, (void*)&SV_SendServerCommand);
+	if (res) {
+		DebugPrint("ERROR: Failed to hook SV_SendServerCommand: %d\n", res);
+		failed = 1;
+	}
 
     res = Hook((void*)SV_SetConfigstring, My_SV_SetConfigstring, (void*)&SV_SetConfigstring);
     if (res) {
@@ -466,9 +466,9 @@ void HookStatic(void) {
 #endif
 
     if (failed) {
-        DebugPrint("Exiting.\n");
-        exit(1);
-    }
+		DebugPrint("Exiting.\n");
+		exit(1);
+	}
 }
 
 /* 
@@ -490,20 +490,22 @@ void HookVm(void) {
     pint vm_call_table = *(int32_t*)OFFSET_RELP_VM_CALL_TABLE + 0xCEFF4 + (pint)qagame;
 #endif
 
-    G_InitGame = *(G_InitGame_ptr*)(vm_call_table + RELOFFSET_VM_CALL_INITGAME);
-    *(void**)(vm_call_table + RELOFFSET_VM_CALL_INITGAME) = My_G_InitGame;
+	G_InitGame = *(G_InitGame_ptr*)(vm_call_table + RELOFFSET_VM_CALL_INITGAME);
+	*(void**)(vm_call_table + RELOFFSET_VM_CALL_INITGAME) = My_G_InitGame;
 
-    G_RunFrame = *(G_RunFrame_ptr*)(vm_call_table + RELOFFSET_VM_CALL_RUNFRAME);
+	G_RunFrame = *(G_RunFrame_ptr*)(vm_call_table + RELOFFSET_VM_CALL_RUNFRAME);
+    ClientUserinfoChanged = *(ClientUserinfoChanged_ptr*)(vm_call_table + RELOFFSET_VM_CALL_CLIENTUSERINFOCHANGED);
+	ClientBegin = *(ClientBegin_ptr*)(vm_call_table + RELOFFSET_VM_CALL_CLIENTBEGIN);
 
 #ifndef NOPY
-    *(void**)(vm_call_table + RELOFFSET_VM_CALL_RUNFRAME) = My_G_RunFrame;
+	*(void**)(vm_call_table + RELOFFSET_VM_CALL_RUNFRAME) = My_G_RunFrame;
 
-    int res, failed = 0, count = 0;
-    res = Hook((void*)ClientConnect, My_ClientConnect, (void*)&ClientConnect);
-    if (res) {
-        DebugPrint("ERROR: Failed to hook ClientConnect: %d\n", res);
-        failed = 1;
-    }
+	int res, failed = 0, count = 0;
+	res = Hook((void*)ClientConnect, My_ClientConnect, (void*)&ClientConnect);
+	if (res) {
+		DebugPrint("ERROR: Failed to hook ClientConnect: %d\n", res);
+		failed = 1;
+	}
     count++;
 
     res = Hook((void*)G_StartKamikaze, My_G_StartKamikaze, (void*)&G_StartKamikaze);
@@ -534,10 +536,10 @@ void HookVm(void) {
     }
     count++;
 
-    if (failed) {
-        DebugPrint("Exiting.\n");
-        exit(1);
-    }
+	if (failed) {
+		DebugPrint("Exiting.\n");
+		exit(1);
+	}
 
     if ( !seek_hook_slot( -count ) ) {
         DebugPrint("ERROR: Failed to rewind hook slot\nExiting.\n");
