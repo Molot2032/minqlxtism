@@ -1,31 +1,31 @@
 #include <Python.h>
+#include <errno.h>
 #include <patchlevel.h>
-#include <structmember.h>
-#include <structseq.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#include <structmember.h>
+#include <structseq.h>
 
+#include "common.h"
+#include "patterns.h"
 #include "pyminqlxtended.h"
 #include "quake_common.h"
-#include "patterns.h"
-#include "common.h"
 
-PyObject* client_command_handler = NULL;
-PyObject* server_command_handler = NULL;
-PyObject* client_connect_handler = NULL;
-PyObject* client_loaded_handler = NULL;
+PyObject* client_command_handler    = NULL;
+PyObject* server_command_handler    = NULL;
+PyObject* client_connect_handler    = NULL;
+PyObject* client_loaded_handler     = NULL;
 PyObject* client_disconnect_handler = NULL;
-PyObject* frame_handler = NULL;
-PyObject* custom_command_handler = NULL;
-PyObject* new_game_handler = NULL;
-PyObject* set_configstring_handler = NULL;
-PyObject* rcon_handler = NULL;
-PyObject* console_print_handler = NULL;
-PyObject* client_spawn_handler = NULL;
+PyObject* frame_handler             = NULL;
+PyObject* custom_command_handler    = NULL;
+PyObject* new_game_handler          = NULL;
+PyObject* set_configstring_handler  = NULL;
+PyObject* rcon_handler              = NULL;
+PyObject* console_print_handler     = NULL;
+PyObject* client_spawn_handler      = NULL;
 
-PyObject* kamikaze_use_handler = NULL;
+PyObject* kamikaze_use_handler     = NULL;
 PyObject* kamikaze_explode_handler = NULL;
 
 static PyThreadState* mainstate;
@@ -36,19 +36,19 @@ static int initialized = 0;
  * and PyRun_String*() if the module has an error in it. It's ugly as
  * fuck, but other than doing this, I have no idea how to extract the
  * traceback. The documentation or Google doesn't help much either.
-*/
-static const char loader[] = "import traceback\n" \
-    "try:\n" \
-    "  import sys\n" \
-	"  sys.path.append('" CORE_MODULE "')\n" \
-    "  sys.path.append('.')\n" \
-	"  import minqlxtended\n" \
-	"  minqlxtended.initialize()\n" \
-    "  ret = True\n" \
-    "except Exception as e:\n" \
-    "  e = traceback.format_exc().rstrip('\\n')\n" \
-    "  for line in e.split('\\n'): print(line)\n" \
-    "  ret = False\n";
+ */
+static const char loader[] = "import traceback\n"
+                             "try:\n"
+                             "  import sys\n"
+                             "  sys.path.append('" CORE_MODULE "')\n"
+                             "  sys.path.append('.')\n"
+                             "  import minqlxtended\n"
+                             "  minqlxtended.initialize()\n"
+                             "  ret = True\n"
+                             "except Exception as e:\n"
+                             "  e = traceback.format_exc().rstrip('\\n')\n"
+                             "  for line in e.split('\\n'): print(line)\n"
+                             "  ret = False\n";
 
 /*
  * The number of handlers was getting large, so instead of a bunch of
@@ -56,30 +56,29 @@ static const char loader[] = "import traceback\n" \
  * pairs and iterate over them instead.
  */
 static handler_t handlers[] = {
-		{"client_command", 		&client_command_handler},
-		{"server_command", 		&server_command_handler},
-		{"frame", 				&frame_handler},
-		{"player_connect", 		&client_connect_handler},
-		{"player_loaded", 		&client_loaded_handler},
-		{"player_disconnect", 	&client_disconnect_handler},
-		{"custom_command", 		&custom_command_handler},
-		{"new_game",			&new_game_handler},
-		{"set_configstring", 	&set_configstring_handler},
-        {"rcon",                &rcon_handler},
-        {"console_print",       &console_print_handler},
-        {"player_spawn",        &client_spawn_handler},
+    {"client_command", &client_command_handler},
+    {"server_command", &server_command_handler},
+    {"frame", &frame_handler},
+    {"player_connect", &client_connect_handler},
+    {"player_loaded", &client_loaded_handler},
+    {"player_disconnect", &client_disconnect_handler},
+    {"custom_command", &custom_command_handler},
+    {"new_game", &new_game_handler},
+    {"set_configstring", &set_configstring_handler},
+    {"rcon", &rcon_handler},
+    {"console_print", &console_print_handler},
+    {"player_spawn", &client_spawn_handler},
 
-        {"kamikaze_use",        &kamikaze_use_handler},
-        {"kamikaze_explode",    &kamikaze_explode_handler},
+    {"kamikaze_use", &kamikaze_use_handler},
+    {"kamikaze_explode", &kamikaze_explode_handler},
 
-		{NULL, NULL}
-};
+    {NULL, NULL}};
 
 /*
  * ================================================================
  *                      Struct Sequences
  * ================================================================
-*/
+ */
 
 // Players
 static PyTypeObject player_info_type = {0};
@@ -92,15 +91,13 @@ static PyStructSequence_Field player_info_fields[] = {
     {"steam_id", "The player's 64-bit representation of the Steam ID."},
     {"team", "The player's team."},
     {"privileges", "The player's privileges."},
-    {NULL}
-};
+    {NULL}};
 
 static PyStructSequence_Desc player_info_desc = {
     "PlayerInfo",
     "Information about a player, such as Steam ID, name, client ID, and whatnot.",
     player_info_fields,
-    (sizeof(player_info_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(player_info_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 // Player state
 static PyTypeObject player_state_type = {0};
@@ -120,15 +117,13 @@ static PyStructSequence_Field player_state_fields[] = {
     {"flight", "A struct sequence with flight parameters."},
     {"is_frozen", "Whether the player is frozen(freezetag)."},
     {"keys", "The player's keys."},
-    {NULL}
-};
+    {NULL}};
 
 static PyStructSequence_Desc player_state_desc = {
     "PlayerState",
     "Information about a player's state in the game.",
     player_state_fields,
-    (sizeof(player_state_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(player_state_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 // Stats
 static PyTypeObject player_stats_type = {0};
@@ -141,15 +136,13 @@ static PyStructSequence_Field player_stats_fields[] = {
     {"damage_taken", "The player's total damage taken."},
     {"time", "The time in milliseconds the player has on a team since the game started."},
     {"ping", "The player's ping."},
-    {NULL}
-};
+    {NULL}};
 
 static PyStructSequence_Desc player_stats_desc = {
     "PlayerStats",
     "A player's score and some basic stats.",
     player_stats_fields,
-    (sizeof(player_stats_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(player_stats_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 // Vectors
 static PyTypeObject vector3_type = {0};
@@ -158,51 +151,37 @@ static PyStructSequence_Field vector3_fields[] = {
     {"x", NULL},
     {"y", NULL},
     {"z", NULL},
-    {NULL}
-};
+    {NULL}};
 
 static PyStructSequence_Desc vector3_desc = {
     "Vector3",
     "A three-dimensional vector.",
     vector3_fields,
-    (sizeof(vector3_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(vector3_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 // Weapons
 static PyTypeObject weapons_type = {0};
 
 static PyStructSequence_Field weapons_fields[] = {
-    {"g", NULL}, {"mg", NULL}, {"sg", NULL},
-    {"gl", NULL}, {"rl", NULL}, {"lg", NULL},
-    {"rg", NULL}, {"pg", NULL}, {"bfg", NULL},
-    {"gh", NULL}, {"ng", NULL}, {"pl", NULL},
-    {"cg", NULL}, {"hmg", NULL}, {"hands", NULL},
-    {NULL}
-};
+    {"g", NULL}, {"mg", NULL}, {"sg", NULL}, {"gl", NULL}, {"rl", NULL}, {"lg", NULL}, {"rg", NULL}, {"pg", NULL}, {"bfg", NULL}, {"gh", NULL}, {"ng", NULL}, {"pl", NULL}, {"cg", NULL}, {"hmg", NULL}, {"hands", NULL}, {NULL}};
 
 static PyStructSequence_Desc weapons_desc = {
     "Weapons",
     "A struct sequence containing all the weapons in the game.",
     weapons_fields,
-    (sizeof(weapons_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(weapons_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 // Powerups
 static PyTypeObject powerups_type = {0};
 
 static PyStructSequence_Field powerups_fields[] = {
-    {"quad", NULL}, {"battlesuit", NULL},
-    {"haste", NULL}, {"invisibility", NULL},
-    {"regeneration", NULL}, {"invulnerability", NULL},
-    {NULL}
-};
+    {"quad", NULL}, {"battlesuit", NULL}, {"haste", NULL}, {"invisibility", NULL}, {"regeneration", NULL}, {"invulnerability", NULL}, {NULL}};
 
 static PyStructSequence_Desc powerups_desc = {
     "Powerups",
     "A struct sequence containing all the powerups in the game.",
     powerups_fields,
-    (sizeof(powerups_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(powerups_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 // Flight
 static PyTypeObject flight_type = {0};
@@ -212,15 +191,13 @@ static PyStructSequence_Field flight_fields[] = {
     {"max_fuel", NULL},
     {"thrust", NULL},
     {"refuel", NULL},
-    {NULL}
-};
+    {NULL}};
 
 static PyStructSequence_Desc flight_desc = {
     "Flight",
     "A struct sequence containing parameters for the flight holdable item.",
     flight_fields,
-    (sizeof(flight_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(flight_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 // Keys
 static PyTypeObject keys_type = {0};
@@ -229,47 +206,46 @@ static PyStructSequence_Field keys_fields[] = {
     {"silver", NULL},
     {"gold", NULL},
     {"master", NULL},
-    {NULL}
-};
+    {NULL}};
 
 static PyStructSequence_Desc keys_desc = {
     "Keys",
     "A struct sequence containing all the keys in the game.",
     keys_fields,
-    (sizeof(keys_fields)/sizeof(PyStructSequence_Field)) - 1
-};
+    (sizeof(keys_fields) / sizeof(PyStructSequence_Field)) - 1};
 
 /*
  * ================================================================
  *                    player_info/players_info
  * ================================================================
-*/
+ */
 
 static PyObject* makePlayerTuple(int client_id) {
     PyObject *name, *team, *priv;
     PyObject* cid = PyLong_FromLongLong(client_id);
 
     if (g_entities[client_id].client != NULL) {
-        if (g_entities[client_id].client->pers.connected == CON_DISCONNECTED)
+        if (g_entities[client_id].client->pers.connected == CON_DISCONNECTED) {
             name = PyUnicode_FromString("");
-        else
+        } else {
             name = PyUnicode_DecodeUTF8(g_entities[client_id].client->pers.netname,
-                strlen(g_entities[client_id].client->pers.netname), "ignore");
+                                        strlen(g_entities[client_id].client->pers.netname), "ignore");
+        }
 
-        if (g_entities[client_id].client->pers.connected == CON_DISCONNECTED)
+        if (g_entities[client_id].client->pers.connected == CON_DISCONNECTED) {
             team = PyLong_FromLongLong(TEAM_SPECTATOR); // Set team to spectator if not yet connected.
-        else
+        } else {
             team = PyLong_FromLongLong(g_entities[client_id].client->sess.sessionTeam);
+        }
 
         priv = PyLong_FromLongLong(g_entities[client_id].client->sess.privileges);
-    }
-    else {
+    } else {
         name = PyUnicode_FromString("");
         team = PyLong_FromLongLong(TEAM_SPECTATOR);
         priv = PyLong_FromLongLong(-1);
     }
 
-    PyObject* state = PyLong_FromLongLong(svs->clients[client_id].state);
+    PyObject* state    = PyLong_FromLongLong(svs->clients[client_id].state);
     PyObject* userinfo = PyUnicode_DecodeUTF8(svs->clients[client_id].userinfo, strlen(svs->clients[client_id].userinfo), "ignore");
     PyObject* steam_id = PyLong_FromLongLong(svs->clients[client_id].steam_id);
 
@@ -285,42 +261,43 @@ static PyObject* makePlayerTuple(int client_id) {
     return info;
 }
 
-static PyObject* PyMinqlx_PlayerInfo(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_PlayerInfo(PyObject* self, PyObject* args) {
     int i;
-    if (!PyArg_ParseTuple(args, "i:player", &i))
+    if (!PyArg_ParseTuple(args, "i:player", &i)) {
         return NULL;
+    }
 
     if (i < 0 || i >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-
-    }
-    else if (allow_free_client != i && svs->clients[i].state == CS_FREE) {
-        #ifndef NDEBUG
-        DebugPrint("WARNING: PyMinqlx_PlayerInfo called for CS_FREE client %d.\n", i);
-        #endif
+    } else if (allow_free_client != i && svs->clients[i].state == CS_FREE) {
+#ifndef NDEBUG
+        DebugPrint("WARNING: PyMinqlxtended_PlayerInfo called for CS_FREE client %d.\n", i);
+#endif
         Py_RETURN_NONE;
     }
 
     return makePlayerTuple(i);
 }
 
-static PyObject* PyMinqlx_PlayersInfo(PyObject* self, PyObject* args) {
-	PyObject* ret = PyList_New(sv_maxclients->integer);
+static PyObject* PyMinqlxtended_PlayersInfo(PyObject* self, PyObject* args) {
+    PyObject* ret = PyList_New(sv_maxclients->integer);
 
-	for (int i = 0; i < sv_maxclients->integer; i++) {
-		if (svs->clients[i].state == CS_FREE) {
-			if (PyList_SetItem(ret, i, Py_None) == -1)
-                        return NULL;
+    for (int i = 0; i < sv_maxclients->integer; i++) {
+        if (svs->clients[i].state == CS_FREE) {
+            if (PyList_SetItem(ret, i, Py_None) == -1) {
+                return NULL;
+            }
             Py_INCREF(Py_None);
             continue;
-		}
+        }
 
-		if (PyList_SetItem(ret, i, makePlayerTuple(i)) == -1)
-			return NULL;
-	}
+        if (PyList_SetItem(ret, i, makePlayerTuple(i)) == -1) {
+            return NULL;
+        }
+    }
 
     return ret;
 }
@@ -329,22 +306,22 @@ static PyObject* PyMinqlx_PlayersInfo(PyObject* self, PyObject* args) {
  * ================================================================
  *                          get_userinfo
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_GetUserinfo(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_GetUserinfo(PyObject* self, PyObject* args) {
     int i;
-    if (!PyArg_ParseTuple(args, "i:get_userinfo", &i))
+    if (!PyArg_ParseTuple(args, "i:get_userinfo", &i)) {
         return NULL;
+    }
 
     if (i < 0 || i >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-
-    }
-    else if (allow_free_client != i && svs->clients[i].state == CS_FREE)
+    } else if (allow_free_client != i && svs->clients[i].state == CS_FREE) {
         Py_RETURN_NONE;
+    }
 
     return PyUnicode_DecodeUTF8(svs->clients[i].userinfo, strlen(svs->clients[i].userinfo), "ignore");
 }
@@ -353,25 +330,25 @@ static PyObject* PyMinqlx_GetUserinfo(PyObject* self, PyObject* args) {
  * ================================================================
  *                       send_server_command
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_SendServerCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SendServerCommand(PyObject* self, PyObject* args) {
     PyObject* client_id;
     int i;
     char* cmd;
-    if (!PyArg_ParseTuple(args, "Os:send_server_command", &client_id, &cmd))
+    if (!PyArg_ParseTuple(args, "Os:send_server_command", &client_id, &cmd)) {
         return NULL;
+    }
 
     if (client_id == Py_None) {
         My_SV_SendServerCommand(NULL, "%s\n", cmd); // Send to all.
         Py_RETURN_TRUE;
-    }
-    else if (PyLong_Check(client_id)) {
+    } else if (PyLong_Check(client_id)) {
         i = PyLong_AsLong(client_id);
         if (i >= 0 && i < sv_maxclients->integer) {
-            if (svs->clients[i].state != CS_ACTIVE)
+            if (svs->clients[i].state != CS_ACTIVE) {
                 Py_RETURN_FALSE;
-            else {
+            } else {
                 My_SV_SendServerCommand(&svs->clients[i], "%s\n", cmd);
                 Py_RETURN_TRUE;
             }
@@ -388,22 +365,23 @@ static PyObject* PyMinqlx_SendServerCommand(PyObject* self, PyObject* args) {
  * ================================================================
  *                          client_command
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_ClientCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_ClientCommand(PyObject* self, PyObject* args) {
     int i;
     char* cmd;
-    if (!PyArg_ParseTuple(args, "is:client_command", &i, &cmd))
+    if (!PyArg_ParseTuple(args, "is:client_command", &i, &cmd)) {
         return NULL;
+    }
 
-	if (i >= 0 && i < sv_maxclients->integer) {
-		if (svs->clients[i].state == CS_FREE || svs->clients[i].state == CS_ZOMBIE)
-			Py_RETURN_FALSE;
-		else {
-			My_SV_ExecuteClientCommand(&svs->clients[i], cmd, qtrue);
-			Py_RETURN_TRUE;
-		}
-	}
+    if (i >= 0 && i < sv_maxclients->integer) {
+        if (svs->clients[i].state == CS_FREE || svs->clients[i].state == CS_ZOMBIE) {
+            Py_RETURN_FALSE;
+        } else {
+            My_SV_ExecuteClientCommand(&svs->clients[i], cmd, qtrue);
+            Py_RETURN_TRUE;
+        }
+    }
 
     PyErr_Format(PyExc_ValueError,
                  "client_id needs to be a number from 0 to %d, or None.",
@@ -415,12 +393,13 @@ static PyObject* PyMinqlx_ClientCommand(PyObject* self, PyObject* args) {
  * ================================================================
  *                         console_command
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_ConsoleCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_ConsoleCommand(PyObject* self, PyObject* args) {
     char* cmd;
-    if (!PyArg_ParseTuple(args, "s:console_command", &cmd))
+    if (!PyArg_ParseTuple(args, "s:console_command", &cmd)) {
         return NULL;
+    }
 
     Cmd_ExecuteString(cmd);
 
@@ -431,16 +410,17 @@ static PyObject* PyMinqlx_ConsoleCommand(PyObject* self, PyObject* args) {
  * ================================================================
  *                           get_cvar
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_GetCvar(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_GetCvar(PyObject* self, PyObject* args) {
     char* name;
-    if (!PyArg_ParseTuple(args, "s:get_cvar", &name))
+    if (!PyArg_ParseTuple(args, "s:get_cvar", &name)) {
         return NULL;
+    }
 
     cvar_t* cvar = Cvar_FindVar(name);
     if (cvar) {
-    	return PyUnicode_FromString(cvar->string);
+        return PyUnicode_FromString(cvar->string);
     }
 
     Py_RETURN_NONE;
@@ -450,13 +430,14 @@ static PyObject* PyMinqlx_GetCvar(PyObject* self, PyObject* args) {
  * ================================================================
  *                           set_cvar
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_SetCvar(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetCvar(PyObject* self, PyObject* args) {
     char *name, *value;
     int flags = 0;
-    if (!PyArg_ParseTuple(args, "ss|i:set_cvar", &name, &value, &flags))
+    if (!PyArg_ParseTuple(args, "ss|i:set_cvar", &name, &value, &flags)) {
         return NULL;
+    }
 
     cvar_t* var = Cvar_FindVar(name);
     if (!var) {
@@ -464,10 +445,11 @@ static PyObject* PyMinqlx_SetCvar(PyObject* self, PyObject* args) {
         Py_RETURN_TRUE;
     }
 
-    if (flags == -1)
+    if (flags == -1) {
         Cvar_Set2(name, value, qtrue);
-    else
+    } else {
         Cvar_Set2(name, value, qfalse);
+    }
 
     Py_RETURN_FALSE;
 }
@@ -476,13 +458,14 @@ static PyObject* PyMinqlx_SetCvar(PyObject* self, PyObject* args) {
  * ================================================================
  *                           set_cvar_limit
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_SetCvarLimit(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetCvarLimit(PyObject* self, PyObject* args) {
     char *name, *value, *min, *max;
     int flags = 0;
-    if (!PyArg_ParseTuple(args, "ssss|i:set_cvar_limit", &name, &value, &min, &max, &flags))
+    if (!PyArg_ParseTuple(args, "ssss|i:set_cvar_limit", &name, &value, &min, &max, &flags)) {
         return NULL;
+    }
 
     Cvar_GetLimit(name, value, min, max, flags);
     Py_RETURN_NONE;
@@ -492,34 +475,33 @@ static PyObject* PyMinqlx_SetCvarLimit(PyObject* self, PyObject* args) {
  * ================================================================
  *                             kick
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_Kick(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_Kick(PyObject* self, PyObject* args) {
     int i;
     PyObject* reason;
-    if (!PyArg_ParseTuple(args, "iO:kick", &i, &reason))
-        return NULL;
 
-	if (i >= 0 && i < sv_maxclients->integer) {
-		if (svs->clients[i].state != CS_ACTIVE) {
-			PyErr_Format(PyExc_ValueError,
-					"client_id must be None or the ID of an active player.");
-			return NULL;
-		}
-		else if (reason == Py_None || (PyUnicode_Check(reason) && PyUnicode_AsUTF8(reason)[0] == 0)) {
-			// Default kick message for None or empty strings.
-			My_SV_DropClient(&svs->clients[i], "was kicked.");
-		}
-		else if (PyUnicode_Check(reason)) {
-			My_SV_DropClient(&svs->clients[i], PyUnicode_AsUTF8(reason));
-		}
-	}
-	else {
-		PyErr_Format(PyExc_ValueError,
-				"client_id needs to be a number from 0 to %d, or None.",
-				sv_maxclients->integer);
-		return NULL;
-	}
+    if (!PyArg_ParseTuple(args, "iO:kick", &i, &reason)) {
+        return NULL;
+    }
+
+    if (i >= 0 && i < sv_maxclients->integer) {
+        if (svs->clients[i].state != CS_ACTIVE) {
+            PyErr_Format(PyExc_ValueError,
+                         "client_id must be None or the ID of an active player.");
+            return NULL;
+        } else if (reason == Py_None || (PyUnicode_Check(reason) && PyUnicode_AsUTF8(reason)[0] == 0)) {
+            // Default kick message for None or empty strings.
+            My_SV_DropClient(&svs->clients[i], "was kicked.");
+        } else if (PyUnicode_Check(reason)) {
+            My_SV_DropClient(&svs->clients[i], PyUnicode_AsUTF8(reason));
+        }
+    } else {
+        PyErr_Format(PyExc_ValueError,
+                     "client_id needs to be a number from 0 to %d, or None.",
+                     sv_maxclients->integer);
+        return NULL;
+    }
 
     Py_RETURN_NONE;
 }
@@ -528,12 +510,13 @@ static PyObject* PyMinqlx_Kick(PyObject* self, PyObject* args) {
  * ================================================================
  *                          console_print
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_ConsolePrint(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_ConsolePrint(PyObject* self, PyObject* args) {
     char* text;
-    if (!PyArg_ParseTuple(args, "s:console_print", &text))
+    if (!PyArg_ParseTuple(args, "s:console_print", &text)) {
         return NULL;
+    }
 
     My_Com_Printf("%s\n", text);
 
@@ -544,19 +527,21 @@ static PyObject* PyMinqlx_ConsolePrint(PyObject* self, PyObject* args) {
  * ================================================================
  *                          get_configstring
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_GetConfigstring(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_GetConfigstring(PyObject* self, PyObject* args) {
     int i;
     char csbuffer[4096];
-    if (!PyArg_ParseTuple(args, "i:get_configstring", &i))
+    if (!PyArg_ParseTuple(args, "i:get_configstring", &i)) {
         return NULL;
+    }
+
     else if (i < 0 || i > MAX_CONFIGSTRINGS) {
-		PyErr_Format(PyExc_ValueError,
-						 "index needs to be a number from 0 to %d.",
-						 MAX_CONFIGSTRINGS);
-		return NULL;
-	}
+        PyErr_Format(PyExc_ValueError,
+                     "index needs to be a number from 0 to %d.",
+                     MAX_CONFIGSTRINGS);
+        return NULL;
+    }
 
     SV_GetConfigstring(i, csbuffer, sizeof(csbuffer));
     return PyUnicode_DecodeUTF8(csbuffer, strlen(csbuffer), "ignore");
@@ -566,18 +551,20 @@ static PyObject* PyMinqlx_GetConfigstring(PyObject* self, PyObject* args) {
  * ================================================================
  *                          set_configstring
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_SetConfigstring(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetConfigstring(PyObject* self, PyObject* args) {
     int i;
     char* cs;
-    if (!PyArg_ParseTuple(args, "is:set_configstring", &i, &cs))
+    if (!PyArg_ParseTuple(args, "is:set_configstring", &i, &cs)) {
         return NULL;
+    }
+
     else if (i < 0 || i > MAX_CONFIGSTRINGS) {
-    	PyErr_Format(PyExc_ValueError,
-    	                 "index needs to be a number from 0 to %d.",
-						 MAX_CONFIGSTRINGS);
-		return NULL;
+        PyErr_Format(PyExc_ValueError,
+                     "index needs to be a number from 0 to %d.",
+                     MAX_CONFIGSTRINGS);
+        return NULL;
     }
 
     My_SV_SetConfigstring(i, cs);
@@ -589,27 +576,27 @@ static PyObject* PyMinqlx_SetConfigstring(PyObject* self, PyObject* args) {
  * ================================================================
  *                          force_vote
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_ForceVote(PyObject* self, PyObject* args) {
-	int pass;
-    if (!PyArg_ParseTuple(args, "p:force_vote", &pass))
+static PyObject* PyMinqlxtended_ForceVote(PyObject* self, PyObject* args) {
+    int pass;
+    if (!PyArg_ParseTuple(args, "p:force_vote", &pass)) {
         return NULL;
+    }
 
     if (!level->voteTime) {
-    	// No active vote.
-    	Py_RETURN_FALSE;
-    }
-    else if (pass && level->voteTime) {
-    	// We tell the server every single client voted yes, making it pass in the next G_RunFrame.
-		for (int i = 0; i < sv_maxclients->integer; i++) {
-			if (svs->clients[i].state == CS_ACTIVE)
-				g_entities[i].client->pers.voteState = VOTE_YES;
-		}
-    }
-    else if (!pass && level->voteTime) {
-    	// If we tell the server the vote is over, it'll fail it right away.
-		level->voteTime -= 30000;
+        // No active vote.
+        Py_RETURN_FALSE;
+    } else if (pass && level->voteTime) {
+        // We tell the server every single client voted yes, making it pass in the next G_RunFrame.
+        for (int i = 0; i < sv_maxclients->integer; i++) {
+            if (svs->clients[i].state == CS_ACTIVE) {
+                g_entities[i].client->pers.voteState = VOTE_YES;
+            }
+        }
+    } else if (!pass && level->voteTime) {
+        // If we tell the server the vote is over, it'll fail it right away.
+        level->voteTime -= 30000;
     }
 
     Py_RETURN_TRUE;
@@ -619,12 +606,13 @@ static PyObject* PyMinqlx_ForceVote(PyObject* self, PyObject* args) {
  * ================================================================
  *                       add_console_command
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_AddConsoleCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_AddConsoleCommand(PyObject* self, PyObject* args) {
     char* cmd;
-    if (!PyArg_ParseTuple(args, "s:add_console_command", &cmd))
+    if (!PyArg_ParseTuple(args, "s:add_console_command", &cmd)) {
         return NULL;
+    }
 
     Cmd_AddCommand(cmd, PyCommand);
 
@@ -635,77 +623,78 @@ static PyObject* PyMinqlx_AddConsoleCommand(PyObject* self, PyObject* args) {
  * ================================================================
  *                         register_handler
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_RegisterHandler(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_RegisterHandler(PyObject* self, PyObject* args) {
     char* event;
     PyObject* new_handler;
 
     if (!PyArg_ParseTuple(args, "sO:register_handler", &event, &new_handler)) {
-    	return NULL;
+        return NULL;
     }
+
     else if (new_handler != Py_None && !PyCallable_Check(new_handler)) {
-		PyErr_SetString(PyExc_TypeError, "The handler must be callable.");
-		return NULL;
-	}
+        PyErr_SetString(PyExc_TypeError, "The handler must be callable.");
+        return NULL;
+    }
 
-	for (handler_t* h = handlers; h->name; h++) {
-		if (!strcmp(h->name, event)) {
-			Py_XDECREF(*h->handler);
-			if (new_handler == Py_None)
-				*h->handler = NULL;
-			else {
-				*h->handler = new_handler;
-				Py_INCREF(new_handler);
-			}
+    for (handler_t* h = handlers; h->name; h++) {
+        if (!strcmp(h->name, event)) {
+            Py_XDECREF(*h->handler);
+            if (new_handler == Py_None) {
+                *h->handler = NULL;
+            } else {
+                *h->handler = new_handler;
+                Py_INCREF(new_handler);
+            }
 
-			Py_RETURN_NONE;
-		}
-	}
+            Py_RETURN_NONE;
+        }
+    }
 
-	PyErr_SetString(PyExc_ValueError, "Invalid event.");
-	return NULL;
+    PyErr_SetString(PyExc_ValueError, "Invalid event.");
+    return NULL;
 }
 
 /*
  * ================================================================
  *                          player_state
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
     int client_id;
 
-    if (!PyArg_ParseTuple(args, "i:player_state", &client_id))
+    if (!PyArg_ParseTuple(args, "i:player_state", &client_id)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_NONE;
+    }
 
     PyObject* state = PyStructSequence_New(&player_state_type);
     PyStructSequence_SetItem(state, 0, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 0));
 
     PyObject* pos = PyStructSequence_New(&vector3_type);
     PyStructSequence_SetItem(pos, 0,
-        PyFloat_FromDouble(g_entities[client_id].client->ps.origin[0]));
+                             PyFloat_FromDouble(g_entities[client_id].client->ps.origin[0]));
     PyStructSequence_SetItem(pos, 1,
-        PyFloat_FromDouble(g_entities[client_id].client->ps.origin[1]));
+                             PyFloat_FromDouble(g_entities[client_id].client->ps.origin[1]));
     PyStructSequence_SetItem(pos, 2,
-        PyFloat_FromDouble(g_entities[client_id].client->ps.origin[2]));
+                             PyFloat_FromDouble(g_entities[client_id].client->ps.origin[2]));
     PyStructSequence_SetItem(state, 1, pos);
 
     PyObject* vel = PyStructSequence_New(&vector3_type);
     PyStructSequence_SetItem(vel, 0,
-        PyFloat_FromDouble(g_entities[client_id].client->ps.velocity[0]));
+                             PyFloat_FromDouble(g_entities[client_id].client->ps.velocity[0]));
     PyStructSequence_SetItem(vel, 1,
-        PyFloat_FromDouble(g_entities[client_id].client->ps.velocity[1]));
+                             PyFloat_FromDouble(g_entities[client_id].client->ps.velocity[1]));
     PyStructSequence_SetItem(vel, 2,
-        PyFloat_FromDouble(g_entities[client_id].client->ps.velocity[2]));
+                             PyFloat_FromDouble(g_entities[client_id].client->ps.velocity[2]));
     PyStructSequence_SetItem(state, 2, vel);
 
     PyStructSequence_SetItem(state, 3, PyLong_FromLongLong(g_entities[client_id].health));
@@ -715,10 +704,10 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
 
     // Get weapons and ammo count.
     PyObject* weapons = PyStructSequence_New(&weapons_type);
-    PyObject* ammo = PyStructSequence_New(&weapons_type);
+    PyObject* ammo    = PyStructSequence_New(&weapons_type);
     for (int i = 0; i < weapons_desc.n_in_sequence; i++) {
-        PyStructSequence_SetItem(weapons, i, PyBool_FromLong(g_entities[client_id].client->ps.stats[STAT_WEAPONS] & (1 << (i+1))));
-        PyStructSequence_SetItem(ammo, i, PyLong_FromLongLong(g_entities[client_id].client->ps.ammo[i+1]));
+        PyStructSequence_SetItem(weapons, i, PyBool_FromLong(g_entities[client_id].client->ps.stats[STAT_WEAPONS] & (1 << (i + 1))));
+        PyStructSequence_SetItem(ammo, i, PyLong_FromLongLong(g_entities[client_id].client->ps.ammo[i + 1]));
     }
     PyStructSequence_SetItem(state, 7, weapons);
     PyStructSequence_SetItem(state, 8, ammo);
@@ -726,64 +715,67 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
     PyObject* powerups = PyStructSequence_New(&powerups_type);
     int index;
     for (int i = 0; i < powerups_desc.n_in_sequence; i++) {
-        index = i+PW_QUAD;
-        if (index == PW_FLIGHT) // Skip flight.
+        index = i + PW_QUAD;
+        if (index == PW_FLIGHT) { // Skip flight.
             index = PW_INVULNERABILITY;
+        }
         int remaining = g_entities[client_id].client->ps.powerups[index];
-        if (remaining) // We don't want the time, but the remaining time.
+        if (remaining) { // We don't want the time, but the remaining time.
             remaining -= level->time;
+        }
         PyStructSequence_SetItem(powerups, i, PyLong_FromLongLong(remaining));
     }
     PyStructSequence_SetItem(state, 9, powerups);
 
     PyObject* holdable;
     switch (g_entities[client_id].client->ps.stats[STAT_HOLDABLE_ITEM]) {
-        case 0:
-            holdable = Py_None;
-            Py_INCREF(Py_None);
-            break;
-        case 27:
-            holdable = PyUnicode_FromString("teleporter");
-            break;
-        case 28:
-            holdable = PyUnicode_FromString("medkit");
-            break;
-        case 34:
-            holdable = PyUnicode_FromString("flight");
-            break;
-        case 37:
-            holdable = PyUnicode_FromString("kamikaze");
-            break;
-        case 38:
-            holdable = PyUnicode_FromString("portal");
-            break;
-        case 39:
-            holdable = PyUnicode_FromString("invulnerability");
-            break;
-        default:
-            holdable = PyUnicode_FromString("unknown");
+    case 0:
+        holdable = Py_None;
+        Py_INCREF(Py_None);
+        break;
+    case 27:
+        holdable = PyUnicode_FromString("teleporter");
+        break;
+    case 28:
+        holdable = PyUnicode_FromString("medkit");
+        break;
+    case 34:
+        holdable = PyUnicode_FromString("flight");
+        break;
+    case 37:
+        holdable = PyUnicode_FromString("kamikaze");
+        break;
+    case 38:
+        holdable = PyUnicode_FromString("portal");
+        break;
+    case 39:
+        holdable = PyUnicode_FromString("invulnerability");
+        break;
+    default:
+        holdable = PyUnicode_FromString("unknown");
     }
     PyStructSequence_SetItem(state, 10, holdable);
 
     PyObject* flight = PyStructSequence_New(&flight_type);
     PyStructSequence_SetItem(flight, 0,
-        PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_CUR_FLIGHT_FUEL]));
+                             PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_CUR_FLIGHT_FUEL]));
     PyStructSequence_SetItem(flight, 1,
-        PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_MAX_FLIGHT_FUEL]));
+                             PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_MAX_FLIGHT_FUEL]));
     PyStructSequence_SetItem(flight, 2,
-        PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_FLIGHT_THRUST]));
+                             PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_FLIGHT_THRUST]));
     PyStructSequence_SetItem(flight, 3,
-        PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_FLIGHT_REFUEL]));
+                             PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_FLIGHT_REFUEL]));
     PyStructSequence_SetItem(state, 11, flight);
 
     PyStructSequence_SetItem(state, 12, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 4));
 
     PyObject* keys = PyStructSequence_New(&keys_type);
     for (int i = 0; i < keys_desc.n_in_sequence; i++) {
-        if (g_entities[client_id].client->ps.stats[STAT_KEY] & (1 << i))
+        if (g_entities[client_id].client->ps.stats[STAT_KEY] & (1 << i)) {
             PyStructSequence_SetItem(keys, i, Py_True);
-        else
+        } else {
             PyStructSequence_SetItem(keys, i, Py_False);
+        }
     }
     PyStructSequence_SetItem(state, 13, keys);
 
@@ -794,25 +786,24 @@ static PyObject* PyMinqlx_PlayerState(PyObject* self, PyObject* args) {
  * ================================================================
  *                          player_stats
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_PlayerStats(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_PlayerStats(PyObject* self, PyObject* args) {
     int client_id;
 
-    if (!PyArg_ParseTuple(args, "i:player_stats", &client_id))
+    if (!PyArg_ParseTuple(args, "i:player_stats", &client_id)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_NONE;
+    }
 
     PyObject* stats = PyStructSequence_New(&player_stats_type);
-    int score = g_entities[client_id].client->sess.sessionTeam == TEAM_SPECTATOR ?
-        0 : g_entities[client_id].client->ps.persistant[PERS_ROUND_SCORE];
+    int score       = g_entities[client_id].client->sess.sessionTeam == TEAM_SPECTATOR ? 0 : g_entities[client_id].client->ps.persistant[PERS_ROUND_SCORE];
     PyStructSequence_SetItem(stats, 0, PyLong_FromLongLong(score));
     PyStructSequence_SetItem(stats, 1, PyLong_FromLongLong(g_entities[client_id].client->expandedStats.numKills));
     PyStructSequence_SetItem(stats, 2, PyLong_FromLongLong(g_entities[client_id].client->expandedStats.numDeaths));
@@ -828,23 +819,22 @@ static PyObject* PyMinqlx_PlayerStats(PyObject* self, PyObject* args) {
  * ================================================================
  *                          set_position
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_SetPosition(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetPosition(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* new_position;
 
-    if (!PyArg_ParseTuple(args, "iO:set_position", &client_id, &new_position))
+    if (!PyArg_ParseTuple(args, "iO:set_position", &client_id, &new_position)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(new_position, &vector3_type)) {
+    } else if (!PyObject_TypeCheck(new_position, &vector3_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Vector3.");
         return NULL;
     }
@@ -863,23 +853,22 @@ static PyObject* PyMinqlx_SetPosition(PyObject* self, PyObject* args) {
  * ================================================================
  *                          set_velocity
  * ================================================================
-*/
+ */
 
-static PyObject* PyMinqlx_SetVelocity(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetVelocity(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* new_velocity;
 
-    if (!PyArg_ParseTuple(args, "iO:set_velocity", &client_id, &new_velocity))
+    if (!PyArg_ParseTuple(args, "iO:set_velocity", &client_id, &new_velocity)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(new_velocity, &vector3_type)) {
+    } else if (!PyObject_TypeCheck(new_velocity, &vector3_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Vector3.");
         return NULL;
     }
@@ -895,23 +884,23 @@ static PyObject* PyMinqlx_SetVelocity(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                             noclip
-* ================================================================
-*/
+ * ================================================================
+ *                             noclip
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_NoClip(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_NoClip(PyObject* self, PyObject* args) {
     int client_id, activate;
-    if (!PyArg_ParseTuple(args, "ip:noclip", &client_id, &activate))
+    if (!PyArg_ParseTuple(args, "ip:noclip", &client_id, &activate)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
     if ((activate && g_entities[client_id].client->noclip) || (!activate && !g_entities[client_id].client->noclip)) {
         // Change was made.
@@ -923,71 +912,70 @@ static PyObject* PyMinqlx_NoClip(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                           set_health
-* ================================================================
-*/
+ * ================================================================
+ *                           set_health
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetHealth(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetHealth(PyObject* self, PyObject* args) {
     int client_id, health;
-    if (!PyArg_ParseTuple(args, "ii:set_health", &client_id, &health))
+    if (!PyArg_ParseTuple(args, "ii:set_health", &client_id, &health)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
     g_entities[client_id].health = health;
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                           set_armor
-* ================================================================
-*/
+ * ================================================================
+ *                           set_armor
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetArmor(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetArmor(PyObject* self, PyObject* args) {
     int client_id, armor;
-    if (!PyArg_ParseTuple(args, "ii:set_armor", &client_id, &armor))
+    if (!PyArg_ParseTuple(args, "ii:set_armor", &client_id, &armor)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
     g_entities[client_id].client->ps.stats[STAT_ARMOR] = armor;
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                           set_weapons
-* ================================================================
-*/
+ * ================================================================
+ *                           set_weapons
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetWeapons(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetWeapons(PyObject* self, PyObject* args) {
     int client_id, weapon_flags = 0;
     PyObject* weapons;
-    if (!PyArg_ParseTuple(args, "iO:set_weapons", &client_id, &weapons))
+    if (!PyArg_ParseTuple(args, "iO:set_weapons", &client_id, &weapons)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(weapons, &weapons_type)) {
+    } else if (!PyObject_TypeCheck(weapons, &weapons_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Weapons.");
         return NULL;
     }
@@ -1000,7 +988,7 @@ static PyObject* PyMinqlx_SetWeapons(PyObject* self, PyObject* args) {
             return NULL;
         }
 
-        weapon_flags |= w == Py_True ? (1 << (i+1)) : 0;
+        weapon_flags |= w == Py_True ? (1 << (i + 1)) : 0;
     }
 
     g_entities[client_id].client->ps.stats[STAT_WEAPONS] = weapon_flags;
@@ -1008,24 +996,23 @@ static PyObject* PyMinqlx_SetWeapons(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                           set_weapon
-* ================================================================
-*/
+ * ================================================================
+ *                           set_weapon
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetWeapon(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetWeapon(PyObject* self, PyObject* args) {
     int client_id, weapon;
-    if (!PyArg_ParseTuple(args, "ii:set_weapon", &client_id, &weapon))
+    if (!PyArg_ParseTuple(args, "ii:set_weapon", &client_id, &weapon)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (weapon < 0 || weapon >= MAX_WEAPONS) {
+    } else if (weapon < 0 || weapon >= MAX_WEAPONS) {
         PyErr_Format(PyExc_ValueError, "Weapon must be a number from 0 to 15.");
         return NULL;
     }
@@ -1035,25 +1022,24 @@ static PyObject* PyMinqlx_SetWeapon(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                           set_ammo
-* ================================================================
-*/
+ * ================================================================
+ *                           set_ammo
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetAmmo(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetAmmo(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* ammos;
-    if (!PyArg_ParseTuple(args, "iO:set_ammo", &client_id, &ammos))
+    if (!PyArg_ParseTuple(args, "iO:set_ammo", &client_id, &ammos)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(ammos, &weapons_type)) {
+    } else if (!PyObject_TypeCheck(ammos, &weapons_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Weapons.");
         return NULL;
     }
@@ -1066,32 +1052,31 @@ static PyObject* PyMinqlx_SetAmmo(PyObject* self, PyObject* args) {
             return NULL;
         }
 
-        g_entities[client_id].client->ps.ammo[i+1] = PyLong_AsLong(a);
+        g_entities[client_id].client->ps.ammo[i + 1] = PyLong_AsLong(a);
     }
 
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                           set_powerups
-* ================================================================
-*/
+ * ================================================================
+ *                           set_powerups
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetPowerups(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetPowerups(PyObject* self, PyObject* args) {
     int client_id, t;
     PyObject* powerups;
-    if (!PyArg_ParseTuple(args, "iO:set_powerups", &client_id, &powerups))
+    if (!PyArg_ParseTuple(args, "iO:set_powerups", &client_id, &powerups)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(powerups, &powerups_type)) {
+    } else if (!PyObject_TypeCheck(powerups, &powerups_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Powerups.");
         return NULL;
     }
@@ -1108,97 +1093,103 @@ static PyObject* PyMinqlx_SetPowerups(PyObject* self, PyObject* args) {
 
         // If i == 5, it'll modify flight, which isn't a real powerup.
         // We bump it up and modify invulnerability instead.
-        if (i+PW_QUAD == PW_FLIGHT)
+        if (i + PW_QUAD == PW_FLIGHT) {
             i = PW_INVULNERABILITY - PW_QUAD;
+        }
 
         t = PyLong_AsLong(powerup);
         if (!t) {
-            g_entities[client_id].client->ps.powerups[i+PW_QUAD] = 0;
+            g_entities[client_id].client->ps.powerups[i + PW_QUAD] = 0;
             continue;
         }
 
-        g_entities[client_id].client->ps.powerups[i+PW_QUAD] = level->time - (level->time % 1000) + t;
+        g_entities[client_id].client->ps.powerups[i + PW_QUAD] = level->time - (level->time % 1000) + t;
     }
 
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                           set_holdable
-* ================================================================
-*/
+ * ================================================================
+ *                           set_holdable
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetHoldable(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetHoldable(PyObject* self, PyObject* args) {
     int client_id, i;
-    if (!PyArg_ParseTuple(args, "ii:set_holdable", &client_id, &i))
+    if (!PyArg_ParseTuple(args, "ii:set_holdable", &client_id, &i)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
-    if (i == 37)  // 37 - kamikaze
+    if (i == 37) { // 37 - kamikaze
         g_entities[client_id].client->ps.eFlags |= EF_KAMIKAZE;
-    else
+    } else {
         g_entities[client_id].client->ps.eFlags &= ~EF_KAMIKAZE;
+    }
 
     g_entities[client_id].client->ps.stats[STAT_HOLDABLE_ITEM] = i;
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                          drop_holdable
-* ================================================================
-*/
+ * ================================================================
+ *                          drop_holdable
+ * ================================================================
+ */
 
-void __cdecl Switch_Touch_Item(gentity_t *ent) {
-    ent->touch = (void*)Touch_Item;
-    ent->think = G_FreeEntity;
+void __cdecl Switch_Touch_Item(gentity_t* ent) {
+    ent->touch     = (void*)Touch_Item;
+    ent->think     = G_FreeEntity;
     ent->nextthink = level->time + 29000;
 }
 
-void __cdecl My_Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
-    if (ent->parent == other) return;
+void __cdecl My_Touch_Item(gentity_t* ent, gentity_t* other, trace_t* trace) {
+    if (ent->parent == other) {
+        return;
+    }
     Touch_Item(ent, other, trace);
 }
 
-static PyObject* PyMinqlx_DropHoldable(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_DropHoldable(PyObject* self, PyObject* args) {
     int client_id, item;
     vec3_t velocity;
     vec_t angle;
-    if (!PyArg_ParseTuple(args, "i:drop_holdable", &client_id))
+    if (!PyArg_ParseTuple(args, "i:drop_holdable", &client_id)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
     // removing kamikaze flag (surrounding skulls)
     g_entities[client_id].client->ps.eFlags &= ~EF_KAMIKAZE;
 
     item = g_entities[client_id].client->ps.stats[STAT_HOLDABLE_ITEM];
-    if (item == 0) Py_RETURN_FALSE;
+    if (item == 0) {
+        Py_RETURN_FALSE;
+    }
 
-    angle = g_entities[client_id].s.apos.trBase[1] * (M_PI*2 / 360);
-    velocity[0] = 150*cos(angle);
-    velocity[1] = 150*sin(angle);
+    angle       = g_entities[client_id].s.apos.trBase[1] * (M_PI * 2 / 360);
+    velocity[0] = 150 * cos(angle);
+    velocity[1] = 150 * sin(angle);
     velocity[2] = 250;
 
-    gentity_t* entity = LaunchItem(bg_itemlist + item, g_entities[client_id].s.pos.trBase, velocity);
-    entity->touch     = (void*)My_Touch_Item;
-    entity->parent    = &g_entities[client_id];
-    entity->think     = Switch_Touch_Item;
-    entity->nextthink = level->time + 1000;
+    gentity_t* entity    = LaunchItem(bg_itemlist + item, g_entities[client_id].s.pos.trBase, velocity);
+    entity->touch        = (void*)My_Touch_Item;
+    entity->parent       = &g_entities[client_id];
+    entity->think        = Switch_Touch_Item;
+    entity->nextthink    = level->time + 1000;
     entity->s.pos.trTime = level->time - 500;
 
     // removing holdable from player entity
@@ -1207,64 +1198,61 @@ static PyObject* PyMinqlx_DropHoldable(PyObject* self, PyObject* args) {
     Py_RETURN_TRUE;
 }
 
-
 /*
-* ================================================================
-*                           set_flight
-* ================================================================
-*/
+ * ================================================================
+ *                           set_flight
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetFlight(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetFlight(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* flight;
-    if (!PyArg_ParseTuple(args, "iO:set_flight", &client_id, &flight))
+    if (!PyArg_ParseTuple(args, "iO:set_flight", &client_id, &flight)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(flight, &flight_type)) {
+    } else if (!PyObject_TypeCheck(flight, &flight_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Flight.");
         return NULL;
     }
 
-    for (int i = 0; i < flight_desc.n_in_sequence; i++)
+    for (int i = 0; i < flight_desc.n_in_sequence; i++) {
         if (!PyLong_Check(PyStructSequence_GetItem(flight, i))) {
             PyErr_Format(PyExc_ValueError, "Tuple argument %d is not an integer.", i);
             return NULL;
         }
+    }
 
     g_entities[client_id].client->ps.stats[STAT_CUR_FLIGHT_FUEL] = PyLong_AsLong(PyStructSequence_GetItem(flight, 0));
     g_entities[client_id].client->ps.stats[STAT_MAX_FLIGHT_FUEL] = PyLong_AsLong(PyStructSequence_GetItem(flight, 1));
-    g_entities[client_id].client->ps.stats[STAT_FLIGHT_THRUST] = PyLong_AsLong(PyStructSequence_GetItem(flight, 2));
-    g_entities[client_id].client->ps.stats[STAT_FLIGHT_REFUEL] = PyLong_AsLong(PyStructSequence_GetItem(flight, 3));
+    g_entities[client_id].client->ps.stats[STAT_FLIGHT_THRUST]   = PyLong_AsLong(PyStructSequence_GetItem(flight, 2));
+    g_entities[client_id].client->ps.stats[STAT_FLIGHT_REFUEL]   = PyLong_AsLong(PyStructSequence_GetItem(flight, 3));
     Py_RETURN_TRUE;
 }
 
-
 /*
-* ================================================================
-*                            set_keys
-* ================================================================
-*/
-static PyObject* PyMinqlx_SetKeys(PyObject* self, PyObject* args) {
+ * ================================================================
+ *                            set_keys
+ * ================================================================
+ */
+static PyObject* PyMinqlxtended_SetKeys(PyObject* self, PyObject* args) {
     int client_id, key_flags = 0;
     PyObject* keys;
-    if (!PyArg_ParseTuple(args, "iO:set_keys", &client_id, &keys))
+    if (!PyArg_ParseTuple(args, "iO:set_keys", &client_id, &keys)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
-            "client_id needs to be a number from 0 to %d.",
-            sv_maxclients->integer);
+                     "client_id needs to be a number from 0 to %d.",
+                     sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (!PyObject_TypeCheck(keys, &keys_type)) {
+    } else if (!PyObject_TypeCheck(keys, &keys_type)) {
         PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Keys.");
         return NULL;
     }
@@ -1285,24 +1273,23 @@ static PyObject* PyMinqlx_SetKeys(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                        set_invulnerability
-* ================================================================
-*/
+ * ================================================================
+ *                        set_invulnerability
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetInvulnerability(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetInvulnerability(PyObject* self, PyObject* args) {
     int client_id, time;
-    if (!PyArg_ParseTuple(args, "ii:set_invulnerability", &client_id, &time))
+    if (!PyArg_ParseTuple(args, "ii:set_invulnerability", &client_id, &time)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (time <= 0) {
+    } else if (time <= 0) {
         PyErr_Format(PyExc_ValueError, "time needs to be positive integer.");
         return NULL;
     }
@@ -1312,50 +1299,53 @@ static PyObject* PyMinqlx_SetInvulnerability(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                           set_score
-* ================================================================
-*/
+ * ================================================================
+ *                           set_score
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetScore(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetScore(PyObject* self, PyObject* args) {
     int client_id, score;
-    if (!PyArg_ParseTuple(args, "ii:set_score", &client_id, &score))
+    if (!PyArg_ParseTuple(args, "ii:set_score", &client_id, &score)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
     g_entities[client_id].client->ps.persistant[PERS_ROUND_SCORE] = score;
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                           callvote
-* ================================================================
-*/
+ * ================================================================
+ *                           callvote
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_Callvote(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_Callvote(PyObject* self, PyObject* args) {
     char *vote, *vote_disp;
     int vote_time = 30;
     char buf[64];
-    if (!PyArg_ParseTuple(args, "ss|i:callvote", &vote, &vote_disp, &vote_time))
+    if (!PyArg_ParseTuple(args, "ss|i:callvote", &vote, &vote_disp, &vote_time)) {
         return NULL;
+    }
 
     strncpy(level->voteString, vote, sizeof(level->voteString));
     strncpy(level->voteDisplayString, vote_disp, sizeof(level->voteDisplayString));
     level->voteTime = (level->time - 30000) + vote_time * 1000;
-    level->voteYes = 0;
-    level->voteNo = 0;
+    level->voteYes  = 0;
+    level->voteNo   = 0;
 
-    for (int i = 0; i < sv_maxclients->integer; i++)
-        if (g_entities[i].client)
+    for (int i = 0; i < sv_maxclients->integer; i++) {
+        if (g_entities[i].client) {
             g_entities[i].client->pers.voteState = VOTE_PENDING;
+        }
+    }
 
     My_SV_SetConfigstring(CS_VOTE_STRING, level->voteDisplayString);
     snprintf(buf, sizeof(buf), "%d", level->voteTime);
@@ -1367,42 +1357,44 @@ static PyObject* PyMinqlx_Callvote(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                      allow_single_player
-* ================================================================
-*/
+ * ================================================================
+ *                      allow_single_player
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_AllowSinglePlayer(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_AllowSinglePlayer(PyObject* self, PyObject* args) {
     int x;
-    if (!PyArg_ParseTuple(args, "p:allow_single_player", &x))
+    if (!PyArg_ParseTuple(args, "p:allow_single_player", &x)) {
         return NULL;
+    }
 
-    if (x)
+    if (x) {
         level->mapIsTrainingMap = qtrue;
-    else
+    } else {
         level->mapIsTrainingMap = qfalse;
+    }
 
     Py_RETURN_NONE;
 }
 
 /*
-* ================================================================
-*                           player_spawn
-* ================================================================
-*/
+ * ================================================================
+ *                           player_spawn
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_PlayerSpawn(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_PlayerSpawn(PyObject* self, PyObject* args) {
     int client_id;
-    if (!PyArg_ParseTuple(args, "i:player_spawn", &client_id))
+    if (!PyArg_ParseTuple(args, "i:player_spawn", &client_id)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
     g_entities[client_id].client->ps.pm_type = PM_NORMAL;
     My_ClientSpawn(&g_entities[client_id]);
@@ -1410,64 +1402,67 @@ static PyObject* PyMinqlx_PlayerSpawn(PyObject* self, PyObject* args) {
 }
 
 /*
-* ================================================================
-*                           set_privileges
-* ================================================================
-*/
+ * ================================================================
+ *                           set_privileges
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SetPrivileges(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SetPrivileges(PyObject* self, PyObject* args) {
     int client_id, priv;
-    if (!PyArg_ParseTuple(args, "ii:set_privileges", &client_id, &priv))
+    if (!PyArg_ParseTuple(args, "ii:set_privileges", &client_id, &priv)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
+    }
 
     g_entities[client_id].client->sess.privileges = priv;
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                        destroy_kamikaze_timers
-* ================================================================
-*/
+ * ================================================================
+ *                        destroy_kamikaze_timers
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_DestroyKamikazeTimers(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_DestroyKamikazeTimers(PyObject* self, PyObject* args) {
     int i;
     gentity_t* ent;
 
     for (i = 0; i < MAX_GENTITIES; i++) {
         ent = &g_entities[i];
-        if (!ent->inuse)
+        if (!ent->inuse) {
             continue;
+        }
 
         // removing kamikaze skull from dead body
         if (ent->client && ent->health <= 0) {
             ent->client->ps.eFlags &= ~EF_KAMIKAZE;
         }
 
-        if (strcmp(ent->classname, "kamikaze timer") == 0)
+        if (strcmp(ent->classname, "kamikaze timer") == 0) {
             G_FreeEntity(ent);
+        }
     }
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                        spawn_item
-* ================================================================
-*/
+ * ================================================================
+ *                        spawn_item
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_SpawnItem(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SpawnItem(PyObject* self, PyObject* args) {
     int item_id, x, y, z;
-    if (!PyArg_ParseTuple(args, "iiii:spawn_item", &item_id, &x, &y, &z))
+    if (!PyArg_ParseTuple(args, "iiii:spawn_item", &item_id, &x, &y, &z)) {
         return NULL;
+    }
     if (item_id < 1 || item_id >= bg_numItems) {
         PyErr_Format(PyExc_ValueError,
                      "item_id needs to be a number from 1 to %d.",
@@ -1475,147 +1470,149 @@ static PyObject* PyMinqlx_SpawnItem(PyObject* self, PyObject* args) {
         return NULL;
     }
 
-    vec3_t origin = {x, y, z};
+    vec3_t origin   = {x, y, z};
     vec3_t velocity = {0};
 
     gentity_t* ent = LaunchItem(bg_itemlist + item_id, origin, velocity);
     ent->nextthink = 0;
-    ent->think = 0;
+    ent->think     = 0;
     G_AddEvent(ent, EV_ITEM_RESPAWN, 0); // make item be scaled up
 
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                        remove_dropped_items
-* ================================================================
-*/
+ * ================================================================
+ *                        remove_dropped_items
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_RemoveDroppedItems(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_RemoveDroppedItems(PyObject* self, PyObject* args) {
     int i;
     gentity_t* ent;
 
     for (i = 0; i < MAX_GENTITIES; i++) {
         ent = &g_entities[i];
-        if (!ent->inuse)
+        if (!ent->inuse) {
             continue;
+        }
 
-        if (ent->flags & FL_DROPPED_ITEM)
+        if (ent->flags & FL_DROPPED_ITEM) {
             G_FreeEntity(ent);
+        }
     }
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                         slay_with_mod
-* ================================================================
-*/
+ * ================================================================
+ *                         slay_with_mod
+ * ================================================================
+ */
 
 // it is alternative to Slay from command.c
-static PyObject* PyMinqlx_SlayWithMod(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_SlayWithMod(PyObject* self, PyObject* args) {
     int client_id, mod;
-    if (!PyArg_ParseTuple(args, "ii:slay_with_mod", &client_id, &mod))
+    if (!PyArg_ParseTuple(args, "ii:slay_with_mod", &client_id, &mod)) {
         return NULL;
-    else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
         PyErr_Format(PyExc_ValueError,
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    }
-    else if (!g_entities[client_id].client)
+    } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
-    else if (g_entities[client_id].health <= 0)
+    } else if (g_entities[client_id].health <= 0) {
         Py_RETURN_TRUE;
+    }
 
     gentity_t* ent = &g_entities[client_id];
-    int damage = g_entities[client_id].health + (mod == MOD_KAMIKAZE ? 100000 : 0);
+    int damage     = g_entities[client_id].health + (mod == MOD_KAMIKAZE ? 100000 : 0);
 
     g_entities[client_id].client->ps.stats[STAT_ARMOR] = 0;
 
     // self damage = half damage, so multiplaying by 2
-    G_Damage( ent, ent, ent, NULL, NULL, damage*2, DAMAGE_NO_PROTECTION, mod );
+    G_Damage(ent, ent, ent, NULL, NULL, damage * 2, DAMAGE_NO_PROTECTION, mod);
     Py_RETURN_TRUE;
 }
 
 /*
-* ================================================================
-*                         replace_items
-* ================================================================
-*/
+ * ================================================================
+ *                         replace_items
+ * ================================================================
+ */
 
 void replace_item_core(gentity_t* ent, int item_id) {
     char csbuffer[4096];
 
     if (item_id) {
         ent->s.modelindex = item_id;
-        ent->classname = bg_itemlist[item_id].classname;
-        ent->item = &bg_itemlist[item_id];
+        ent->classname    = bg_itemlist[item_id].classname;
+        ent->item         = &bg_itemlist[item_id];
 
         // this forces client to load new item
         SV_GetConfigstring(CS_ITEMS, csbuffer, sizeof(csbuffer));
         csbuffer[item_id] = '1';
         My_SV_SetConfigstring(CS_ITEMS, csbuffer);
-
     } else {
         G_FreeEntity(ent);
     }
 }
 
-static PyObject* PyMinqlx_ReplaceItems(PyObject* self, PyObject* args) {
-    PyObject *arg1, *arg2 ;
+static PyObject* PyMinqlxtended_ReplaceItems(PyObject* self, PyObject* args) {
+    PyObject *arg1, *arg2;
     int entity_id = 0, item_id = 0;
-    #if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
+#if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
     char *entity_classname = NULL, *item_classname = NULL;
-    #else
+#else
     const char *entity_classname = NULL, *item_classname = NULL;
-    #endif
+#endif
     gentity_t* ent;
 
-
-    if (!PyArg_ParseTuple(args, "OO:replace_items", &arg1, &arg2))
+    if (!PyArg_ParseTuple(args, "OO:replace_items", &arg1, &arg2)) {
         return NULL;
+    }
 
     // checking type of first arg
     if (PyLong_Check(arg1)) {
         entity_id = PyLong_AsLong(arg1);
-    } else if (PyUnicode_Check(arg1))
+    } else if (PyUnicode_Check(arg1)) {
         entity_classname = PyUnicode_AsUTF8(arg1);
-    else {
+    } else {
         PyErr_Format(PyExc_ValueError, "entity needs to be type of int or string.");
         return NULL;
     }
 
     // checking type of second arg
-    if (PyLong_Check(arg2))
+    if (PyLong_Check(arg2)) {
         item_id = PyLong_AsLong(arg2);
-    else if (PyUnicode_Check(arg2))
+    } else if (PyUnicode_Check(arg2)) {
         item_classname = PyUnicode_AsUTF8(arg2);
-    else {
+    } else {
         PyErr_Format(PyExc_ValueError, "item needs to be type of int or string.");
         return NULL;
     }
 
     // convert second arg to item_id, if needed
-    int i=1;
-    if (item_classname == NULL) i=bg_numItems;
-    for (; i<bg_numItems; i++)
+    int i = 1;
+    if (item_classname == NULL) {
+        i = bg_numItems;
+    }
+    for (; i < bg_numItems; i++) {
         if (strcmp(bg_itemlist[i].classname, item_classname) == 0) {
             item_id = i;
             break;
         }
+    }
 
     // checking for valid item_id or item_classname
     if (item_classname && item_id == 0) {
-
         // throw error if invalid item_classname
         PyErr_Format(PyExc_ValueError, "invalid item classname: %s.", item_classname);
         return NULL;
     } else if (item_id < 0 || item_id >= bg_numItems) {
-
         // throw error if invalid item_id
-        PyErr_Format(PyExc_ValueError, "item_id needs to be between 0 and %d.", bg_numItems-1);
+        PyErr_Format(PyExc_ValueError, "item_id needs to be between 0 and %d.", bg_numItems - 1);
         return NULL;
     }
 
@@ -1626,7 +1623,7 @@ static PyObject* PyMinqlx_ReplaceItems(PyObject* self, PyObject* args) {
 
         // entity_id checking
         if (entity_id < 0 || entity_id >= MAX_GENTITIES) {
-            PyErr_Format(PyExc_ValueError, "entity_id needs to be between 0 and %d.", MAX_GENTITIES-1);
+            PyErr_Format(PyExc_ValueError, "entity_id needs to be between 0 and %d.", MAX_GENTITIES - 1);
             return NULL;
         } else if (g_entities[entity_id].inuse == 0) {
             PyErr_Format(PyExc_ValueError, "entity #%d is not in use.", entity_id);
@@ -1639,19 +1636,20 @@ static PyObject* PyMinqlx_ReplaceItems(PyObject* self, PyObject* args) {
         Com_Printf("%s\n", g_entities[entity_id].classname);
         replace_item_core(&g_entities[entity_id], item_id);
         Py_RETURN_TRUE;
-
     } else {
         // replacing items by entity_classname
 
         int is_entity_found = 0;
-        for (i=0; i<MAX_GENTITIES; i++) {
+        for (i = 0; i < MAX_GENTITIES; i++) {
             ent = &g_entities[i];
 
-            if (!ent->inuse)
+            if (!ent->inuse) {
                 continue;
+            }
 
-            if (ent->s.eType != ET_ITEM)
+            if (ent->s.eType != ET_ITEM) {
                 continue;
+            }
 
             if (strcmp(ent->classname, entity_classname) == 0) {
                 is_entity_found = 1;
@@ -1659,38 +1657,41 @@ static PyObject* PyMinqlx_ReplaceItems(PyObject* self, PyObject* args) {
             }
         }
 
-        if (is_entity_found)
+        if (is_entity_found) {
             Py_RETURN_TRUE;
-        else
-            Py_RETURN_FALSE;
+        }
+
+        Py_RETURN_FALSE;
     }
 }
 
 /*
-* ================================================================
-*                         dev_print_items
-* ================================================================
-*/
+ * ================================================================
+ *                         dev_print_items
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_DevPrintItems(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtended_DevPrintItems(PyObject* self, PyObject* args) {
     gentity_t* ent;
     char buffer[1024], temp_buffer[1024];
     int buffer_index = 0;
     size_t chars_written;
-    char format[] = "%d %s\n";
+    char format[]             = "%d %s\n";
     qboolean is_buffer_enough = qtrue;
 
     // default results
     sprintf(buffer, "No items found in the map");
 
-    for (int i=0; i<MAX_GENTITIES; i++) {
+    for (int i = 0; i < MAX_GENTITIES; i++) {
         ent = &g_entities[i];
 
-        if (!ent->inuse)
+        if (!ent->inuse) {
             continue;
+        }
 
-        if (ent->s.eType != ET_ITEM)
+        if (ent->s.eType != ET_ITEM) {
             continue;
+        }
 
         chars_written = sprintf(temp_buffer, format, i, ent->classname);
         if (is_buffer_enough && buffer_index + chars_written >= sizeof(buffer)) {
@@ -1707,42 +1708,47 @@ static PyObject* PyMinqlx_DevPrintItems(PyObject* self, PyObject* args) {
         buffer_index += chars_written;
     }
 
-    if (is_buffer_enough)
+    if (is_buffer_enough) {
         SV_SendServerCommand(NULL, "print \"%s\"", buffer);
+    }
     Py_RETURN_NONE;
 }
 
 /*
-* ================================================================
-*                         force_weapon_respawn_time
-* ================================================================
-*/
+ * ================================================================
+ *                         force_weapon_respawn_time
+ * ================================================================
+ */
 
-static PyObject* PyMinqlx_ForceWeaponRespawnTime(PyObject* self, PyObject* args) {
-	int respawn_time;
+static PyObject* PyMinqlxtended_ForceWeaponRespawnTime(PyObject* self, PyObject* args) {
+    int respawn_time;
     gentity_t* ent;
-	
-	if (!PyArg_ParseTuple(args, "i:force_weapon_respawn_time", &respawn_time))
-		return NULL;
-	
-	if (respawn_time < 0) {    
+
+    if (!PyArg_ParseTuple(args, "i:force_weapon_respawn_time", &respawn_time)) {
+        return NULL;
+    }
+
+    if (respawn_time < 0) {
         PyErr_Format(PyExc_ValueError, "respawn time needs to be an integer 0 or greater");
         return NULL;
-    }	
+    }
 
-    for (int i=0; i<MAX_GENTITIES; i++) {
+    for (int i = 0; i < MAX_GENTITIES; i++) {
         ent = &g_entities[i];
 
-        if (!ent->inuse)
+        if (!ent->inuse) {
             continue;
+        }
 
-		if (ent->s.eType != ET_ITEM || ent->item == NULL)
-            continue;		
-		
-		if (ent->item->giType != IT_WEAPON)
-			continue;
-				
-		ent->wait = respawn_time;
+        if (ent->s.eType != ET_ITEM || ent->item == NULL) {
+            continue;
+        }
+
+        if (ent->item->giType != IT_WEAPON) {
+            continue;
+        }
+
+        ent->wait = respawn_time;
     }
 
     Py_RETURN_TRUE;
@@ -1752,117 +1758,115 @@ static PyObject* PyMinqlx_ForceWeaponRespawnTime(PyObject* self, PyObject* args)
  * ================================================================
  *             Module definition and initialization
  * ================================================================
-*/
+ */
 
 static PyMethodDef minqlxtendedMethods[] = {
-    {"player_info", PyMinqlx_PlayerInfo, METH_VARARGS,
+    {"player_info", PyMinqlxtended_PlayerInfo, METH_VARARGS,
      "Returns a dictionary with information about a player by ID."},
-	{"players_info", PyMinqlx_PlayersInfo, METH_NOARGS,
-	 "Returns a list with dictionaries with information about all the players on the server."},
-	{"get_userinfo", PyMinqlx_GetUserinfo, METH_VARARGS,
-	 "Returns a string with a player's userinfo."},
-    {"send_server_command", PyMinqlx_SendServerCommand, METH_VARARGS,
+    {"players_info", PyMinqlxtended_PlayersInfo, METH_NOARGS,
+     "Returns a list with dictionaries with information about all the players on the server."},
+    {"get_userinfo", PyMinqlxtended_GetUserinfo, METH_VARARGS,
+     "Returns a string with a player's userinfo."},
+    {"send_server_command", PyMinqlxtended_SendServerCommand, METH_VARARGS,
      "Sends a server command to either one specific client or all the clients."},
-	{"client_command", PyMinqlx_ClientCommand, METH_VARARGS,
-	 "Tells the server to process a command from a specific client."},
-	{"console_command", PyMinqlx_ConsoleCommand, METH_VARARGS,
-	 "Executes a command as if it was executed from the server console."},
-	{"get_cvar", PyMinqlx_GetCvar, METH_VARARGS,
-	 "Gets a cvar."},
-	{"set_cvar", PyMinqlx_SetCvar, METH_VARARGS,
-	 "Sets a cvar."},
-    {"set_cvar_limit", PyMinqlx_SetCvarLimit, METH_VARARGS,
+    {"client_command", PyMinqlxtended_ClientCommand, METH_VARARGS,
+     "Tells the server to process a command from a specific client."},
+    {"console_command", PyMinqlxtended_ConsoleCommand, METH_VARARGS,
+     "Executes a command as if it was executed from the server console."},
+    {"get_cvar", PyMinqlxtended_GetCvar, METH_VARARGS,
+     "Gets a cvar."},
+    {"set_cvar", PyMinqlxtended_SetCvar, METH_VARARGS,
+     "Sets a cvar."},
+    {"set_cvar_limit", PyMinqlxtended_SetCvarLimit, METH_VARARGS,
      "Sets a non-string cvar with a minimum and maximum value."},
-	{"kick", PyMinqlx_Kick, METH_VARARGS,
-	 "Kick a player and allowing the admin to supply a reason for it."},
-	{"console_print", PyMinqlx_ConsolePrint, METH_VARARGS,
-	 "Prints text on the console. If used during an RCON command, it will be printed in the player's console."},
-	{"get_configstring", PyMinqlx_GetConfigstring, METH_VARARGS,
-	 "Get a configstring."},
-	{"set_configstring", PyMinqlx_SetConfigstring, METH_VARARGS,
-	 "Sets a configstring and sends it to all the players on the server."},
-	{"force_vote", PyMinqlx_ForceVote, METH_VARARGS,
-	 "Forces the current vote to either fail or pass."},
-	{"add_console_command", PyMinqlx_AddConsoleCommand, METH_VARARGS,
-	 "Adds a console command that will be handled by Python code."},
-    {"register_handler", PyMinqlx_RegisterHandler, METH_VARARGS,
+    {"kick", PyMinqlxtended_Kick, METH_VARARGS,
+     "Kick a player and allowing the admin to supply a reason for it."},
+    {"console_print", PyMinqlxtended_ConsolePrint, METH_VARARGS,
+     "Prints text on the console. If used during an RCON command, it will be printed in the player's console."},
+    {"get_configstring", PyMinqlxtended_GetConfigstring, METH_VARARGS,
+     "Get a configstring."},
+    {"set_configstring", PyMinqlxtended_SetConfigstring, METH_VARARGS,
+     "Sets a configstring and sends it to all the players on the server."},
+    {"force_vote", PyMinqlxtended_ForceVote, METH_VARARGS,
+     "Forces the current vote to either fail or pass."},
+    {"add_console_command", PyMinqlxtended_AddConsoleCommand, METH_VARARGS,
+     "Adds a console command that will be handled by Python code."},
+    {"register_handler", PyMinqlxtended_RegisterHandler, METH_VARARGS,
      "Register an event handler. Can be called more than once per event, but only the last one will work."},
-    {"player_state", PyMinqlx_PlayerState, METH_VARARGS,
+    {"player_state", PyMinqlxtended_PlayerState, METH_VARARGS,
      "Get information about the player's state in the game."},
-    {"player_stats", PyMinqlx_PlayerStats, METH_VARARGS,
+    {"player_stats", PyMinqlxtended_PlayerStats, METH_VARARGS,
      "Get some player stats."},
-    {"set_position", PyMinqlx_SetPosition, METH_VARARGS,
+    {"set_position", PyMinqlxtended_SetPosition, METH_VARARGS,
      "Sets a player's position vector."},
-    {"set_velocity", PyMinqlx_SetVelocity, METH_VARARGS,
+    {"set_velocity", PyMinqlxtended_SetVelocity, METH_VARARGS,
      "Sets a player's velocity vector."},
-    {"noclip", PyMinqlx_NoClip, METH_VARARGS,
+    {"noclip", PyMinqlxtended_NoClip, METH_VARARGS,
      "Sets noclip for a player."},
-    {"set_health", PyMinqlx_SetHealth, METH_VARARGS,
+    {"set_health", PyMinqlxtended_SetHealth, METH_VARARGS,
      "Sets a player's health."},
-    {"set_armor", PyMinqlx_SetArmor, METH_VARARGS,
+    {"set_armor", PyMinqlxtended_SetArmor, METH_VARARGS,
      "Sets a player's armor."},
-    {"set_weapons", PyMinqlx_SetWeapons, METH_VARARGS,
+    {"set_weapons", PyMinqlxtended_SetWeapons, METH_VARARGS,
      "Sets a player's weapons."},
-    {"set_weapon", PyMinqlx_SetWeapon, METH_VARARGS,
+    {"set_weapon", PyMinqlxtended_SetWeapon, METH_VARARGS,
      "Sets a player's current weapon."},
-    {"set_ammo", PyMinqlx_SetAmmo, METH_VARARGS,
+    {"set_ammo", PyMinqlxtended_SetAmmo, METH_VARARGS,
      "Sets a player's ammo."},
-    {"set_powerups", PyMinqlx_SetPowerups, METH_VARARGS,
+    {"set_powerups", PyMinqlxtended_SetPowerups, METH_VARARGS,
      "Sets a player's powerups."},
-    {"set_holdable", PyMinqlx_SetHoldable, METH_VARARGS,
+    {"set_holdable", PyMinqlxtended_SetHoldable, METH_VARARGS,
      "Sets a player's holdable item."},
-    {"drop_holdable", PyMinqlx_DropHoldable, METH_VARARGS,
+    {"drop_holdable", PyMinqlxtended_DropHoldable, METH_VARARGS,
      "Drops player's holdable item."},
-    {"set_flight", PyMinqlx_SetFlight, METH_VARARGS,
+    {"set_flight", PyMinqlxtended_SetFlight, METH_VARARGS,
      "Sets a player's flight parameters, such as current fuel, max fuel and, so on."},
-    {"set_keys", PyMinqlx_SetKeys, METH_VARARGS,
+    {"set_keys", PyMinqlxtended_SetKeys, METH_VARARGS,
      "Sets a player's keys."},
-    {"set_invulnerability", PyMinqlx_SetInvulnerability, METH_VARARGS,
+    {"set_invulnerability", PyMinqlxtended_SetInvulnerability, METH_VARARGS,
      "Makes player invulnerable for limited time."},
-    {"set_score", PyMinqlx_SetScore, METH_VARARGS,
+    {"set_score", PyMinqlxtended_SetScore, METH_VARARGS,
      "Sets a player's score."},
-    {"callvote", PyMinqlx_Callvote, METH_VARARGS,
+    {"callvote", PyMinqlxtended_Callvote, METH_VARARGS,
      "Calls a vote as if started by the server and not a player."},
-    {"allow_single_player", PyMinqlx_AllowSinglePlayer, METH_VARARGS,
+    {"allow_single_player", PyMinqlxtended_AllowSinglePlayer, METH_VARARGS,
      "Allows or disallows a game with only a single player in it to go on without forfeiting. Useful for race."},
-    {"player_spawn", PyMinqlx_PlayerSpawn, METH_VARARGS,
-     "Allows or disallows a game with only a single player in it to go on without forfeiting. Useful for race."},
-    {"set_privileges", PyMinqlx_SetPrivileges, METH_VARARGS,
+    {"player_spawn", PyMinqlxtended_PlayerSpawn, METH_VARARGS,
+     "Forces the player to spawn in the map (no matter the team!)"},
+    {"set_privileges", PyMinqlxtended_SetPrivileges, METH_VARARGS,
      "Sets a player's privileges. Does not persist."},
-    {"destroy_kamikaze_timers", PyMinqlx_DestroyKamikazeTimers, METH_NOARGS,
+    {"destroy_kamikaze_timers", PyMinqlxtended_DestroyKamikazeTimers, METH_NOARGS,
      "Removes all current kamikaze timers."},
-    {"spawn_item", PyMinqlx_SpawnItem, METH_VARARGS,
+    {"spawn_item", PyMinqlxtended_SpawnItem, METH_VARARGS,
      "Spawns item with specified coordinates."},
-    {"remove_dropped_items", PyMinqlx_RemoveDroppedItems, METH_NOARGS,
+    {"remove_dropped_items", PyMinqlxtended_RemoveDroppedItems, METH_NOARGS,
      "Removes all dropped items."},
-    {"slay_with_mod", PyMinqlx_SlayWithMod, METH_VARARGS,
+    {"slay_with_mod", PyMinqlxtended_SlayWithMod, METH_VARARGS,
      "Slay player with mean of death."},
-    {"replace_items", PyMinqlx_ReplaceItems, METH_VARARGS,
+    {"replace_items", PyMinqlxtended_ReplaceItems, METH_VARARGS,
      "Replaces target entity's item with specified one."},
-    {"dev_print_items", PyMinqlx_DevPrintItems, METH_NOARGS,
+    {"dev_print_items", PyMinqlxtended_DevPrintItems, METH_NOARGS,
      "Prints all items and entity numbers to server console."},
-    {"force_weapon_respawn_time", PyMinqlx_ForceWeaponRespawnTime, METH_VARARGS,
+    {"force_weapon_respawn_time", PyMinqlxtended_ForceWeaponRespawnTime, METH_VARARGS,
      "Force all weapons to have a specified respawn time, overriding custom map respawn times set for them."},
-    {NULL, NULL, 0, NULL}
-};
+    {NULL, NULL, 0, NULL}};
 
 static PyModuleDef minqlxtendedModule = {
     PyModuleDef_HEAD_INIT, "minqlxtended", NULL, -1, minqlxtendedMethods,
-    NULL, NULL, NULL, NULL
-};
+    NULL, NULL, NULL, NULL};
 
-static PyObject* PyMinqlx_InitModule(void) {
+static PyObject* PyMinqlxtended_InitModule(void) {
     PyObject* module = PyModule_Create(&minqlxtendedModule);
 
     // Set minqlxtended version.
     PyModule_AddStringConstant(module, "__version__", MINQLXTENDED_VERSION);
 
-    // Set IS_DEBUG.
-    #ifndef NDEBUG
+// Set IS_DEBUG.
+#ifndef NDEBUG
     PyModule_AddObject(module, "DEBUG", Py_True);
-    #else
+#else
     PyModule_AddObject(module, "DEBUG", Py_False);
-    #endif
+#endif
 
     // Set a bunch of constants. We set them here because if you define functions in Python that use module
     // constants as keyword defaults, we have to always make sure they're exported first, and fuck that.
@@ -1976,60 +1980,59 @@ static PyObject* PyMinqlx_InitModule(void) {
     return module;
 }
 
-int PyMinqlx_IsInitialized(void) {
-   return initialized;
+int PyMinqlxtended_IsInitialized(void) {
+    return initialized;
 }
 
-PyMinqlx_InitStatus_t PyMinqlx_Initialize(void) {
-    if (PyMinqlx_IsInitialized()) {
+PyMinqlxtended_InitStatus_t PyMinqlxtended_Initialize(void) {
+    if (PyMinqlxtended_IsInitialized()) {
         DebugPrint("%s was called while already initialized!\n", __func__);
         return PYM_ALREADY_INITIALIZED;
     }
 
     DebugPrint("Initializing Python...\n");
     Py_SetProgramName(PYTHON_FILENAME);
-    PyImport_AppendInittab("_minqlxtended", &PyMinqlx_InitModule);
+    PyImport_AppendInittab("_minqlxtended", &PyMinqlxtended_InitModule);
     Py_Initialize();
-    #if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
+#if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
     PyEval_InitThreads();
-    #endif
+#endif
 
     // Add the main module.
     PyObject* main_module = PyImport_AddModule("__main__");
-    PyObject* main_dict = PyModule_GetDict(main_module);
+    PyObject* main_dict   = PyModule_GetDict(main_module);
     // Run script to load pyminqlxtended.
     PyObject* res = PyRun_String(loader, Py_file_input, main_dict, main_dict);
     if (res == NULL) {
-		DebugPrint("PyRun_String() returned NULL. Did you modify the loader?\n");
-		return PYM_MAIN_SCRIPT_ERROR;
-	}
+        DebugPrint("PyRun_String() returned NULL. Did you modify the loader?\n");
+        return PYM_MAIN_SCRIPT_ERROR;
+    }
     PyObject* ret = PyDict_GetItemString(main_dict, "ret");
     Py_XDECREF(ret);
     Py_DECREF(res);
     if (ret == NULL) {
-		DebugPrint("The loader script return value doesn't exist?\n");
-		return PYM_MAIN_SCRIPT_ERROR;
-	}
-	else if (ret != Py_True) {
-		// No need to print anything, since the traceback should be printed already.
-		return PYM_MAIN_SCRIPT_ERROR;
-	}
+        DebugPrint("The loader script return value doesn't exist?\n");
+        return PYM_MAIN_SCRIPT_ERROR;
+    } else if (ret != Py_True) {
+        // No need to print anything, since the traceback should be printed already.
+        return PYM_MAIN_SCRIPT_ERROR;
+    }
 
-    mainstate = PyEval_SaveThread();
+    mainstate   = PyEval_SaveThread();
     initialized = 1;
     DebugPrint("Python initialized!\n");
     return PYM_SUCCESS;
 }
 
-PyMinqlx_InitStatus_t PyMinqlx_Finalize(void) {
-    if (!PyMinqlx_IsInitialized()) {
+PyMinqlxtended_InitStatus_t PyMinqlxtended_Finalize(void) {
+    if (!PyMinqlxtended_IsInitialized()) {
         DebugPrint("%s was called before being initialized!\n", __func__);
         return PYM_NOT_INITIALIZED_ERROR;
     }
 
     for (handler_t* h = handlers; h->name; h++) {
-		*h->handler = NULL;
-	}
+        *h->handler = NULL;
+    }
 
     PyEval_RestoreThread(mainstate);
     Py_Finalize();

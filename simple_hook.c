@@ -1,31 +1,31 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/mman.h>
+#include "trampoline.h"
 #include <errno.h>
 #include <stdint.h>
-#include "trampoline.h"
+#include <stdio.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 #if defined(__x86_64__) || defined(_M_X64)
 typedef uint64_t pint;
 typedef int64_t sint;
-#define WORST_CASE 			42
-#define JUMP_SIZE 			sizeof(JMP_ABS)
+#define WORST_CASE 42
+#define JUMP_SIZE sizeof(JMP_ABS)
 #elif defined(__i386) || defined(_M_IX86)
 typedef uint32_t pint;
 typedef int32_t sint;
-#define WORST_CASE 			29
-#define JUMP_SIZE 			sizeof(JMP_REL)
+#define WORST_CASE 29
+#define JUMP_SIZE sizeof(JMP_REL)
 #endif
 
-#define TRMPS_ARRAY_SIZE	30
+#define TRMPS_ARRAY_SIZE 30
 const uint8_t NOP = 0x90;
 
 static void* trmps;
 static int last_trmp = 0; // trmp[TRMPS_ARRAY_SIZE]
 
 static void initializeTrampolines(void) {
-	trmps = mmap(NULL, (WORST_CASE * TRMPS_ARRAY_SIZE),
-		        PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    trmps = mmap(NULL, (WORST_CASE * TRMPS_ARRAY_SIZE),
+                 PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 }
 
 int Hook(void* target, void* replacement, void** func_ptr) {
@@ -34,10 +34,11 @@ int Hook(void* target, void* replacement, void** func_ptr) {
 
     // Check if our trampoline pool has been initialized. If not, do so.
     if (!trmps) {
-    	initializeTrampolines();
-    }
-    else { // TODO: Implement a way to add and remove hooks.
-    	if (last_trmp + 1 > TRMPS_ARRAY_SIZE) return -3;
+        initializeTrampolines();
+    } else { // TODO: Implement a way to add and remove hooks.
+        if (last_trmp + 1 > TRMPS_ARRAY_SIZE) {
+            return -3;
+        }
     }
 
     void* trmp = (void*)((pint)trmps + last_trmp * WORST_CASE);
@@ -51,9 +52,13 @@ int Hook(void* target, void* replacement, void** func_ptr) {
     }
 
     page_size = sysconf(_SC_PAGESIZE);
-    if (page_size == -1) return errno;
-    res = mprotect((void*)((pint)target & ~(page_size-1)), page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
-    if (res) return errno;
+    if (page_size == -1) {
+        return errno;
+    }
+    res = mprotect((void*)((pint)target & ~(page_size - 1)), page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
+    if (res) {
+        return errno;
+    }
 
 #if defined(__x86_64__) || defined(_M_X64)
     PJMP_ABS pJmp = (PJMP_ABS)target;
@@ -64,11 +69,11 @@ int Hook(void* target, void* replacement, void** func_ptr) {
 #else
     PJMP_REL pJmp = (PJMP_REL)target;
     pJmp->opcode  = 0xE9;
-    pJmp->operand = (pint)replacement - ( (pint)target + sizeof(JMP_REL) );
+    pJmp->operand = (pint)replacement - ((pint)target + sizeof(JMP_REL));
 #endif
 
-    int difference = ct.oldIPs[ ct.nIP - 1 ];
-    for (int i=JUMP_SIZE; i<difference; i++) {
+    int difference = ct.oldIPs[ct.nIP - 1];
+    for (int i = JUMP_SIZE; i < difference; i++) {
         *((uint8_t*)target + i) = NOP;
     }
 
@@ -78,10 +83,11 @@ int Hook(void* target, void* replacement, void** func_ptr) {
     return 0;
 }
 
-int seek_hook_slot( int offset ) {
+int seek_hook_slot(int offset) {
 
-    if ( (last_trmp + offset < 0) || (last_trmp + offset >= TRMPS_ARRAY_SIZE) )
+    if ((last_trmp + offset < 0) || (last_trmp + offset >= TRMPS_ARRAY_SIZE)) {
         return 0;
+    }
 
     last_trmp += offset;
     return 1;

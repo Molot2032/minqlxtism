@@ -20,19 +20,19 @@ typedef int32_t sint;
 #endif
 
 // Permission flags. The two last are mutually exclusive.
-#define PG_READ 	1
-#define PG_WRITE 	2
-#define PG_EXECUTE 	4
-#define PG_PRIVATE 	8
-#define PG_SHARED 	16
+#define PG_READ 1
+#define PG_WRITE 2
+#define PG_EXECUTE 4
+#define PG_PRIVATE 8
+#define PG_SHARED 16
 
 typedef struct {
-	char name[512];
-	char path[4096];
-	int entries;
-	int permissions[128];
-	pint address_start[128];
-	pint address_end[128];
+    char name[512];
+    char path[4096];
+    int entries;
+    int permissions[128];
+    pint address_start[128];
+    pint address_end[128];
 } module_info_t;
 
 int GetModuleInfo(module_info_t* module_info);

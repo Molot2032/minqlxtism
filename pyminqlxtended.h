@@ -15,15 +15,15 @@ typedef enum {
     PYM_MAIN_SCRIPT_ERROR,
     PYM_ALREADY_INITIALIZED,
     PYM_NOT_INITIALIZED_ERROR
-} PyMinqlx_InitStatus_t;
+} PyMinqlxtended_InitStatus_t;
 
 // Used primarily in Python, but defined here and added using PyModule_AddIntMacro().
 enum {
     RET_NONE,
-    RET_STOP, // Stop execution of event handlers within Python.
-	RET_STOP_EVENT, // Only stop the event, but let other handlers process it.
-    RET_STOP_ALL, // Stop execution at an engine level. SCARY STUFF!
-	RET_USAGE // Used for commands. Replies to the channel with a command's usage.
+    RET_STOP,       // Stop execution of event handlers within Python.
+    RET_STOP_EVENT, // Only stop the event, but let other handlers process it.
+    RET_STOP_ALL,   // Stop execution at an engine level. SCARY STUFF!
+    RET_USAGE       // Used for commands. Replies to the channel with a command's usage.
 };
 
 enum {
@@ -34,18 +34,18 @@ enum {
     PRI_LOWEST
 };
 
-int PyMinqlx_IsInitialized(void);
-PyMinqlx_InitStatus_t PyMinqlx_Initialize(void);
-PyMinqlx_InitStatus_t PyMinqlx_Finalize(void);
+int PyMinqlxtended_IsInitialized(void);
+PyMinqlxtended_InitStatus_t PyMinqlxtended_Initialize(void);
+PyMinqlxtended_InitStatus_t PyMinqlxtended_Finalize(void);
 
 /*
  * Event handlers. Note that we're using simple PyObject pointers, meaning it only supports
  * a single handler for each event. I don't see the need for multiple handlers, since you can
  * do that more easily in Python-level code instead of C.
-*/
+ */
 typedef struct {
-	char* name;
-	PyObject** handler;
+    char* name;
+    PyObject** handler;
 } handler_t;
 extern PyObject* client_command_handler;
 extern PyObject* server_command_handler;
