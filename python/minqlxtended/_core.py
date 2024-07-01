@@ -241,7 +241,7 @@ def set_map_subtitles():
     cs = minqlxtended.get_configstring(679)
     if cs:
         cs += " - "
-    minqlxtended.set_configstring(679, cs + "Check ^6http://github.com/MinoMino/minqlxtended^7 for more details.")
+    minqlxtended.set_configstring(679, cs + "Check ^6http://github.com/tjone270/minqlxtended^7 for more details.")
 
 # ====================================================================
 #                              DECORATORS
