@@ -561,6 +561,10 @@ class Player():
         return self.state.is_frozen
 
     @property
+    def is_bot(self):
+        return (str(self._steam_id)[0] == "9")
+
+    @property
     def score(self):
         return self.stats.score
 
