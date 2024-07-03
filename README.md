@@ -63,6 +63,8 @@ For plugin configuration see the [plugins repository](https://github.com/tjone27
   - Default: `127.0.0.1`
 - `qlx_redisDatabase`: The Redis database number (by default there are 16 available (zero-indexed)).
   - Default: `0`
+- `qlx_redisProtocol`: The Redis "RESP" protocol to use. Accepts either `"2"` or `"3"`.
+  - Default: `3`
 - `qlx_redisUnixSocket`: A boolean that determines whether or not `qlx_redisAddress` is a path to a UNIX socket.
   - Default: `0`
 - `qlx_redisPassword`: The password to the Redis server, if any.
