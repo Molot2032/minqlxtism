@@ -1,6 +1,7 @@
 /*
-Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 1997-2001 id Software, Inc.
 Copyright (C) 2015 Mino <mino@minomino.org>
+Copyright (C) 2022-2024 Thomas Jones <me@thomasjones.id.au>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,12 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
- * Mino: A lot of this is from Q3 sources, but obviously the structs aren't
- * exactly the same, so there's a good number of modifications to make it
- * fit QL. The end of the file has a bunch of stuff I added. Might want
- * to refactor it. TODO.
- */
 
 #ifndef QUAKE_COMMON_H
 #define QUAKE_COMMON_H
@@ -31,13 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common.h"
 #include "patterns.h"
 
-#define CS_SCORES1 6
-#define CS_SCORES2 7
-#define CS_VOTE_TIME 8
-#define CS_VOTE_STRING 9
-#define CS_VOTE_YES 10
-#define CS_VOTE_NO 11
-#define CS_ITEMS 15
 
 #define MAX_CLIENTS 64
 #define MAX_CHALLENGES 1024
@@ -52,17 +40,101 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_DOWNLOAD_WINDOW 8    // max of eight download frames
 #define MAX_NETNAME 36
 #define PACKET_BACKUP 32 // number of old messages that must be kept on client and
-                         // server for delta comrpession and ping estimation
+                         // server for delta compression and ping estimation
 #define PACKET_MASK (PACKET_BACKUP - 1)
 #define MAX_ENT_CLUSTERS 16
 #define MAX_MODELS 256 // these are sent over the net as 8 bits
+#define MAX_SOUNDS 256
+#define MAX_LOCATIONS 64
 #define MAX_CONFIGSTRINGS 1024
 #define GENTITYNUM_BITS 10 // don't need to send any more
 #define MAX_GENTITIES (1 << GENTITYNUM_BITS)
+#define ENTITYNUM_NONE (MAX_GENTITIES - 1)
+#define ENTITYNUM_WORLD (MAX_GENTITIES - 2)
+#define ENTITYNUM_MAX_NORMAL (MAX_GENTITIES - 2)
 #define MAX_ITEM_MODELS 4
 #define MAX_SPAWN_VARS 64
 #define MAX_SPAWN_VARS_CHARS 4096
 #define BODY_QUEUE_SIZE 8
+
+// configstrings
+#define CS_MUSIC 2
+#define CS_MESSAGE 3 // from the map worldspawn's message field
+#define CS_MOTD 4    // g_motd string for server message of the day (not used in QL)
+#define CS_WARMUP 5  // server time when the match will be restarted
+#define CS_SCORES1 6 // 1st place score
+#define CS_SCORES2 7 // 2nd place score
+#define CS_VOTE_TIME 8
+#define CS_VOTE_STRING 9
+#define CS_VOTE_YES 10
+#define CS_VOTE_NO 11
+#define CS_GAME_VERSION 12
+#define CS_LEVEL_START_TIME 13 // so the timer only shows the current level
+#define CS_INTERMISSION 14     // when 1, fraglimit/timelimit has been hit and intermission will start in a second or two
+#define CS_ITEMS 15            // string of 0's and 1's that tell the client which items are present/to load.
+#define CS_BOTINFO 16          // internal debugging stuff
+#define CS_MODELS 17
+#define CS_SOUNDS (CS_MODELS + MAX_MODELS)             // 273
+#define CS_PLAYERS (CS_SOUNDS + MAX_SOUNDS)            // 529
+#define CS_LOCATIONS (CS_PLAYERS + MAX_CLIENTS)        // 593
+#define CS_LAST_GENERIC (CS_LOCATIONS + MAX_LOCATIONS) // 657
+#define CS_FLAGSTATUS 658
+#define CS_SCORES1PLAYER 659 // 1st place player's name
+#define CS_SCORES2PLAYER 660 // 2nd place player's name
+#define CS_ROUND_WARMUP 661
+#define CS_ROUND_START_TIME 662
+#define CS_TEAMCOUNT_RED 663
+#define CS_TEAMCOUNT_BLUE 664
+#define CS_SHADERSTATE 665
+#define CS_NEXTMAP 666
+#define CS_PRACTICE 667
+#define CS_FREECAM 668
+#define CS_PAUSE_START_TIME 669 // if this is non-zero, the game is paused
+#define CS_PAUSE_END_TIME 670   // 0 = pause, !0 = timeout
+#define CS_TIMEOUTS_RED 671     // TOs REMAINING
+#define CS_TIMEOUTS_BLUE 672
+#define CS_MODEL_OVERRIDE 673
+#define CS_PLAYER_CYLINDERS 674
+#define CS_DEBUGFLAGS 675
+#define CS_ENABLEBREATH 676
+#define CS_DMGTHROUGHDEPTH 677
+#define CS_AUTHOR 678 // from the map worldspawn's author field
+#define CS_AUTHOR2 679
+#define CS_ADVERT_DELAY 680
+#define CS_PMOVEINFO 681
+#define CS_ARMORINFO 682
+#define CS_WEAPONINFO 683
+#define CS_PLAYERINFO 684
+#define CS_SCORE1STPLAYER 685     // Score of the duel player on the left
+#define CS_SCORE2NDPLAYER 686     // Score of the duel player on the right
+#define CS_CLIENTNUM1STPLAYER 687 // ClientNum of the duel player on the left
+#define CS_CLIENTNUM2NDPLAYER 688 // ClientNum of the duel player on the right
+#define CS_ATMOSEFFECT 689        // unused, was per-map rain/snow effects
+#define CS_MOST_DAMAGEDEALT_PLYR 690
+#define CS_MOST_ACCURATE_PLYR 691
+#define CS_REDTEAMBASE 692
+#define CS_BLUETEAMBASE 693
+#define CS_BEST_ITEMCONTROL_PLYR 694
+#define CS_MOST_VALUABLE_OFFENSIVE_PLYR 695
+#define CS_MOST_VALUABLE_DEFENSIVE_PLYR 696
+#define CS_MOST_VALUABLE_PLYR 697
+#define CS_GENERIC_COUNT_RED 698
+#define CS_GENERIC_COUNT_BLUE 699
+#define CS_AD_SCORES 700
+#define CS_ROUND_WINNER 701
+#define CS_CUSTOM_SETTINGS 702
+#define CS_ROTATIONMAPS 703
+#define CS_ROTATIONVOTES 704
+#define CS_DISABLE_VOTE_UI 705
+#define CS_ALLREADY_TIME 706
+#define CS_INFECTED_SURVIVOR_MINSPEED 707
+#define CS_RACE_POINTS 708
+#define CS_DISABLE_LOADOUT 709
+#define CS_MATCH_GUID 710
+#define CS_STARTING_WEAPONS 711
+#define CS_STEAM_ID 712
+#define CS_STEAM_WORKSHOP_IDS 713
+#define CS_MAX 714
 
 // bit field limits
 #define MAX_STATS 16
@@ -87,7 +159,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define BUTTON_UPMOVE 2048     // Mino: Not in Q3. I'm guessing it's for cg_autohop.
 #define BUTTON_ANY 4096        // any key whatsoever
 #define BUTTON_IS_ACTIVE 65536 // Mino: No idea what it is, but it goes off after a while of being
-                               //       AFK, then goes on after being active for a while.
+                               //   AFK, then goes on after being active for a while.
 
 // eflags
 #define EF_DEAD 0x00000001            // don't draw a foe marker over players with EF_DEAD
@@ -115,6 +187,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define FL_DROPPED_ITEM 0x00001000
 
 #define DAMAGE_NO_PROTECTION 0x00000008
+
+// angle helpers
+#define ANGLE2SHORT(x) ((int)((x) * 65536 / 360) & 65535)
+#define SHORT2ANGLE(x) ((x) * (360.0 / 65536))
+
+// entity->svFlags
+// the server does not know how to interpret most of the values
+// in entityStates (level eType), so the game must explicitly flag
+// special server behaviors
+#define SVF_NOCLIENT 0x00000001 // don't send entity to clients, even if it has effects
+#define SVF_CLIENTMASK 0x00000002
+#define SVF_BOT 0x00000008                // set if the entity is a bot
+#define SVF_BROADCAST 0x00000020          // send to all connected clients
+#define SVF_PORTAL 0x00000040             // merge a second pvs at origin2 into snapshots
+#define SVF_USE_CURRENT_ORIGIN 0x00000080 // entity->r.currentOrigin instead of entity->s.origin
+                                          // for link position (missiles and movers)
+#define SVF_SINGLECLIENT 0x00000100       // only send to a single client (entityShared_t->singleClient)
+#define SVF_NOSERVERINFO 0x00000200       // don't send CS_SERVERINFO updates to this client
+                                          // so that it can be updated for ping tools without
+                                          // lagging clients
+#define SVF_CAPSULE 0x00000400            // use capsule for collision detection instead of bbox
+#define SVF_NOTSINGLECLIENT 0x00000800    // send entity to everyone but one client
+                                          // (entityShared_t->singleClient)
+
 
 typedef enum { qfalse,
                qtrue } qboolean;
