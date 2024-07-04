@@ -244,7 +244,7 @@ class Redis(AbstractDatabase):
         except KeyError:
             return default
 
-    def connect(self, host=None, database=0, unix_socket=False, password=None):
+    def connect(self, host=None, database=0, unix_socket=False, password=None, protocol=3):
         """Returns a connection to a Redis database. If *host* is None, it will
         fall back to the settings in the config and ignore the rest of the arguments.
         It will also share the connection across any plugins using the default
@@ -258,6 +258,8 @@ class Redis(AbstractDatabase):
         :type database: int
         :param unix_socket: Whether or not *host* should be interpreted as a unix socket path.
         :type unix_socket: bool
+        :param protocol: The version of the RESP protocol to use.
+        :type protocol: int
         :raises: RuntimeError
 
         """
@@ -292,10 +294,10 @@ class Redis(AbstractDatabase):
 
             if unix_socket:
                 self._conn = redis.Redis(unix_socket_path=host, db=database, password=password,
-                    decode_responses=True, protocol=cvar_proto)
+                    decode_responses=True, protocol=protocol)
             else:
                 self._pool = redis.ConnectionPool(host=split_host[0], port=port, db=database, password=password, 
-                    decode_responses=True, protocol=cvar_proto)
+                    decode_responses=True, protocol=protocol)
                 self._conn = redis.Redis(connection_pool=self._pool, decode_responses=True)
         return self._conn
 
