@@ -244,13 +244,13 @@ class Redis(AbstractDatabase):
         except KeyError:
             return default
 
-    def connect(self, host=None, database=0, unix_socket=False, password=None, protocol=3):
+    def connect(self, host=None, database=0, unix_socket=False, password=None, protocol=2):
         """Returns a connection to a Redis database. If *host* is None, it will
         fall back to the settings in the config and ignore the rest of the arguments.
         It will also share the connection across any plugins using the default
         configuration. Passing *host* will make it connect to a specific database
         that is not shared at all. Subsequent calls to this will return the connection
-        initialized the first call unless it has been closed.
+        initialized in the first call unless it has been closed.
 
         :param host: The host name. If no port is specified, it will use 6379. Ex.: ``localhost:1234``.
         :type host: str
@@ -258,47 +258,52 @@ class Redis(AbstractDatabase):
         :type database: int
         :param unix_socket: Whether or not *host* should be interpreted as a unix socket path.
         :type unix_socket: bool
-        :param protocol: The version of the RESP protocol to use.
+        :param password: The password to the database as defined in Redis's `requirepass` directive.
+        :type password: str
+        :param protocol: The RESP protocol to use when connecting to the Redis database. Accepts either 2 or 3.
         :type protocol: int
         :raises: RuntimeError
 
         """
-        if not host and not self._conn: # Resort to default settings in config?
+        
+        if not host: # use the configuration defined in CVARs
+            address = minqlx.get_cvar("qlx_redisAddress")
+            unix_socket = bool(int(minqlx.get_cvar("qlx_redisUnixSocket")))
+            database = int(minqlx.get_cvar("qlx_redisDatabase"))
+            Redis._pass = minqlx.get_cvar("qlx_redisPassword")
+            protocol = int(minqlx.get_cvar("qlx_redisProtocol"))
+        
+        address = address.split(":")
+        connection_kwargs = {
+            "unix_socket_path": address[0] if unix_socket else None,
+            "host": address[0] if not unix_socket else None,
+            "port": int(address[1]) if (not unix_socket) and (len(address) > 1) else 6379,
+            "db": database,
+            "password": Redis._pass,
+            "decode_responses": True
+        }
+
+        if redis.VERSION >= (5, 0, 0): # redis-py>=5.0.0 supports specifying the protocol and deprecates StrictRedis
+            connection_kwargs["protocol"] = protocol
+            redis_instance = redis.Redis
+        else: # otherwise use StrictRedis and disregard protocol
+            redis_instance = redis.StrictRedis
+
+        if not host and not self._conn:
             if not Redis._conn:
-                cvar_host = minqlxtended.get_cvar("qlx_redisAddress")
-                cvar_db = int(minqlxtended.get_cvar("qlx_redisDatabase"))
-                cvar_proto = int(minqlxtended.get_cvar("qlx_redisProtocol"))
-                cvar_unixsocket = bool(int(minqlxtended.get_cvar("qlx_redisUnixSocket")))
-                Redis._pass = minqlxtended.get_cvar("qlx_redisPassword")
-                if cvar_unixsocket:
-                    Redis._conn = redis.Redis(unix_socket_path=cvar_host,
-                        db=cvar_db, password=Redis._pass, decode_responses=True, protocol=cvar_proto)
+                if unix_socket:
+                    Redis._conn = redis_instance(**connection_kwargs)
                 else:
-                    split_host = cvar_host.split(":")
-                    if len(split_host) > 1:
-                        port = int(split_host[1])
-                    else:
-                        port = 6379 # Default port.
-                    Redis._pool = redis.ConnectionPool(host=split_host[0],
-                        port=port, db=cvar_db, password=Redis._pass, decode_responses=True, protocol=cvar_proto)
-                    Redis._conn = redis.Redis(connection_pool=Redis._pool, decode_responses=True)
-                    # TODO: Why does self._conn get set when doing Redis._conn?
+                    Redis._pool = redis.ConnectionPool(**connection_kwargs)
+                    Redis._conn = redis_instance(connection_pool=Redis._pool, decode_responses=True)
                     self._conn = None
             return Redis._conn
         elif not self._conn:
-            split_host = host.split(":")
-            if len(split_host) > 1:
-                port = int(split_host[1])
-            else:
-                port = 6379 # Default port.
-
             if unix_socket:
-                self._conn = redis.Redis(unix_socket_path=host, db=database, password=password,
-                    decode_responses=True, protocol=protocol)
+                self._conn = redis_instance(**connection_kwargs)
             else:
-                self._pool = redis.ConnectionPool(host=split_host[0], port=port, db=database, password=password, 
-                    decode_responses=True, protocol=protocol)
-                self._conn = redis.Redis(connection_pool=self._pool, decode_responses=True)
+                self._pool = redis.ConnectionPool(**connection_kwargs)
+                self._conn = redis_instance(connection_pool=self._pool, decode_responses=True)
         return self._conn
 
 
