@@ -244,7 +244,7 @@ class Redis(AbstractDatabase):
         except KeyError:
             return default
 
-    def connect(self, host=None, database=0, unix_socket=False, password=None, protocol=2):
+    def connect(self, host=None, database=0, unix_socket=False, password=None, protocol=3):
         """Returns a connection to a Redis database. If *host* is None, it will
         fall back to the settings in the config and ignore the rest of the arguments.
         It will also share the connection across any plugins using the default
