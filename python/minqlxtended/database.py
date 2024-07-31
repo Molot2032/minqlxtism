@@ -158,9 +158,9 @@ class Redis(AbstractDatabase):
 
         """
         if isinstance(player, minqlxtended.Player):
-            key = "minqlxtended:players:{}:permission".format(player.steam_id)
+            key = "minqlx:players:{}:permission".format(player.steam_id)
         else:
-            key = "minqlxtended:players:{}:permission".format(player)
+            key = "minqlx:players:{}:permission".format(player)
 
         self[key] = level
 
@@ -185,7 +185,7 @@ class Redis(AbstractDatabase):
         if steam_id == minqlxtended.owner():
             return 5
 
-        key = "minqlxtended:players:{}:permission".format(steam_id)
+        key = "minqlx:players:{}:permission".format(steam_id)
         try:
             perm = self[key]
         except KeyError:
@@ -217,9 +217,9 @@ class Redis(AbstractDatabase):
 
         """
         if isinstance(player, minqlxtended.Player):
-            key = "minqlxtended:players:{0}:flags:{1}".format(player.steam_id, flag)
+            key = "minqlx:players:{0}:flags:{1}".format(player.steam_id, flag)
         else:
-            key = "minqlxtended:players:{0}:flags:{1}".format(player, flag)
+            key = "minqlx:players:{0}:flags:{1}".format(player, flag)
 
         self[key] = 1 if value else 0
 
@@ -235,9 +235,9 @@ class Redis(AbstractDatabase):
 
         """
         if isinstance(player, minqlxtended.Player):
-            key = "minqlxtended:players:{0}:flags:{1}".format(player.steam_id, flag)
+            key = "minqlx:players:{0}:flags:{1}".format(player.steam_id, flag)
         else:
-            key = "minqlxtended:players:{0}:flags:{1}".format(player, flag)
+            key = "minqlx:players:{0}:flags:{1}".format(player, flag)
 
         try:
             return bool(int(self[key]))
