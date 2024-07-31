@@ -267,11 +267,11 @@ class Redis(AbstractDatabase):
         """
         
         if not host: # use the configuration defined in CVARs
-            address = minqlx.get_cvar("qlx_redisAddress")
-            unix_socket = bool(int(minqlx.get_cvar("qlx_redisUnixSocket")))
-            database = int(minqlx.get_cvar("qlx_redisDatabase"))
-            Redis._pass = minqlx.get_cvar("qlx_redisPassword")
-            protocol = int(minqlx.get_cvar("qlx_redisProtocol"))
+            address = minqlxtended.get_cvar("qlx_redisAddress")
+            unix_socket = bool(int(minqlxtended.get_cvar("qlx_redisUnixSocket")))
+            database = int(minqlxtended.get_cvar("qlx_redisDatabase"))
+            Redis._pass = minqlxtended.get_cvar("qlx_redisPassword")
+            protocol = int(minqlxtended.get_cvar("qlx_redisProtocol"))
         
         address = address.split(":")
         connection_kwargs = {
