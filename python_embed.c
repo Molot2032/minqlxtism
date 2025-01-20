@@ -782,10 +782,13 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
     }
     PyStructSequence_SetItem(state, 13, keys);
 
+    // FL_* flags now accessible.
     PyStructSequence_SetItem(state, 14, PyLong_FromLongLong(g_entities[client_id].flags));
 
+    // God-mode flag set on the player?
     PyStructSequence_SetItem(state, 15, PyBool_FromLong(((g_entities[client_id].flags & FL_GODMODE) == FL_GODMODE)));
 
+    // Notarget-mode flag set on the player?
     PyStructSequence_SetItem(state, 16, PyBool_FromLong(((g_entities[client_id].flags & FL_NOTARGET) == FL_NOTARGET)));
 
     return state;
@@ -935,6 +938,8 @@ static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
+    } else if (!g_entities[client_id].client) {
+        Py_RETURN_FALSE;
     }
 
     if (activate) {
@@ -961,6 +966,8 @@ static PyObject* PyMinqlxtended_NoTarget(PyObject* self, PyObject* args) {
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
+    } else if (!g_entities[client_id].client) {
+        Py_RETURN_FALSE;
     }
 
     if (activate) {
@@ -969,6 +976,29 @@ static PyObject* PyMinqlxtended_NoTarget(PyObject* self, PyObject* args) {
         g_entities[client_id].flags = g_entities[client_id].flags & (~FL_NOTARGET);
     }
 
+    Py_RETURN_TRUE;
+}
+
+/*
+ * ================================================================
+ *                           set_flags
+ * ================================================================
+ */
+
+static PyObject* PyMinqlxtended_SetFlags(PyObject* self, PyObject* args) {
+    int client_id, flags;
+    if (!PyArg_ParseTuple(args, "ii:set_flags", &client_id, &flags)) {
+        return NULL;
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+        PyErr_Format(PyExc_ValueError,
+                     "client_id needs to be a number from 0 to %d.",
+                     sv_maxclients->integer);
+        return NULL;
+    } else if (!g_entities[client_id].client) {
+        Py_RETURN_FALSE;
+    }
+
+    g_entities[client_id].flags = flags;
     Py_RETURN_TRUE;
 }
 
@@ -1868,6 +1898,8 @@ static PyMethodDef minqlxtendedMethods[] = {
      "Sets godmode for a player."},
     {"notarget", PyMinqlxtended_NoTarget, METH_VARARGS,
      "Sets notarget for a player."},
+    {"set_flags", PyMinqlxtended_SetFlags, METH_VARARGS,
+     "Sets a player's entity flags."},
     {"set_health", PyMinqlxtended_SetHealth, METH_VARARGS,
      "Sets a player's health."},
     {"set_armor", PyMinqlxtended_SetArmor, METH_VARARGS,
