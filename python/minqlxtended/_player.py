@@ -112,7 +112,7 @@ class Player():
         if self._info.name:
             self._name = self._info.name
         else:
-            self._userinfo = minqlxtended.parse_variables(self._info.userinfo, ordered=True)
+            self._userinfo = minqlxtended.parse_variables(self._info.userinfo)
             if "name" in self._userinfo:
                 self._name = self._userinfo["name"]
             else:
@@ -128,7 +128,7 @@ class Player():
             self._invalidate()
 
         if not self._userinfo:
-            self._userinfo = minqlxtended.parse_variables(self._info.userinfo, ordered=True)
+            self._userinfo = minqlxtended.parse_variables(self._info.userinfo)
 
         return self._userinfo.copy()
 
@@ -165,7 +165,7 @@ class Player():
     @clan.setter
     def clan(self, tag):
         index = self.id + 529
-        cs = minqlxtended.parse_variables(minqlxtended.get_configstring(index), ordered=True)
+        cs = minqlxtended.parse_variables(minqlxtended.get_configstring(index))
         cs["xcn"] = tag
         cs["cn"] = tag
         new_cs = "".join(["\\{}\\{}".format(key, cs[key]) for key in cs])
