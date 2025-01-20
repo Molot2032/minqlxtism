@@ -784,9 +784,9 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
 
     PyStructSequence_SetItem(state, 14, PyLong_FromLongLong(g_entities[client_id].flags));
 
-    PyStructSequence_SetItem(state, 15, PyBool_FromLong(g_entities[client_id].flags & FL_GODMODE == FL_GODMODE));
+    PyStructSequence_SetItem(state, 15, PyBool_FromLong(((g_entities[client_id].flags & FL_GODMODE) == FL_GODMODE)));
 
-    PyStructSequence_SetItem(state, 16, PyBool_FromLong(g_entities[client_id].flags & FL_NOTARGET == FL_NOTARGET));
+    PyStructSequence_SetItem(state, 16, PyBool_FromLong(((g_entities[client_id].flags & FL_NOTARGET) == FL_NOTARGET)));
 
     return state;
 }
