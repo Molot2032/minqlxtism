@@ -913,6 +913,34 @@ static PyObject* PyMinqlxtended_NoClip(PyObject* self, PyObject* args) {
 
 /*
  * ================================================================
+ *                             god
+ * ================================================================
+ */
+
+static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
+    int client_id, activate;
+    if (!PyArg_ParseTuple(args, "ip:god", &client_id, &activate)) {
+        return NULL;
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+        PyErr_Format(PyExc_ValueError,
+                     "client_id needs to be a number from 0 to %d.",
+                     sv_maxclients->integer);
+        return NULL;
+    } else if (!g_entities[client_id].client) {
+        Py_RETURN_FALSE;
+    }
+
+    if ((activate && g_entities[client_id].flags & FL_GODMODE) || (!activate && (!g_entities[client_id].flags & FL_GODMODE))) {
+        // Desired state already in place.
+        Py_RETURN_FALSE;
+    }
+
+    g_entities[client_id].flags ^= FL_GODMODE;
+    Py_RETURN_TRUE;
+}
+
+/*
+ * ================================================================
  *                           set_health
  * ================================================================
  */
@@ -1803,6 +1831,8 @@ static PyMethodDef minqlxtendedMethods[] = {
      "Sets a player's velocity vector."},
     {"noclip", PyMinqlxtended_NoClip, METH_VARARGS,
      "Sets noclip for a player."},
+    {"god", PyMinqlxtended_God, METH_VARARGS,
+     "Sets godmode for a player."},
     {"set_health", PyMinqlxtended_SetHealth, METH_VARARGS,
      "Sets a player's health."},
     {"set_armor", PyMinqlxtended_SetArmor, METH_VARARGS,

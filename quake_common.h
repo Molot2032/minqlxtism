@@ -187,7 +187,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define EF_AWARD_DENIED 0x00040000     // denied
 #define EF_TEAMVOTED 0x00080000        // already cast a team vote
 
+// gentity->flags
+#define FL_GODMODE 0x00000010
+#define FL_NOTARGET 0x00000020
+#define FL_TEAMSLAVE 0x00000400 // not the first on the team
+#define FL_NO_KNOCKBACK 0x00000800
 #define FL_DROPPED_ITEM 0x00001000
+#define FL_NO_BOTS 0x00002000       // spawn point not for bot use
+#define FL_NO_HUMANS 0x00004000     // spawn point just for bots
+#define FL_FORCE_GESTURE 0x00008000 // force gesture on client
 
 #define DAMAGE_NO_PROTECTION 0x00000008
 
