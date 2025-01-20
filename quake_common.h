@@ -58,8 +58,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define BODY_QUEUE_SIZE 8
 
 // configstrings
-#define	CS_SERVERINFO 0  // an info string with all the serverinfo cvars
-#define	CS_SYSTEMINFO 1  // an info string for server system to client system configuration
+#define CS_SERVERINFO 0 // an info string with all the serverinfo cvars
+#define CS_SYSTEMINFO 1 // an info string for server system to client system configuration
 #define CS_MUSIC 2
 #define CS_MESSAGE 3 // from the map worldspawn's message field
 #define CS_MOTD 4    // g_motd string for server message of the day (not used in QL)
@@ -137,6 +137,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CS_STEAM_ID 712
 #define CS_STEAM_WORKSHOP_IDS 713
 #define CS_MAX 714
+#define RESERVED_CONFIGSTRINGS 2 // game can't modify below this, only the system can
 
 // bit field limits
 #define MAX_STATS 16
