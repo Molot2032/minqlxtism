@@ -525,6 +525,22 @@ class Player():
         minqlxtended.noclip(self.id, bool(value))
 
     @property
+    def god(self):
+        return self.state.god
+
+    @god.setter
+    def god(self, value):
+        minqlxtended.god(self.id, bool(value))
+
+    @property
+    def notarget(self):
+        return self.state.notarget
+
+    @notarget.setter
+    def notarget(self, value):
+        minqlxtended.notarget(self.id, bool(value))
+
+    @property
     def health(self):
         return self.state.health
 

@@ -117,6 +117,8 @@ static PyStructSequence_Field player_state_fields[] = {
     {"flight", "A struct sequence with flight parameters."},
     {"is_frozen", "Whether the player is frozen(freezetag)."},
     {"keys", "The player's keys."},
+    {"god", "Whether the player has godmode or not."},
+    {"notarget", "Whether the player has notarget or not."},
     {NULL}};
 
 static PyStructSequence_Desc player_state_desc = {
@@ -779,6 +781,10 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
     }
     PyStructSequence_SetItem(state, 13, keys);
 
+    PyStructSequence_SetItem(state, 14, PyBool_FromLong(g_entities[client_id].flags & FL_GODMODE));
+
+    PyStructSequence_SetItem(state, 15, PyBool_FromLong(g_entities[client_id].flags & FL_NOTARGET));
+
     return state;
 }
 
@@ -926,7 +932,7 @@ static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    } else if (!g_entities[client_id].client) {
+    } else if (!g_entities[client_id].flags) {
         Py_RETURN_FALSE;
     }
 
@@ -936,6 +942,34 @@ static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
     }
 
     g_entities[client_id].flags ^= FL_GODMODE;
+    Py_RETURN_TRUE;
+}
+
+/*
+ * ================================================================
+ *                             notarget
+ * ================================================================
+ */
+
+static PyObject* PyMinqlxtended_NoTarget(PyObject* self, PyObject* args) {
+    int client_id, activate;
+    if (!PyArg_ParseTuple(args, "ip:notarget", &client_id, &activate)) {
+        return NULL;
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+        PyErr_Format(PyExc_ValueError,
+                     "client_id needs to be a number from 0 to %d.",
+                     sv_maxclients->integer);
+        return NULL;
+    } else if (!g_entities[client_id].flags) {
+        Py_RETURN_FALSE;
+    }
+
+    if ((activate && g_entities[client_id].flags & FL_NOTARGET) || (!activate && (!g_entities[client_id].flags & FL_NOTARGET))) {
+        // Desired state already in place.
+        Py_RETURN_FALSE;
+    }
+
+    g_entities[client_id].flags ^= FL_NOTARGET;
     Py_RETURN_TRUE;
 }
 
@@ -1833,6 +1867,8 @@ static PyMethodDef minqlxtendedMethods[] = {
      "Sets noclip for a player."},
     {"god", PyMinqlxtended_God, METH_VARARGS,
      "Sets godmode for a player."},
+    {"notarget", PyMinqlxtended_NoTarget, METH_VARARGS,
+     "Sets notarget for a player."},
     {"set_health", PyMinqlxtended_SetHealth, METH_VARARGS,
      "Sets a player's health."},
     {"set_armor", PyMinqlxtended_SetArmor, METH_VARARGS,
