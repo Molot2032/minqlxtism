@@ -21,20 +21,21 @@ SOURCES += dllmain.c commands.c python_embed.c python_dispatchers.c simple_hook.
 OBJS = $(SOURCES:.c=.o)
 OBJS_NOPY = $(SOURCES_NOPY:.c=.o)
 OUTPUT = $(BINDIR)/minqlxtended$(SUFFIX).so
+OUTPUT_DEBUG = $(BINDIR)/minqlxtended_debug$(SUFFIX).so
 OUTPUT_NOPY = $(BINDIR)/minqlxtended_nopy.so
 PYMODULE = $(BINDIR)/minqlxtended.zip
 PYFILES = $(wildcard python/minqlxtended/*.py)
 
 .PHONY: depend clean
 
-all: CFLAGS += $(shell python3-config --includes)
+all: CFLAGS += $(shell python3-config --includes) -O1
 all: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py)\"
 all: $(OUTPUT) $(PYMODULE)
 	@echo Done!
 
 debug: CFLAGS += $(shell python3-config --includes) -gdwarf-2 -Wall -O0 -fvar-tracking
 debug: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py -d)\"
-debug: $(OUTPUT) $(PYMODULE)
+debug: $(OUTPUT_DEBUG) $(PYMODULE)
 	@echo Done!
 
 nopy: CFLAGS += -Wall -DNOPY
