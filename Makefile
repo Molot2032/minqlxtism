@@ -19,6 +19,7 @@ LDFLAGS += $(shell (python3-config --libs --embed || python3-config --libs) | gr
 SOURCES_NOPY += dllmain.c commands.c simple_hook.c hooks.c misc.c maps_parser.c trampoline.c patches.c
 SOURCES += dllmain.c commands.c python_embed.c python_dispatchers.c simple_hook.c hooks.c misc.c maps_parser.c trampoline.c patches.c
 OBJS = $(SOURCES:.c=.o)
+OBJS_DEBUG = $(SOURCES:.c=.o)
 OBJS_NOPY = $(SOURCES_NOPY:.c=.o)
 OUTPUT = $(BINDIR)/minqlxtended$(SUFFIX).so
 OUTPUT_DEBUG = $(BINDIR)/minqlxtended$(SUFFIX)_debug.so
@@ -50,6 +51,9 @@ nopy_debug: $(OUTPUT_NOPY)
 
 $(OUTPUT): $(OBJS)
 	$(CC) $(CFLAGS) -D$(VERSION) -o $(OUTPUT) $(OBJS) $(LDFLAGS)
+
+$(OUTPUT_DEBUG): $(OBJS_DEBUG)
+	$(CC) $(CFLAGS) -D$(VERSION) -o $(OUTPUT_DEBUG) $(OBJS_DEBUG) $(LDFLAGS)
 
 $(OUTPUT_NOPY): $(OBJS_NOPY)
 	$(CC) $(CFLAGS) -D$(VERSION) -o $(OUTPUT_NOPY) $(OBJS_NOPY) $(LDFLAGS_NOPY)
