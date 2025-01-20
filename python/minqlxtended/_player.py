@@ -541,6 +541,14 @@ class Player():
         minqlxtended.notarget(self.id, bool(value))
 
     @property
+    def flags(self):
+        return self.state.flags
+
+    @flags.setter
+    def flags(self, value):
+        minqlxtended.flags(self.id, int(value))
+
+    @property
     def health(self):
         return self.state.health
 
