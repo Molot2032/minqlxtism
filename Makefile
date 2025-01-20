@@ -29,7 +29,7 @@ PYFILES = $(wildcard python/minqlxtended/*.py)
 
 .PHONY: depend clean
 
-all: CFLAGS += $(shell python3-config --includes) -O1
+all: CFLAGS += $(shell python3-config --includes)
 all: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py)\"
 all: $(OUTPUT) $(PYMODULE)
 	@echo Done!
@@ -50,7 +50,7 @@ nopy_debug: $(OUTPUT_NOPY)
 	@echo Done!
 
 $(OUTPUT): $(OBJS)
-	$(CC) $(CFLAGS) -D$(VERSION) -o $(OUTPUT) $(OBJS) $(LDFLAGS)
+	$(CC) $(CFLAGS) -O1 -D$(VERSION) -o $(OUTPUT) $(OBJS) $(LDFLAGS)
 
 $(OUTPUT_DEBUG): $(OBJS_DEBUG)
 	$(CC) $(CFLAGS) -D$(VERSION) -o $(OUTPUT_DEBUG) $(OBJS_DEBUG) $(LDFLAGS)
