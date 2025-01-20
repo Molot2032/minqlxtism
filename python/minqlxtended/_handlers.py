@@ -140,7 +140,7 @@ def handle_client_command(client_id, cmd):
 
         res = _re_userinfo.match(cmd)
         if res:
-            new_info = minqlxtended.parse_variables(res.group("vars"), ordered=True)
+            new_info = minqlxtended.parse_variables(res.group("vars"))
             old_info = player.cvars
             changed = {}
 

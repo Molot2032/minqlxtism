@@ -66,32 +66,27 @@ DEFAULT_PLUGINS = ("plugin_manager", "essentials", "motd", "permission", "ban", 
 #                               HELPERS
 # ====================================================================
 
-def parse_variables(varstr, ordered=False):
+def parse_variables(infostring: str):
     """
-    Parses strings of key-value pairs delimited by "\\" and puts
-    them into a dictionary.
+    Parses the Quake Live info-string format and places keys/values into an ordered dictionary.
 
-    :param varstr: The string with variables.
-    :type varstr: str
-    :param ordered: Whether it should use :class:`collections.OrderedDict` or not.
-    :type ordered: bool
+    :param infostring: The info-string with variables.
+    :type infostring: str
     :returns: dict -- A dictionary with the variables added as key-value pairs.
     """
-    if ordered:
-        res = collections.OrderedDict()
-    else:
-        res = {}
-    if not varstr.strip():
+
+    res = collections.OrderedDict()
+    if not infostring.strip():
         return res
 
-    vars = varstr.lstrip("\\").split("\\")
+    vars = infostring.lstrip("\\").split("\\")
     try:
         for i in range(0, len(vars), 2):
             res[vars[i]] = vars[i + 1]
     except IndexError:
         # Log and return incomplete dict.
         logger = minqlxtended.get_logger()
-        logger.warning("Uneven number of keys and values: {}".format(varstr))
+        logger.warning("Uneven number of keys and values: {}".format(infostring))
 
     return res
 

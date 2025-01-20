@@ -63,7 +63,7 @@ class Player():
         if self._info.name:
             self._name = self._info.name
         else:
-            self._userinfo = minqlxtended.parse_variables(self._info.userinfo, ordered=True)
+            self._userinfo = minqlxtended.parse_variables(self._info.userinfo)
             if "name" in self._userinfo:
                 self._name = self._userinfo["name"]
             else: # No name at all. Weird userinfo during connection perhaps?
