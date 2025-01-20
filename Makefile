@@ -21,7 +21,7 @@ SOURCES += dllmain.c commands.c python_embed.c python_dispatchers.c simple_hook.
 OBJS = $(SOURCES:.c=.o)
 OBJS_NOPY = $(SOURCES_NOPY:.c=.o)
 OUTPUT = $(BINDIR)/minqlxtended$(SUFFIX).so
-OUTPUT_DEBUG = $(BINDIR)/minqlxtended_debug$(SUFFIX).so
+OUTPUT_DEBUG = $(BINDIR)/minqlxtended$(SUFFIX)_debug.so
 OUTPUT_NOPY = $(BINDIR)/minqlxtended_nopy.so
 PYMODULE = $(BINDIR)/minqlxtended.zip
 PYFILES = $(wildcard python/minqlxtended/*.py)
