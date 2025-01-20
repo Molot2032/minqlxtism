@@ -546,7 +546,7 @@ class Player():
 
     @flags.setter
     def flags(self, value):
-        minqlxtended.flags(self.id, int(value))
+        minqlxtended.set_flags(self.id, int(value))
 
     @property
     def health(self):
