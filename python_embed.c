@@ -935,8 +935,6 @@ static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    } else if (!g_entities[client_id].flags) {
-        Py_RETURN_FALSE;
     }
 
     if (activate) {
@@ -963,8 +961,6 @@ static PyObject* PyMinqlxtended_NoTarget(PyObject* self, PyObject* args) {
                      "client_id needs to be a number from 0 to %d.",
                      sv_maxclients->integer);
         return NULL;
-    } else if (!g_entities[client_id].flags) {
-        Py_RETURN_FALSE;
     }
 
     if (activate) {
