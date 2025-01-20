@@ -115,8 +115,9 @@ static PyStructSequence_Field player_state_fields[] = {
     {"powerups", "The player's powerups."},
     {"holdable", "The player's holdable item."},
     {"flight", "A struct sequence with flight parameters."},
-    {"is_frozen", "Whether the player is frozen(freezetag)."},
+    {"is_frozen", "Whether the player is frozen (freeze tag)."},
     {"keys", "The player's keys."},
+    {"flags", "Player entity flags (FL_*)."},
     {"god", "Whether the player has godmode or not."},
     {"notarget", "Whether the player has notarget or not."},
     {NULL}};
@@ -781,9 +782,11 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
     }
     PyStructSequence_SetItem(state, 13, keys);
 
-    PyStructSequence_SetItem(state, 14, PyBool_FromLong(g_entities[client_id].flags & FL_GODMODE));
+    PyStructSequence_SetItem(state, 14, PyLong_FromLongLong(g_entities[client_id].flags));
 
-    PyStructSequence_SetItem(state, 15, PyBool_FromLong(g_entities[client_id].flags & FL_NOTARGET));
+    PyStructSequence_SetItem(state, 15, PyBool_FromLong(g_entities[client_id].flags & FL_GODMODE == FL_GODMODE));
+
+    PyStructSequence_SetItem(state, 16, PyBool_FromLong(g_entities[client_id].flags & FL_NOTARGET == FL_NOTARGET));
 
     return state;
 }
@@ -936,12 +939,12 @@ static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
         Py_RETURN_FALSE;
     }
 
-    if ((activate && g_entities[client_id].flags & FL_GODMODE) || (!activate && (!g_entities[client_id].flags & FL_GODMODE))) {
-        // Desired state already in place.
-        Py_RETURN_FALSE;
+    if (activate) {
+        g_entities[client_id].flags = g_entities[client_id].flags | FL_GODMODE;
+    } else {
+        g_entities[client_id].flags = g_entities[client_id].flags & (~FL_GODMODE);
     }
 
-    g_entities[client_id].flags ^= FL_GODMODE;
     Py_RETURN_TRUE;
 }
 
@@ -964,12 +967,12 @@ static PyObject* PyMinqlxtended_NoTarget(PyObject* self, PyObject* args) {
         Py_RETURN_FALSE;
     }
 
-    if ((activate && g_entities[client_id].flags & FL_NOTARGET) || (!activate && (!g_entities[client_id].flags & FL_NOTARGET))) {
-        // Desired state already in place.
-        Py_RETURN_FALSE;
+    if (activate) {
+        g_entities[client_id].flags = g_entities[client_id].flags | FL_NOTARGET;
+    } else {
+        g_entities[client_id].flags = g_entities[client_id].flags & (~FL_NOTARGET);
     }
 
-    g_entities[client_id].flags ^= FL_NOTARGET;
     Py_RETURN_TRUE;
 }
 
