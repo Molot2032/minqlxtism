@@ -35,7 +35,7 @@ all: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py)\"
 all: $(OUTPUT) $(PYMODULE)
 	@echo Done!
 
-debug: CFLAGS += $(shell python3-config --includes) -gdwarf-2 -Wall -O0 -fvar-tracking
+debug: CFLAGS += $(shell python3-config --includes) -gdwarf-2 -Wall -O0 -fvar-tracking -DDEBUG
 debug: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py -d)\"
 debug: $(OUTPUT_DEBUG) $(PYMODULE_DEBUG)
 	@echo Done!
@@ -45,7 +45,7 @@ nopy: VERSION := MINQLXTENDED_VERSION=\"$(shell git describe --long --tags --dir
 nopy: $(OUTPUT_NOPY)
 	@echo Done!
 
-nopy_debug: CFLAGS +=  -gdwarf-2 -Wall -O0 -DNOPY
+nopy_debug: CFLAGS += -gdwarf-2 -Wall -O0 -DNOPY
 nopy_debug: VERSION := MINQLXTENDED_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
 nopy_debug: $(OUTPUT_NOPY)
 	@echo Done!
