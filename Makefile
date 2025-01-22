@@ -25,6 +25,7 @@ OUTPUT = $(BINDIR)/minqlxtended$(SUFFIX).so
 OUTPUT_DEBUG = $(BINDIR)/minqlxtended$(SUFFIX)_debug.so
 OUTPUT_NOPY = $(BINDIR)/minqlxtended_nopy.so
 PYMODULE = $(BINDIR)/minqlxtended.zip
+PYMODULE_DEBUG = $(BINDIR)/minqlxtended_debug.zip
 PYFILES = $(wildcard python/minqlxtended/*.py)
 
 .PHONY: depend clean
@@ -36,7 +37,7 @@ all: $(OUTPUT) $(PYMODULE)
 
 debug: CFLAGS += $(shell python3-config --includes) -gdwarf-2 -Wall -O0 -fvar-tracking
 debug: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py -d)\"
-debug: $(OUTPUT_DEBUG) $(PYMODULE)
+debug: $(OUTPUT_DEBUG) $(PYMODULE_DEBUG)
 	@echo Done!
 
 nopy: CFLAGS += -Wall -DNOPY
@@ -60,6 +61,9 @@ $(OUTPUT_NOPY): $(OBJS_NOPY)
 
 $(PYMODULE): $(PYFILES)
 	@python3 -m zipfile -c $(PYMODULE) python/minqlxtended
+
+$(PYMODULE_DEBUG): $(PYFILES)
+	@python3 -m zipfile -c $(PYMODULE_DEBUG) python/minqlxtended
 
 .c.o:
 	$(CC) $(CFLAGS) -D$(VERSION) -c $< -o $@
