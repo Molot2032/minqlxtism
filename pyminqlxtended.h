@@ -2,7 +2,12 @@
 #define PYMINQLXTENDED_H
 
 #define PYTHON_FILENAME L"python3"
+
+#if DEBUG
+#define CORE_MODULE "minqlxtended_debug.zip"
+#else
 #define CORE_MODULE "minqlxtended.zip"
+#endif
 
 #include <Python.h>
 
