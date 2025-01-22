@@ -76,6 +76,11 @@ void __cdecl My_G_InitGame(int levelTime, int randomSeed, int restart) {
 #endif
 }
 
+qboolean __cdecl My_Sys_IsLANAddress(netadr_t adr) {
+    DebugPrint("Sys_IsLANAddress(%d.%d.%d.%d) intercepted, returning qtrue.\n", adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3]);
+    return qtrue; // the server will always believe that all IPs presented are LAN addresses
+}
+
 // USED FOR PYTHON
 
 #ifndef NOPY
@@ -249,6 +254,12 @@ void HookStatic(void) {
     res = Hook((void*)Sys_SetModuleOffset, My_Sys_SetModuleOffset, (void*)&Sys_SetModuleOffset);
     if (res) {
         DebugPrint("ERROR: Failed to hook Sys_SetModuleOffset: %d\n", res);
+        failed = 1;
+    }
+
+    res = Hook((void*)Sys_IsLANAddress, My_Sys_IsLANAddress, (void*)&Sys_IsLANAddress);
+    if (res) {
+        DebugPrint("ERROR: Failed to hook Sys_IsLANAddress: %d\n", res);
         failed = 1;
     }
 
