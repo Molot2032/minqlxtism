@@ -77,7 +77,7 @@ void __cdecl My_G_InitGame(int levelTime, int randomSeed, int restart) {
 }
 
 qboolean __cdecl My_Sys_IsLANAddress(netadr_t adr) {
-    DebugPrint("Sys_IsLANAddress(%d.%d.%d.%d) intercepted, returning qtrue.\n", adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3]);
+    // DebugPrint("Sys_IsLANAddress(%d.%d.%d.%d) intercepted, returning qtrue.\n", adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3]);
     return qtrue; // the server will always believe that all IPs presented are LAN addresses
 }
 
