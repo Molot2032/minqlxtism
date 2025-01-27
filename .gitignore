@@ -24,7 +24,7 @@
 *.out
 *.app
 
-bin/minqlxtended.zip
+bin/*.zip
 
 .vs/*
 .vscode/*

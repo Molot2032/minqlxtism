@@ -82,6 +82,15 @@ void __cdecl Slay(void) {
     }
 }
 
+void __cdecl DownloadWorkshopItem(void) { // different to steam_downloadugc as we defer the FS_Restart.
+    int argc = Cmd_Argc();
+    if (argc < 2) {
+        Com_Printf("Usage: %s <workshop_id>\n", Cmd_Argv(0));
+        return;
+    }
+    idSteamServer_DownloadItem(atoi(Cmd_Argv(1)), 1);
+}
+
 #ifndef NOPY
 // Execute a pyminqlxtended command as if it were the owner executing it.
 // Output will appear in the console.

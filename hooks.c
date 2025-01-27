@@ -82,7 +82,6 @@ qboolean __cdecl My_Sys_IsLANAddress(netadr_t adr) {
 }
 
 // USED FOR PYTHON
-
 #ifndef NOPY
 void __cdecl My_SV_ExecuteClientCommand(client_t* cl, char* s, qboolean clientOK) {
     char* res = s;

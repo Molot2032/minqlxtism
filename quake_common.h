@@ -1608,6 +1608,8 @@ typedef void(__cdecl *Sys_SetModuleOffset_ptr)(char *moduleName, void *offset);
 typedef void(__cdecl *SV_LinkEntity_ptr)(sharedEntity_t *gEnt);
 typedef void(__cdecl *SV_SpawnServer_ptr)(char *server, qboolean killBots);
 typedef void(__cdecl *Cmd_ExecuteString_ptr)(const char *text);
+typedef int(__cdecl *idSteamServer_DownloadItem_ptr)(uint64_t workshopId, qboolean defer);
+
 // VM functions.
 typedef void(__cdecl *G_RunFrame_ptr)(int time);
 typedef void(__cdecl *G_AddEvent_ptr)(gentity_t *ent, int event, int eventParm);
@@ -1622,7 +1624,8 @@ typedef gentity_t *(__cdecl *LaunchItem_ptr)(gitem_t *item, vec3_t origin, vec3_
 typedef gentity_t *(__cdecl *Drop_Item_ptr)(gentity_t *ent, gitem_t *item, float angle);
 typedef void(__cdecl *G_StartKamikaze_ptr)(gentity_t *ent);
 typedef void(__cdecl *G_FreeEntity_ptr)(gentity_t *ed);
-typedef void(__cdecl *Sys_IsLANAddress_ptr)(netadr_t adr);
+typedef qboolean(__cdecl *Sys_IsLANAddress_ptr)(netadr_t adr);
+
 
 // Some of them are initialized by Initialize(), but not all of them necessarily.
 extern Com_Printf_ptr Com_Printf;
@@ -1648,6 +1651,8 @@ extern Sys_SetModuleOffset_ptr Sys_SetModuleOffset;
 extern SV_SpawnServer_ptr SV_SpawnServer;
 extern Cmd_ExecuteString_ptr Cmd_ExecuteString;
 extern Sys_IsLANAddress_ptr Sys_IsLANAddress;
+extern idSteamServer_DownloadItem_ptr idSteamServer_DownloadItem;
+
 // VM functions.
 extern G_RunFrame_ptr G_RunFrame;
 extern G_AddEvent_ptr G_AddEvent;
@@ -1684,11 +1689,12 @@ void __cdecl My_G_StartKamikaze(gentity_t *ent);
 #endif
 
 // Custom commands added using Cmd_AddCommand during initialization.
-void __cdecl SendServerCommand(void); // "cmd"
-void __cdecl CenterPrint(void);       // "cp"
-void __cdecl RegularPrint(void);      // "p"
-void __cdecl Slap(void);              // "slap"
-void __cdecl Slay(void);              // "slay"
+void __cdecl SendServerCommand(void);    // "cmd"
+void __cdecl CenterPrint(void);          // "cp"
+void __cdecl RegularPrint(void);         // "p"
+void __cdecl Slap(void);                 // "slap"
+void __cdecl Slay(void);                 // "slay"
+void __cdecl DownloadWorkshopItem(void); // "steam_downloadugcdefer"
 #ifndef NOPY
 // PyRcon gives the owner the ability to execute pyminqlxtended commands as if the
 // owner executed them.

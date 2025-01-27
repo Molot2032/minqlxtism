@@ -54,6 +54,7 @@ Sys_SetModuleOffset_ptr Sys_SetModuleOffset;
 SV_SpawnServer_ptr SV_SpawnServer;
 Cmd_ExecuteString_ptr Cmd_ExecuteString;
 Sys_IsLANAddress_ptr Sys_IsLANAddress;
+idSteamServer_DownloadItem_ptr idSteamServer_DownloadItem;
 
 // VM functions
 G_RunFrame_ptr G_RunFrame;
@@ -138,6 +139,7 @@ static void SearchFunctions(void) {
     STATIC_SEARCH(SV_SpawnServer, PTRN_SV_SPAWNSERVER, MASK_SV_SPAWNSERVER);
     STATIC_SEARCH(Cmd_ExecuteString, PTRN_CMD_EXECUTESTRING, MASK_CMD_EXECUTESTRING);
     STATIC_SEARCH(Sys_IsLANAddress, PTRN_SYS_ISLANADDRESS, MASK_SYS_ISLANADDRESS);
+    STATIC_SEARCH(idSteamServer_DownloadItem, PTRN_idSteamServer_DownloadItem, MASK_idSteamServer_DownloadItem);
 
     // Cmd_Argc is really small, making it hard to search for, so we use a reference to it instead.
     if (SV_Map_f != NULL) {
@@ -198,6 +200,7 @@ void InitializeStatic(void) {
     Cmd_AddCommand("print", RegularPrint);
     Cmd_AddCommand("slap", Slap);
     Cmd_AddCommand("slay", Slay);
+    Cmd_AddCommand("steam_downloadugcdefer", DownloadWorkshopItem);
 #ifndef NOPY
     Cmd_AddCommand("qlx", PyRcon);
     Cmd_AddCommand("pycmd", PyCommand);
