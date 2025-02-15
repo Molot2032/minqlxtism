@@ -74,7 +74,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CS_LEVEL_START_TIME 13 // so the timer only shows the current level
 #define CS_INTERMISSION 14     // when 1, fraglimit/timelimit has been hit and intermission will start in a second or two
 #define CS_ITEMS 15            // string of 0's and 1's that tell the client which items are present/to load.
-#define CS_BOTINFO 16          // internal debugging stuff
+#define CS_BOTINFO 16          // internal debugging stuff (infostring to render bot_hud values on client screen)
 #define CS_MODELS 17
 #define CS_SOUNDS (CS_MODELS + MAX_MODELS)             // 273
 #define CS_PLAYERS (CS_SOUNDS + MAX_SOUNDS)            // 529
