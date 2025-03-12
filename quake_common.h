@@ -223,20 +223,85 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                           // (entityShared_t->singleClient)
 
 // pmove->pm_flags
-#define PMF_DUCKED 1
-#define PMF_JUMP_HELD 2
+// these are just for moving the player, not for weapons and stuff
+// that are server-side only
+#define PMF_DUCKED 1           // player is ducked
+#define PMF_JUMP_HELD 2        // player is holding jump
 #define PMF_BACKWARDS_JUMP 8   // go into backwards land
 #define PMF_BACKWARDS_RUN 16   // coast down to backwards run
 #define PMF_TIME_LAND 32       // pm_time is time before rejump
 #define PMF_TIME_KNOCKBACK 64  // pm_time is an air-accelerate only time
 #define PMF_TIME_WATERJUMP 256 // pm_time is waterjump
 #define PMF_RESPAWNED 512      // clear after attack and jump buttons come up
-#define PMF_USE_ITEM_HELD 1024
-#define PMF_GRAPPLE_PULL 2048 // pull towards grapple location
-#define PMF_FOLLOW 4096       // spectate following another player
-#define PMF_SCOREBOARD 8192   // spectate as a scoreboard
-#define PMF_INVULEXPAND 16384 // invulnerability sphere set to full size
+#define PMF_USE_ITEM_HELD 1024 // player is holding use
+#define PMF_GRAPPLE_PULL 2048  // pull towards grapple location
+#define PMF_FOLLOW 4096        // spectate following another player
+#define PMF_SCOREBOARD 8192    // spectate as a scoreboard
+#define PMF_INVULEXPAND 16384  // invulnerability sphere set to full size
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_KNOCKBACK)
+
+// Item numbers
+#define MODELINDEX_ARMORSHARD 1
+#define MODELINDEX_ARMORYELLOW 2
+#define MODELINDEX_ARMORRED 3
+#define MODELINDEX_ARMORGREEN 4
+#define MODELINDEX_HEALTH5 5
+#define MODELINDEX_HEALTH25 6
+#define MODELINDEX_HEALTH50 7
+#define MODELINDEX_HEALTHMEGA 8
+#define MODELINDEX_GAUNTLET 9
+#define MODELINDEX_SHOTGUN 10
+#define MODELINDEX_MACHINEGUN 11
+#define MODELINDEX_GRENADELAUNCHER 12
+#define MODELINDEX_ROCKETLAUNCHER 13
+#define MODELINDEX_LIGHTNING 14
+#define MODELINDEX_RAILGUN 15
+#define MODELINDEX_PLASMAGUN 16
+#define MODELINDEX_BFG10K 17
+#define MODELINDEX_GRAPPLINGHOOK 18
+#define MODELINDEX_SHELLS 19
+#define MODELINDEX_BULLETS 20
+#define MODELINDEX_GRENADES 21
+#define MODELINDEX_CELLS 22
+#define MODELINDEX_LIGHTNINGAMMO 23
+#define MODELINDEX_ROCKETS 24
+#define MODELINDEX_SLUGS 25
+#define MODELINDEX_BFGAMMO 26
+#define MODELINDEX_TELEPORTER 27
+#define MODELINDEX_MEDKIT 28
+#define MODELINDEX_QUADDAMAGE 29
+#define MODELINDEX_BATTLESUIT 30
+#define MODELINDEX_HASTE 31
+#define MODELINDEX_INVISIBILITY 32
+#define MODELINDEX_REGENERATION 33
+#define MODELINDEX_FLIGHT 34
+#define MODELINDEX_REDFLAG 35
+#define MODELINDEX_BLUEFLAG 36
+#define MODELINDEX_KAMIKAZE 37
+#define MODELINDEX_PORTAL 38
+#define MODELINDEX_INVULNERABILITY 39
+#define MODELINDEX_NAILS 40
+#define MODELINDEX_MINES 41
+#define MODELINDEX_BELT 42
+#define MODELINDEX_SCOUT 43
+#define MODELINDEX_GUARD 44
+#define MODELINDEX_DAMAGE 45
+#define MODELINDEX_AMMOREGEN 46
+#define MODELINDEX_DOMINATIONPOINT 47
+#define MODELINDEX_REDSKULL 48
+#define MODELINDEX_BLUESKULL 49
+#define MODELINDEX_NAILGUN 50
+#define MODELINDEX_PROXLAUNCHER 51
+#define MODELINDEX_CHAINGUN 52
+#define MODELINDEX_SPAWNARMOR 53
+#define MODELINDEX_HEAVYMACHINEGUN 54
+#define MODELINDEX_HEAVYBULLETS 55
+#define MODELINDEX_AMMOPACK 56
+#define MODELINDEX_KEYSILVER 57
+#define MODELINDEX_KEYGOLD 58
+#define MODELINDEX_KEYMASTER 59 // the master key doesn't have a model in-game but functionally
+                                // works as if the holder has both silver and gold keys
+
 
 typedef enum { qfalse,
                qtrue } qboolean;

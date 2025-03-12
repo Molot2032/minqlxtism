@@ -736,22 +736,22 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
         holdable = Py_None;
         Py_INCREF(Py_None);
         break;
-    case 27:
+    case MODELINDEX_TELEPORTER:
         holdable = PyUnicode_FromString("teleporter");
         break;
-    case 28:
+    case MODELINDEX_MEDKIT:
         holdable = PyUnicode_FromString("medkit");
         break;
-    case 34:
+    case MODELINDEX_FLIGHT:
         holdable = PyUnicode_FromString("flight");
         break;
-    case 37:
+    case MODELINDEX_KAMIKAZE:
         holdable = PyUnicode_FromString("kamikaze");
         break;
-    case 38:
+    case MODELINDEX_PORTAL:
         holdable = PyUnicode_FromString("portal");
         break;
-    case 39:
+    case MODELINDEX_INVULNERABILITY:
         holdable = PyUnicode_FromString("invulnerability");
         break;
     default:
