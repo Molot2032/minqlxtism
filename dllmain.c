@@ -201,6 +201,7 @@ void InitializeStatic(void) {
     Cmd_AddCommand("slap", Slap);
     Cmd_AddCommand("slay", Slay);
     Cmd_AddCommand("steam_downloadugcdefer", DownloadWorkshopItem);
+    Cmd_AddCommand("stopfollowing", StopFollowing);
 #ifndef NOPY
     Cmd_AddCommand("qlx", PyRcon);
     Cmd_AddCommand("pycmd", PyCommand);

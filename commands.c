@@ -91,6 +91,37 @@ void __cdecl DownloadWorkshopItem(void) { // different to steam_downloadugc as w
     idSteamServer_DownloadItem(atoi(Cmd_Argv(1)), 1);
 }
 
+void __cdecl StopFollowing(void) {
+    int argc = Cmd_Argc();
+    if (argc < 2) {
+        Com_Printf("Usage: %s <client_id>\n", Cmd_Argv(0));
+        return;
+    }
+
+    int i = atoi(Cmd_Argv(1));
+    if (i < 0 || i > sv_maxclients->integer) {
+        Com_Printf("client_id must be a number between 0 and %d\n.", sv_maxclients->integer);
+        return;
+    }
+
+    if (!g_entities[i].inuse) {
+        Com_Printf("That player isn't currently active.\n");
+        return;
+    }
+
+    if (g_entities[i].client->sess.spectatorState != SPECTATOR_FOLLOW) {
+        Com_Printf("That player is not following anyone, current spectatorState == %d\n", g_entities[i].client->sess.spectatorState);
+        return;
+    }
+
+    Com_Printf("Stopping player %d following player %d... ", i, g_entities[i].client->sess.spectatorClient);
+    g_entities[i].client->sess.spectatorState = SPECTATOR_FREE;
+    g_entities[i].client->ps.pm_flags &= ~PMF_FOLLOW;
+    g_entities[i].r.svFlags &= ~SVF_BOT;
+    g_entities[i].client->ps.clientNum = i;
+    Com_Printf("Done.\n");
+}
+
 #ifndef NOPY
 // Execute a pyminqlxtended command as if it were the owner executing it.
 // Output will appear in the console.
