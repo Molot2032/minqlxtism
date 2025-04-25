@@ -336,8 +336,12 @@ class Player:
         return self._valid
 
     @property
-    def stats(self):
+    def stats(self) -> minqlxtended.PlayerStats:
         return minqlxtended.player_stats(self.id)
+
+    @stats.setter
+    def stats(self, value: minqlxtended.PlayerStats):
+        return minqlxtended.set_stats(self.id, value)
 
     @property
     def ping(self):

@@ -108,6 +108,8 @@ static PyStructSequence_Field player_state_fields[] = {
     {"velocity", "The player's velocity."},
     {"health", "The player's health."},
     {"armor", "The player's armor."},
+    {"speed", "The player's speed."},
+    {"gravity", "The player's gravity."},
     {"noclip", "Whether the player has noclip or not."},
     {"weapon", "The weapon the player is currently using."},
     {"weapons", "The player's weapons."},
@@ -702,8 +704,12 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
 
     PyStructSequence_SetItem(state, 3, PyLong_FromLongLong(g_entities[client_id].health));
     PyStructSequence_SetItem(state, 4, PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_ARMOR]));
-    PyStructSequence_SetItem(state, 5, PyBool_FromLong(g_entities[client_id].client->noclip));
-    PyStructSequence_SetItem(state, 6, PyLong_FromLongLong(g_entities[client_id].client->ps.weapon));
+
+    PyStructSequence_SetItem(state, 5, PyLong_FromLongLong(g_entities[client_id].client->ps.speed));
+    PyStructSequence_SetItem(state, 6, PyLong_FromLongLong(g_entities[client_id].client->ps.gravity));
+
+    PyStructSequence_SetItem(state, 7, PyBool_FromLong(g_entities[client_id].client->noclip));
+    PyStructSequence_SetItem(state, 8, PyLong_FromLongLong(g_entities[client_id].client->ps.weapon));
 
     // Get weapons and ammo count.
     PyObject* weapons = PyStructSequence_New(&weapons_type);
@@ -712,8 +718,8 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
         PyStructSequence_SetItem(weapons, i, PyBool_FromLong(g_entities[client_id].client->ps.stats[STAT_WEAPONS] & (1 << (i + 1))));
         PyStructSequence_SetItem(ammo, i, PyLong_FromLongLong(g_entities[client_id].client->ps.ammo[i + 1]));
     }
-    PyStructSequence_SetItem(state, 7, weapons);
-    PyStructSequence_SetItem(state, 8, ammo);
+    PyStructSequence_SetItem(state, 9, weapons);
+    PyStructSequence_SetItem(state, 10, ammo);
 
     PyObject* powerups = PyStructSequence_New(&powerups_type);
     int index;
@@ -728,7 +734,7 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
         }
         PyStructSequence_SetItem(powerups, i, PyLong_FromLongLong(remaining));
     }
-    PyStructSequence_SetItem(state, 9, powerups);
+    PyStructSequence_SetItem(state, 11, powerups);
 
     PyObject* holdable;
     switch (g_entities[client_id].client->ps.stats[STAT_HOLDABLE_ITEM]) {
@@ -757,7 +763,7 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
     default:
         holdable = PyUnicode_FromString("unknown");
     }
-    PyStructSequence_SetItem(state, 10, holdable);
+    PyStructSequence_SetItem(state, 12, holdable);
 
     PyObject* flight = PyStructSequence_New(&flight_type);
     PyStructSequence_SetItem(flight, 0,
@@ -768,9 +774,9 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
                              PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_FLIGHT_THRUST]));
     PyStructSequence_SetItem(flight, 3,
                              PyLong_FromLongLong(g_entities[client_id].client->ps.stats[STAT_FLIGHT_REFUEL]));
-    PyStructSequence_SetItem(state, 11, flight);
+    PyStructSequence_SetItem(state, 13, flight);
 
-    PyStructSequence_SetItem(state, 12, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 4));
+    PyStructSequence_SetItem(state, 14, PyBool_FromLong(g_entities[client_id].client->ps.pm_type == 4));
 
     PyObject* keys = PyStructSequence_New(&keys_type);
     for (int i = 0; i < keys_desc.n_in_sequence; i++) {
@@ -780,16 +786,16 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
             PyStructSequence_SetItem(keys, i, Py_False);
         }
     }
-    PyStructSequence_SetItem(state, 13, keys);
+    PyStructSequence_SetItem(state, 15, keys);
 
     // FL_* flags now accessible.
-    PyStructSequence_SetItem(state, 14, PyLong_FromLongLong(g_entities[client_id].flags));
+    PyStructSequence_SetItem(state, 16, PyLong_FromLongLong(g_entities[client_id].flags));
 
     // God-mode flag set on the player?
-    PyStructSequence_SetItem(state, 15, PyBool_FromLong(((g_entities[client_id].flags & FL_GODMODE) == FL_GODMODE)));
+    PyStructSequence_SetItem(state, 17, PyBool_FromLong(((g_entities[client_id].flags & FL_GODMODE) == FL_GODMODE)));
 
     // Notarget-mode flag set on the player?
-    PyStructSequence_SetItem(state, 16, PyBool_FromLong(((g_entities[client_id].flags & FL_NOTARGET) == FL_NOTARGET)));
+    PyStructSequence_SetItem(state, 18, PyBool_FromLong(((g_entities[client_id].flags & FL_NOTARGET) == FL_NOTARGET)));
 
     return state;
 }
@@ -825,6 +831,45 @@ static PyObject* PyMinqlxtended_PlayerStats(PyObject* self, PyObject* args) {
     PyStructSequence_SetItem(stats, 6, PyLong_FromLongLong(g_entities[client_id].client->ps.ping));
 
     return stats;
+}
+
+/*
+ * ================================================================
+ *                          set_stats
+ * ================================================================
+ */
+
+static PyObject* PyMinqlxtended_SetStats(PyObject* self, PyObject* args) {
+    int client_id;
+    PyObject* new_player_stats;
+
+    if (!PyArg_ParseTuple(args, "iO:set_stats", &client_id, &new_player_stats)) {
+        return NULL;
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+        PyErr_Format(PyExc_ValueError,
+                     "client_id needs to be a number from 0 to %d.",
+                     sv_maxclients->integer);
+        return NULL;
+    } else if (!g_entities[client_id].client) {
+        Py_RETURN_FALSE;
+    } else if (!PyObject_TypeCheck(new_player_stats, &player_stats_type)) {
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.PlayerStats.");
+        return NULL;
+    }
+
+    g_entities[client_id].client->expandedStats.numKills =
+        (int)PyLong_AsLong(PyStructSequence_GetItem(new_player_stats, 1));
+    g_entities[client_id].client->expandedStats.numDeaths =
+        (int)PyLong_AsLong(PyStructSequence_GetItem(new_player_stats, 2));
+    g_entities[client_id].client->expandedStats.totalDamageDealt =
+        (int)PyLong_AsLong(PyStructSequence_GetItem(new_player_stats, 3));
+    g_entities[client_id].client->expandedStats.totalDamageTaken =
+        (int)PyLong_AsLong(PyStructSequence_GetItem(new_player_stats, 4));
+
+
+    // of course, we don't set ping or time.
+
+    Py_RETURN_TRUE;
 }
 
 /*
@@ -1045,6 +1090,52 @@ static PyObject* PyMinqlxtended_SetArmor(PyObject* self, PyObject* args) {
     }
 
     g_entities[client_id].client->ps.stats[STAT_ARMOR] = armor;
+    Py_RETURN_TRUE;
+}
+
+/*
+ * ================================================================
+ *                           set_speed
+ * ================================================================
+ */
+
+static PyObject* PyMinqlxtended_SetSpeed(PyObject* self, PyObject* args) {
+    int client_id, speed;
+    if (!PyArg_ParseTuple(args, "ii:set_speed", &client_id, &speed)) {
+        return NULL;
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+        PyErr_Format(PyExc_ValueError,
+                     "client_id needs to be a number from 0 to %d.",
+                     sv_maxclients->integer);
+        return NULL;
+    } else if (!g_entities[client_id].client) {
+        Py_RETURN_FALSE;
+    }
+
+    g_entities[client_id].client->ps.speed = speed;
+    Py_RETURN_TRUE;
+}
+
+/*
+ * ================================================================
+ *                           set_gravity
+ * ================================================================
+ */
+
+static PyObject* PyMinqlxtended_SetGravity(PyObject* self, PyObject* args) {
+    int client_id, gravity;
+    if (!PyArg_ParseTuple(args, "ii:set_gravity", &client_id, &gravity)) {
+        return NULL;
+    } else if (client_id < 0 || client_id >= sv_maxclients->integer) {
+        PyErr_Format(PyExc_ValueError,
+                     "client_id needs to be a number from 0 to %d.",
+                     sv_maxclients->integer);
+        return NULL;
+    } else if (!g_entities[client_id].client) {
+        Py_RETURN_FALSE;
+    }
+
+    g_entities[client_id].client->ps.gravity = gravity;
     Py_RETURN_TRUE;
 }
 
@@ -1888,6 +1979,8 @@ static PyMethodDef minqlxtendedMethods[] = {
      "Get information about the player's state in the game."},
     {"player_stats", PyMinqlxtended_PlayerStats, METH_VARARGS,
      "Get some player stats."},
+    {"set_stats", PyMinqlxtended_SetStats, METH_VARARGS,
+     "Set some player stats."},
     {"set_position", PyMinqlxtended_SetPosition, METH_VARARGS,
      "Sets a player's position vector."},
     {"set_velocity", PyMinqlxtended_SetVelocity, METH_VARARGS,
@@ -1904,6 +1997,10 @@ static PyMethodDef minqlxtendedMethods[] = {
      "Sets a player's health."},
     {"set_armor", PyMinqlxtended_SetArmor, METH_VARARGS,
      "Sets a player's armor."},
+    {"set_speed", PyMinqlxtended_SetSpeed, METH_VARARGS,
+     "Sets a player's speed. (for that frame, experimental)"},
+    {"set_gravity", PyMinqlxtended_SetGravity, METH_VARARGS,
+     "Sets a player's gravity. (for that frame, experimental)"},
     {"set_weapons", PyMinqlxtended_SetWeapons, METH_VARARGS,
      "Sets a player's weapons."},
     {"set_weapon", PyMinqlxtended_SetWeapon, METH_VARARGS,
