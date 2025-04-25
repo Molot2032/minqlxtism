@@ -19,19 +19,24 @@
 import minqlxtended
 import re
 
-_DUMMY_USERINFO = ("ui_singlePlayerActive\\0\\cg_autoAction\\1\\cg_autoHop\\0"
+_DUMMY_USERINFO = (
+    "ui_singlePlayerActive\\0\\cg_autoAction\\1\\cg_autoHop\\0"
     "\\cg_predictItems\\1\\model\\bitterman/sport_blue\\headmodel\\crash/red"
     "\\handicap\\100\\cl_anonymous\\0\\color1\\4\\color2\\23\\sex\\male"
-    "\\teamtask\\0\\rate\\25000\\country\\NO")
+    "\\teamtask\\0\\rate\\25000\\country\\NO"
+)
+
 
 class NonexistentPlayerError(Exception):
     """An exception that is raised when a player that disconnected is being used
     as if the player were still present.
 
     """
+
     pass
 
-class Player():
+
+class Player:
     """A class that represents a player on the server. As opposed to minqlbot,
     attributes are all the values from when the class was instantiated. This
     means for instance if a player is on the blue team when you check, but
@@ -41,6 +46,7 @@ class Player():
     :exc:`minqlxtended.NonexistentPlayerError` exception.
 
     """
+
     def __init__(self, client_id, info=None):
         self._valid = True
 
@@ -52,8 +58,7 @@ class Player():
             self._id = client_id
             self._info = minqlxtended.player_info(client_id)
             if not self._info:
-                self._invalidate("Tried to initialize a Player instance of nonexistant player {}."
-                    .format(client_id))
+                self._invalidate("Tried to initialize a Player instance of nonexistant player {}.".format(client_id))
 
         self._userinfo = None
         self._steam_id = self._info.steam_id
@@ -66,16 +71,14 @@ class Player():
             self._userinfo = minqlxtended.parse_variables(self._info.userinfo)
             if "name" in self._userinfo:
                 self._name = self._userinfo["name"]
-            else: # No name at all. Weird userinfo during connection perhaps?
+            else:  # No name at all. Weird userinfo during connection perhaps?
                 self._name = ""
 
     def __repr__(self):
         if not self._valid:
-            return "{}(INVALID:'{}':{})".format(self.__class__.__name__,
-                self.clean_name, self.steam_id)
+            return "{}(INVALID:'{}':{})".format(self.__class__.__name__, self.clean_name, self.steam_id)
 
-        return "{}({}:'{}':{})".format(self.__class__.__name__, self._id,
-            self.clean_name, self.steam_id)
+        return "{}({}:'{}':{})".format(self.__class__.__name__, self._id, self.clean_name, self.steam_id)
 
     def __str__(self):
         return self.name
@@ -135,7 +138,7 @@ class Player():
     @cvars.setter
     def cvars(self, new_cvars):
         new = "".join(["\\{}\\{}".format(key, new_cvars[key]) for key in new_cvars])
-        minqlxtended.client_command(self.id, "userinfo \"{}\"".format(new))
+        minqlxtended.client_command(self.id, 'userinfo "{}"'.format(new))
 
     @property
     def steam_id(self):
@@ -372,7 +375,7 @@ class Player():
 
     def weapons(self, reset=False, **kwargs):
         if reset:
-            weaps = minqlxtended.Weapons(((False,)*15))
+            weaps = minqlxtended.Weapons(((False,) * 15))
         else:
             weaps = self.state.weapons
 
@@ -395,8 +398,7 @@ class Player():
         hmg = weaps.hmg if "hmg" not in kwargs else kwargs["hmg"]
         hands = weaps.hands if "hands" not in kwargs else kwargs["hands"]
 
-        return minqlxtended.set_weapons(self.id,
-            minqlxtended.Weapons((g, mg, sg, gl, rl, lg, rg, pg, bfg, gh, ng, pl, cg, hmg, hands)))
+        return minqlxtended.set_weapons(self.id, minqlxtended.Weapons((g, mg, sg, gl, rl, lg, rg, pg, bfg, gh, ng, pl, cg, hmg, hands)))
 
     def weapon(self, new_weapon=None):
         if new_weapon is None:
@@ -410,7 +412,7 @@ class Player():
 
     def ammo(self, reset=False, **kwargs):
         if reset:
-            a = minqlxtended.Weapons(((0,)*15))
+            a = minqlxtended.Weapons(((0,) * 15))
         else:
             a = self.state.ammo
 
@@ -433,31 +435,29 @@ class Player():
         hmg = a.hmg if "hmg" not in kwargs else kwargs["hmg"]
         hands = a.hands if "hands" not in kwargs else kwargs["hands"]
 
-        return minqlxtended.set_ammo(self.id,
-            minqlxtended.Weapons((g, mg, sg, gl, rl, lg, rg, pg, bfg, gh, ng, pl, cg, hmg, hands)))
+        return minqlxtended.set_ammo(self.id, minqlxtended.Weapons((g, mg, sg, gl, rl, lg, rg, pg, bfg, gh, ng, pl, cg, hmg, hands)))
 
     def powerups(self, reset=False, **kwargs):
         if reset:
-            pu = minqlxtended.Powerups(((0,)*6))
+            pu = minqlxtended.Powerups(((0,) * 6))
         else:
             pu = self.state.powerups
 
         if not kwargs:
             return pu
 
-        quad = pu.quad if "quad" not in kwargs else round(kwargs["quad"]*1000)
-        bs = pu.battlesuit if "battlesuit" not in kwargs else round(kwargs["battlesuit"]*1000)
-        haste = pu.haste if "haste" not in kwargs else round(kwargs["haste"]*1000)
-        invis = pu.invisibility if "invisibility" not in kwargs else round(kwargs["invisibility"]*1000)
-        regen = pu.regeneration if "regeneration" not in kwargs else round(kwargs["regeneration"]*1000)
-        invul = pu.invulnerability if "invulnerability" not in kwargs else round(kwargs["invulnerability"]*1000)
+        quad = pu.quad if "quad" not in kwargs else round(kwargs["quad"] * 1000)
+        bs = pu.battlesuit if "battlesuit" not in kwargs else round(kwargs["battlesuit"] * 1000)
+        haste = pu.haste if "haste" not in kwargs else round(kwargs["haste"] * 1000)
+        invis = pu.invisibility if "invisibility" not in kwargs else round(kwargs["invisibility"] * 1000)
+        regen = pu.regeneration if "regeneration" not in kwargs else round(kwargs["regeneration"] * 1000)
+        invul = pu.invulnerability if "invulnerability" not in kwargs else round(kwargs["invulnerability"] * 1000)
 
-        return minqlxtended.set_powerups(self.id,
-            minqlxtended.Powerups((quad, bs, haste, invis, regen, invul)))
+        return minqlxtended.set_powerups(self.id, minqlxtended.Powerups((quad, bs, haste, invis, regen, invul)))
 
     def keys(self, reset=False, **kwargs):
         if reset:
-            k = minqlxtended.Keys(((False,)*3))
+            k = minqlxtended.Keys(((False,) * 3))
         else:
             k = self.state.keys
 
@@ -586,7 +586,7 @@ class Player():
 
     @property
     def is_bot(self):
-        return (str(self._steam_id)[0] == "9")
+        return str(self._steam_id)[0] == "9"
 
     @property
     def score(self):
@@ -601,7 +601,7 @@ class Player():
         return minqlxtended.TellChannel(self)
 
     def center_print(self, msg):
-        minqlxtended.send_server_command(self.id, "cp \"{}\"".format(msg))
+        minqlxtended.send_server_command(self.id, 'cp "{}"'.format(msg))
 
     def tell(self, msg, **kwargs):
         return minqlxtended.Plugin.tell(msg, self, **kwargs)
@@ -652,10 +652,10 @@ class Player():
     def all_players(cls):
         return [cls(i, info=info) for i, info in enumerate(minqlxtended.players_info()) if info]
 
+
 class AbstractDummyPlayer(Player):
     def __init__(self, name="DummyPlayer"):
-        info = minqlxtended.PlayerInfo((-1, name, minqlxtended.CS_CONNECTED,
-            _DUMMY_USERINFO, -1, minqlxtended.TEAM_SPECTATOR, minqlxtended.PRIV_NONE))
+        info = minqlxtended.PlayerInfo((-1, name, minqlxtended.CS_CONNECTED, _DUMMY_USERINFO, -1, minqlxtended.TEAM_SPECTATOR, minqlxtended.PRIV_NONE))
         super().__init__(-1, info=info)
 
     @property
@@ -675,6 +675,7 @@ class AbstractDummyPlayer(Player):
 
     def tell(self, msg):
         raise NotImplementedError("tell() needs to be implemented.")
+
 
 class RconDummyPlayer(AbstractDummyPlayer):
     def __init__(self):
