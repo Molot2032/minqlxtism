@@ -132,11 +132,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CS_INFECTED_SURVIVOR_MINSPEED 707
 #define CS_RACE_POINTS 708
 #define CS_DISABLE_LOADOUT 709
-#define CS_MATCH_GUID 710
-#define CS_STARTING_WEAPONS 711
-#define CS_STEAM_ID 712
-#define CS_STEAM_WORKSHOP_IDS 713
-#define CS_MAX 714
+#define CS_MATCH_GUID 712         // also sent in the ZMQ stats
+#define CS_STARTING_WEAPONS 713   // appears on the ESC menu in the client under Starting Weapons - bitmask of weapons identical to g_startingWeapons
+#define CS_STEAM_ID 714           // the server's steam ID (64)
+#define CS_STEAM_WORKSHOP_IDS 715 // space separated list of workshop IDs for the client to load
+#define CS_MAX 716
 #define RESERVED_CONFIGSTRINGS 2 // game can't modify below this, only the system can
 
 // bit field limits
