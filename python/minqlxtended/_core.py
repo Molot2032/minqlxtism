@@ -110,6 +110,19 @@ def parse_variables(infostring: str):
 
     return res
 
+
+def stringify_variables(variables: dict | collections.OrderedDict):
+    """
+    Converts a dictionary of variables to the Quake Live info-string format.
+
+    :param variables: The variables to convert.
+    :type variables: dict
+    :returns: str -- The info-string with the variables.
+    """
+
+    return "".join(["\\" + str(k) + "\\" + str(v) for k, v in variables.items()])
+
+
 main_logger = None
 
 
