@@ -19,7 +19,8 @@
 import minqlxtended
 import collections
 
-class Plugin():
+
+class Plugin:
     """The base plugin class.
 
     Every plugin must inherit this or a subclass of this. It does not support any database
@@ -41,6 +42,7 @@ class Plugin():
         like :func:`minqlxtended.thread` can be useful.
 
     """
+
     # Static dictionary of plugins currently loaded for the purpose of inter-plugin communication.
     _loaded_plugins = {}
     # The database driver class the plugin should use.
@@ -57,8 +59,7 @@ class Plugin():
     def db(self):
         """The database instance."""
         if not self.database:
-            raise RuntimeError("Plugin '{}' does not have a database driver."
-                .format(self.name))
+            raise RuntimeError("Plugin '{}' does not have a database driver.".format(self.name))
         elif not hasattr(self, "_db_instance"):
             self._db_instance = self.database(self)
 
@@ -120,7 +121,19 @@ class Plugin():
         minqlxtended.EVENT_DISPATCHERS[event].remove_hook(self.name, handler, priority)
         self._hooks.remove((event, handler, priority))
 
-    def add_command(self, name, handler, permission=0, channels=None, exclude_channels=(), priority=minqlxtended.PRI_NORMAL, client_cmd_pass=False, client_cmd_perm=5, prefix=True, usage=""):
+    def add_command(
+        self,
+        name,
+        handler,
+        permission=0,
+        channels=None,
+        exclude_channels=(),
+        priority=minqlxtended.PRI_NORMAL,
+        client_cmd_pass=False,
+        client_cmd_perm=5,
+        prefix=True,
+        usage="",
+    ):
         if not hasattr(self, "_commands"):
             self._commands = []
 
@@ -184,7 +197,7 @@ class Plugin():
             minqlxtended.set_cvar(name, value, flags)
             return True
         else:
-            minqlxtended.console_command("{} \"{}\"".format(name, value))
+            minqlxtended.console_command('{} "{}"'.format(name, value))
             return False
 
     @classmethod
@@ -210,7 +223,7 @@ class Plugin():
             minqlxtended.set_cvar(name, value, flags)
             return True
         else:
-            minqlxtended.console_command("{} \"{}\"".format(name, value))
+            minqlxtended.console_command('{} "{}"'.format(name, value))
             return False
 
     @classmethod
@@ -405,7 +418,7 @@ class Plugin():
         if recipient:
             recipient = cls.client_id(recipient)
 
-        minqlxtended.send_server_command(recipient, "cp \"{}\"".format(msg))
+        minqlxtended.send_server_command(recipient, 'cp "{}"'.format(msg))
 
     @classmethod
     def tell(cls, msg, recipient, **kwargs):
