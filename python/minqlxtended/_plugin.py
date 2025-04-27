@@ -437,10 +437,9 @@ class Plugin():
             return None
 
     @classmethod
-    def callvote(cls, vote, display, time=30):
+    def callvote(cls, vote, display, caller=None, time=30):
         if not cls.is_vote_active():
-            # Tell vote_started's dispatcher that it's a vote called by the server.
-            minqlxtended.EVENT_DISPATCHERS["vote_started"].caller(None)
+            minqlxtended.EVENT_DISPATCHERS["vote_started"].caller(caller)
             minqlxtended.callvote(vote, display, time)
             return True
 
