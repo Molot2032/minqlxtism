@@ -710,27 +710,27 @@ enum {
 };
 
 enum cvar_flags {
-    CVAR_ARCHIVE      = 1,
-    CVAR_USERINFO     = 2,
-    CVAR_SERVERINFO   = 4,
-    CVAR_SYSTEMINFO   = 8,
-    CVAR_INIT         = 16,
-    CVAR_LATCH        = 32,
-    CVAR_ROM          = 64,
-    CVAR_USER_CREATED = 128,
-    CVAR_TEMP         = 256,
-    CVAR_CHEAT        = 512,
-    CVAR_NORESTART    = 1024,
-    CVAR_UNKOWN1      = 2048,
-    CVAR_UNKOWN2      = 4096,
-    CVAR_UNKOWN3      = 8192,
-    CVAR_UNKOWN4      = 16384,
-    CVAR_UNKOWN5      = 32768,
-    CVAR_UNKOWN6      = 65536,
-    CVAR_UNKOWN7      = 131072,
-    CVAR_UNKOWN8      = 262144,
-    CVAR_UNKOWN9      = 524288,
-    CVAR_UNKOWN10     = 1048576
+    CVAR_ARCHIVE      = 1,    // Saves to config file, used for system variables
+    CVAR_USERINFO     = 2,    // Sent to server on connect or modification
+    CVAR_SERVERINFO   = 4,    // Sent in response to front-end requests
+    CVAR_SYSTEMINFO   = 8,    // Sent to all clients when changed
+    CVAR_INIT         = 16,   // Allow setting from the command-line only, never from console
+    CVAR_LATCH        = 32,   // Save the latched value until the next restart
+    CVAR_ROM          = 64,   // Display purposes only, cannot be set by the user
+    CVAR_USER_CREATED = 128,  // Created as a result of the 'set' command
+    CVAR_TEMP         = 256,  // Can be set when cheats are disabled, but is not archived
+    CVAR_CHEAT        = 512,  // Can not be changed if cheats are disabled
+    CVAR_NORESTART    = 1024, // Do not clear on a cvar_restart
+    CVAR_REPLICATED   = 2048,
+    CVAR_UNKNOWN1     = 4096,
+    CVAR_UNKNOWN2     = 8192,
+    CVAR_UNKNOWN3     = 16384,
+    CVAR_UNKNOWN4     = 32768,
+    CVAR_UNKNOWN5     = 65536,
+    CVAR_UNKNOWN6     = 131072,
+    CVAR_UNKNOWN7     = 262144,
+    CVAR_UNKNOWN8     = 524288,
+    CVAR_GAMERULE     = 1048576
 };
 
 // paramters for command buffer stuffing
