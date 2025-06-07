@@ -722,8 +722,8 @@ enum cvar_flags {
     CVAR_CHEAT        = 512,  // Can not be changed if cheats are disabled
     CVAR_NORESTART    = 1024, // Do not clear on a cvar_restart
     CVAR_REPLICATED   = 2048,
-    CVAR_UNKNOWN1     = 4096,
-    CVAR_UNKNOWN2     = 8192,
+    CVAR_MINMAX       = 4096,
+    CVAR_OPTIONS      = 8192,
     CVAR_UNKNOWN3     = 16384,
     CVAR_UNKNOWN4     = 32768,
     CVAR_UNKNOWN5     = 65536,
