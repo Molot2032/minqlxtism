@@ -1,7 +1,7 @@
-import _minqlxtended
+import _minqlxtism
 import re as _re
 
-__version__ = _minqlxtended.__version__
+__version__ = _minqlxtism.__version__
 
 temp = _re.search(r"([0-9]+)\.([0-9]+)\.([0-9]+)", __version__)
 try:
@@ -11,7 +11,7 @@ except:
 del temp
 
 # Put everything into a single module.
-from _minqlxtended import *
+from _minqlxtism import *
 from ._core import *
 from ._plugin import *
 from ._game import *

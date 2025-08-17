@@ -1777,7 +1777,7 @@ void __cdecl Slay(void);                 // "slay"
 void __cdecl DownloadWorkshopItem(void); // "steam_downloadugcdefer"
 void __cdecl StopFollowing(void);        // "stopfollowing"
 #ifndef NOPY
-// PyRcon gives the owner the ability to execute pyminqlxtended commands as if the
+// PyRcon gives the owner the ability to execute pyminqlxtism commands as if the
 // owner executed them.
 void __cdecl PyRcon(void);
 // PyCommand is special. It'll serve as the handler for console commands added

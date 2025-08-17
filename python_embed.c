@@ -9,7 +9,7 @@
 
 #include "common.h"
 #include "patterns.h"
-#include "pyminqlxtended.h"
+#include "pyminqlxtism.h"
 #include "quake_common.h"
 
 PyObject* client_command_handler    = NULL;
@@ -42,8 +42,8 @@ static const char loader[] = "import traceback\n"
                              "  import sys\n"
                              "  sys.path.append('" CORE_MODULE "')\n"
                              "  sys.path.append('.')\n"
-                             "  import minqlxtended\n"
-                             "  minqlxtended.initialize()\n"
+                             "  import minqlxtism\n"
+                             "  minqlxtism.initialize()\n"
                              "  ret = True\n"
                              "except Exception as e:\n"
                              "  e = traceback.format_exc().rstrip('\\n')\n"
@@ -266,7 +266,7 @@ static PyObject* makePlayerTuple(int client_id) {
     return info;
 }
 
-static PyObject* PyMinqlxtended_PlayerInfo(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_PlayerInfo(PyObject* self, PyObject* args) {
     int i;
     if (!PyArg_ParseTuple(args, "i:player", &i)) {
         return NULL;
@@ -279,7 +279,7 @@ static PyObject* PyMinqlxtended_PlayerInfo(PyObject* self, PyObject* args) {
         return NULL;
     } else if (allow_free_client != i && svs->clients[i].state == CS_FREE) {
 #ifndef NDEBUG
-        DebugPrint("WARNING: PyMinqlxtended_PlayerInfo called for CS_FREE client %d.\n", i);
+        DebugPrint("WARNING: PyMinqlxtism_PlayerInfo called for CS_FREE client %d.\n", i);
 #endif
         Py_RETURN_NONE;
     }
@@ -287,7 +287,7 @@ static PyObject* PyMinqlxtended_PlayerInfo(PyObject* self, PyObject* args) {
     return makePlayerTuple(i);
 }
 
-static PyObject* PyMinqlxtended_PlayersInfo(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_PlayersInfo(PyObject* self, PyObject* args) {
     PyObject* ret = PyList_New(sv_maxclients->integer);
 
     for (int i = 0; i < sv_maxclients->integer; i++) {
@@ -313,7 +313,7 @@ static PyObject* PyMinqlxtended_PlayersInfo(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_GetUserinfo(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_GetUserinfo(PyObject* self, PyObject* args) {
     int i;
     if (!PyArg_ParseTuple(args, "i:get_userinfo", &i)) {
         return NULL;
@@ -337,7 +337,7 @@ static PyObject* PyMinqlxtended_GetUserinfo(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SendServerCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SendServerCommand(PyObject* self, PyObject* args) {
     PyObject* client_id;
     int i;
     char* cmd;
@@ -372,7 +372,7 @@ static PyObject* PyMinqlxtended_SendServerCommand(PyObject* self, PyObject* args
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_ClientCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_ClientCommand(PyObject* self, PyObject* args) {
     int i;
     char* cmd;
     if (!PyArg_ParseTuple(args, "is:client_command", &i, &cmd)) {
@@ -400,7 +400,7 @@ static PyObject* PyMinqlxtended_ClientCommand(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_ConsoleCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_ConsoleCommand(PyObject* self, PyObject* args) {
     char* cmd;
     if (!PyArg_ParseTuple(args, "s:console_command", &cmd)) {
         return NULL;
@@ -417,7 +417,7 @@ static PyObject* PyMinqlxtended_ConsoleCommand(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_GetCvar(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_GetCvar(PyObject* self, PyObject* args) {
     char* name;
     if (!PyArg_ParseTuple(args, "s:get_cvar", &name)) {
         return NULL;
@@ -437,7 +437,7 @@ static PyObject* PyMinqlxtended_GetCvar(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetCvar(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetCvar(PyObject* self, PyObject* args) {
     char *name, *value;
     int flags = 0;
     if (!PyArg_ParseTuple(args, "ss|i:set_cvar", &name, &value, &flags)) {
@@ -465,7 +465,7 @@ static PyObject* PyMinqlxtended_SetCvar(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetCvarLimit(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetCvarLimit(PyObject* self, PyObject* args) {
     char *name, *value, *min, *max;
     int flags = 0;
     if (!PyArg_ParseTuple(args, "ssss|i:set_cvar_limit", &name, &value, &min, &max, &flags)) {
@@ -482,7 +482,7 @@ static PyObject* PyMinqlxtended_SetCvarLimit(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_Kick(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_Kick(PyObject* self, PyObject* args) {
     int i;
     PyObject* reason;
 
@@ -517,7 +517,7 @@ static PyObject* PyMinqlxtended_Kick(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_ConsolePrint(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_ConsolePrint(PyObject* self, PyObject* args) {
     char* text;
     if (!PyArg_ParseTuple(args, "s:console_print", &text)) {
         return NULL;
@@ -534,7 +534,7 @@ static PyObject* PyMinqlxtended_ConsolePrint(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_GetConfigstring(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_GetConfigstring(PyObject* self, PyObject* args) {
     int i;
     char csbuffer[4096];
     if (!PyArg_ParseTuple(args, "i:get_configstring", &i)) {
@@ -558,7 +558,7 @@ static PyObject* PyMinqlxtended_GetConfigstring(PyObject* self, PyObject* args) 
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetConfigstring(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetConfigstring(PyObject* self, PyObject* args) {
     int i;
     char* cs;
     if (!PyArg_ParseTuple(args, "is:set_configstring", &i, &cs)) {
@@ -583,7 +583,7 @@ static PyObject* PyMinqlxtended_SetConfigstring(PyObject* self, PyObject* args) 
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_ForceVote(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_ForceVote(PyObject* self, PyObject* args) {
     int pass;
     if (!PyArg_ParseTuple(args, "p:force_vote", &pass)) {
         return NULL;
@@ -613,7 +613,7 @@ static PyObject* PyMinqlxtended_ForceVote(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_AddConsoleCommand(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_AddConsoleCommand(PyObject* self, PyObject* args) {
     char* cmd;
     if (!PyArg_ParseTuple(args, "s:add_console_command", &cmd)) {
         return NULL;
@@ -630,7 +630,7 @@ static PyObject* PyMinqlxtended_AddConsoleCommand(PyObject* self, PyObject* args
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_RegisterHandler(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_RegisterHandler(PyObject* self, PyObject* args) {
     char* event;
     PyObject* new_handler;
 
@@ -667,7 +667,7 @@ static PyObject* PyMinqlxtended_RegisterHandler(PyObject* self, PyObject* args) 
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_PlayerState(PyObject* self, PyObject* args) {
     int client_id;
 
     if (!PyArg_ParseTuple(args, "i:player_state", &client_id)) {
@@ -806,7 +806,7 @@ static PyObject* PyMinqlxtended_PlayerState(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_PlayerStats(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_PlayerStats(PyObject* self, PyObject* args) {
     int client_id;
 
     if (!PyArg_ParseTuple(args, "i:player_stats", &client_id)) {
@@ -839,7 +839,7 @@ static PyObject* PyMinqlxtended_PlayerStats(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetStats(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetStats(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* new_player_stats;
 
@@ -853,7 +853,7 @@ static PyObject* PyMinqlxtended_SetStats(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(new_player_stats, &player_stats_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.PlayerStats.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.PlayerStats.");
         return NULL;
     }
 
@@ -878,7 +878,7 @@ static PyObject* PyMinqlxtended_SetStats(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetPosition(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetPosition(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* new_position;
 
@@ -892,7 +892,7 @@ static PyObject* PyMinqlxtended_SetPosition(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(new_position, &vector3_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Vector3.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.Vector3.");
         return NULL;
     }
 
@@ -912,7 +912,7 @@ static PyObject* PyMinqlxtended_SetPosition(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetVelocity(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetVelocity(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* new_velocity;
 
@@ -926,7 +926,7 @@ static PyObject* PyMinqlxtended_SetVelocity(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(new_velocity, &vector3_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Vector3.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.Vector3.");
         return NULL;
     }
 
@@ -946,7 +946,7 @@ static PyObject* PyMinqlxtended_SetVelocity(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_NoClip(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_NoClip(PyObject* self, PyObject* args) {
     int client_id, activate;
     if (!PyArg_ParseTuple(args, "ip:noclip", &client_id, &activate)) {
         return NULL;
@@ -974,7 +974,7 @@ static PyObject* PyMinqlxtended_NoClip(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_God(PyObject* self, PyObject* args) {
     int client_id, activate;
     if (!PyArg_ParseTuple(args, "ip:god", &client_id, &activate)) {
         return NULL;
@@ -1002,7 +1002,7 @@ static PyObject* PyMinqlxtended_God(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_NoTarget(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_NoTarget(PyObject* self, PyObject* args) {
     int client_id, activate;
     if (!PyArg_ParseTuple(args, "ip:notarget", &client_id, &activate)) {
         return NULL;
@@ -1030,7 +1030,7 @@ static PyObject* PyMinqlxtended_NoTarget(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetFlags(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetFlags(PyObject* self, PyObject* args) {
     int client_id, flags;
     if (!PyArg_ParseTuple(args, "ii:set_flags", &client_id, &flags)) {
         return NULL;
@@ -1053,7 +1053,7 @@ static PyObject* PyMinqlxtended_SetFlags(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetHealth(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetHealth(PyObject* self, PyObject* args) {
     int client_id, health;
     if (!PyArg_ParseTuple(args, "ii:set_health", &client_id, &health)) {
         return NULL;
@@ -1076,7 +1076,7 @@ static PyObject* PyMinqlxtended_SetHealth(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetArmor(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetArmor(PyObject* self, PyObject* args) {
     int client_id, armor;
     if (!PyArg_ParseTuple(args, "ii:set_armor", &client_id, &armor)) {
         return NULL;
@@ -1099,7 +1099,7 @@ static PyObject* PyMinqlxtended_SetArmor(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetSpeed(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetSpeed(PyObject* self, PyObject* args) {
     int client_id, speed;
     if (!PyArg_ParseTuple(args, "ii:set_speed", &client_id, &speed)) {
         return NULL;
@@ -1122,7 +1122,7 @@ static PyObject* PyMinqlxtended_SetSpeed(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetGravity(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetGravity(PyObject* self, PyObject* args) {
     int client_id, gravity;
     if (!PyArg_ParseTuple(args, "ii:set_gravity", &client_id, &gravity)) {
         return NULL;
@@ -1145,7 +1145,7 @@ static PyObject* PyMinqlxtended_SetGravity(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetWeapons(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetWeapons(PyObject* self, PyObject* args) {
     int client_id, weapon_flags = 0;
     PyObject* weapons;
     if (!PyArg_ParseTuple(args, "iO:set_weapons", &client_id, &weapons)) {
@@ -1158,7 +1158,7 @@ static PyObject* PyMinqlxtended_SetWeapons(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(weapons, &weapons_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Weapons.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.Weapons.");
         return NULL;
     }
 
@@ -1183,7 +1183,7 @@ static PyObject* PyMinqlxtended_SetWeapons(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetWeapon(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetWeapon(PyObject* self, PyObject* args) {
     int client_id, weapon;
     if (!PyArg_ParseTuple(args, "ii:set_weapon", &client_id, &weapon)) {
         return NULL;
@@ -1209,7 +1209,7 @@ static PyObject* PyMinqlxtended_SetWeapon(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetAmmo(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetAmmo(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* ammos;
     if (!PyArg_ParseTuple(args, "iO:set_ammo", &client_id, &ammos)) {
@@ -1222,7 +1222,7 @@ static PyObject* PyMinqlxtended_SetAmmo(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(ammos, &weapons_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Weapons.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.Weapons.");
         return NULL;
     }
 
@@ -1246,7 +1246,7 @@ static PyObject* PyMinqlxtended_SetAmmo(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetPowerups(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetPowerups(PyObject* self, PyObject* args) {
     int client_id, t;
     PyObject* powerups;
     if (!PyArg_ParseTuple(args, "iO:set_powerups", &client_id, &powerups)) {
@@ -1259,7 +1259,7 @@ static PyObject* PyMinqlxtended_SetPowerups(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(powerups, &powerups_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Powerups.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.Powerups.");
         return NULL;
     }
 
@@ -1297,7 +1297,7 @@ static PyObject* PyMinqlxtended_SetPowerups(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetHoldable(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetHoldable(PyObject* self, PyObject* args) {
     int client_id, i;
     if (!PyArg_ParseTuple(args, "ii:set_holdable", &client_id, &i)) {
         return NULL;
@@ -1339,7 +1339,7 @@ void __cdecl My_Touch_Item(gentity_t* ent, gentity_t* other, trace_t* trace) {
     Touch_Item(ent, other, trace);
 }
 
-static PyObject* PyMinqlxtended_DropHoldable(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_DropHoldable(PyObject* self, PyObject* args) {
     int client_id, item;
     vec3_t velocity;
     vec_t angle;
@@ -1386,7 +1386,7 @@ static PyObject* PyMinqlxtended_DropHoldable(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetFlight(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetFlight(PyObject* self, PyObject* args) {
     int client_id;
     PyObject* flight;
     if (!PyArg_ParseTuple(args, "iO:set_flight", &client_id, &flight)) {
@@ -1399,7 +1399,7 @@ static PyObject* PyMinqlxtended_SetFlight(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(flight, &flight_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Flight.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.Flight.");
         return NULL;
     }
 
@@ -1422,7 +1422,7 @@ static PyObject* PyMinqlxtended_SetFlight(PyObject* self, PyObject* args) {
  *                            set_keys
  * ================================================================
  */
-static PyObject* PyMinqlxtended_SetKeys(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetKeys(PyObject* self, PyObject* args) {
     int client_id, key_flags = 0;
     PyObject* keys;
     if (!PyArg_ParseTuple(args, "iO:set_keys", &client_id, &keys)) {
@@ -1435,7 +1435,7 @@ static PyObject* PyMinqlxtended_SetKeys(PyObject* self, PyObject* args) {
     } else if (!g_entities[client_id].client) {
         Py_RETURN_FALSE;
     } else if (!PyObject_TypeCheck(keys, &keys_type)) {
-        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtended.Keys.");
+        PyErr_Format(PyExc_ValueError, "Argument must be of type minqlxtism.Keys.");
         return NULL;
     }
 
@@ -1460,7 +1460,7 @@ static PyObject* PyMinqlxtended_SetKeys(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetInvulnerability(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetInvulnerability(PyObject* self, PyObject* args) {
     int client_id, time;
     if (!PyArg_ParseTuple(args, "ii:set_invulnerability", &client_id, &time)) {
         return NULL;
@@ -1486,7 +1486,7 @@ static PyObject* PyMinqlxtended_SetInvulnerability(PyObject* self, PyObject* arg
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetScore(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetScore(PyObject* self, PyObject* args) {
     int client_id, score;
     if (!PyArg_ParseTuple(args, "ii:set_score", &client_id, &score)) {
         return NULL;
@@ -1509,7 +1509,7 @@ static PyObject* PyMinqlxtended_SetScore(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_Callvote(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_Callvote(PyObject* self, PyObject* args) {
     char *vote, *vote_disp;
     int vote_time = 30;
     char buf[64];
@@ -1544,7 +1544,7 @@ static PyObject* PyMinqlxtended_Callvote(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_AllowSinglePlayer(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_AllowSinglePlayer(PyObject* self, PyObject* args) {
     int x;
     if (!PyArg_ParseTuple(args, "p:allow_single_player", &x)) {
         return NULL;
@@ -1565,7 +1565,7 @@ static PyObject* PyMinqlxtended_AllowSinglePlayer(PyObject* self, PyObject* args
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_PlayerSpawn(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_PlayerSpawn(PyObject* self, PyObject* args) {
     int client_id;
     if (!PyArg_ParseTuple(args, "i:player_spawn", &client_id)) {
         return NULL;
@@ -1589,7 +1589,7 @@ static PyObject* PyMinqlxtended_PlayerSpawn(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SetPrivileges(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SetPrivileges(PyObject* self, PyObject* args) {
     int client_id, priv;
     if (!PyArg_ParseTuple(args, "ii:set_privileges", &client_id, &priv)) {
         return NULL;
@@ -1612,7 +1612,7 @@ static PyObject* PyMinqlxtended_SetPrivileges(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_DestroyKamikazeTimers(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_DestroyKamikazeTimers(PyObject* self, PyObject* args) {
     int i;
     gentity_t* ent;
 
@@ -1640,7 +1640,7 @@ static PyObject* PyMinqlxtended_DestroyKamikazeTimers(PyObject* self, PyObject* 
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_SpawnItem(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SpawnItem(PyObject* self, PyObject* args) {
     int item_id, x, y, z;
     if (!PyArg_ParseTuple(args, "iiii:spawn_item", &item_id, &x, &y, &z)) {
         return NULL;
@@ -1669,7 +1669,7 @@ static PyObject* PyMinqlxtended_SpawnItem(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_RemoveDroppedItems(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_RemoveDroppedItems(PyObject* self, PyObject* args) {
     int i;
     gentity_t* ent;
 
@@ -1693,7 +1693,7 @@ static PyObject* PyMinqlxtended_RemoveDroppedItems(PyObject* self, PyObject* arg
  */
 
 // it is alternative to Slay from command.c
-static PyObject* PyMinqlxtended_SlayWithMod(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_SlayWithMod(PyObject* self, PyObject* args) {
     int client_id, mod;
     if (!PyArg_ParseTuple(args, "ii:slay_with_mod", &client_id, &mod)) {
         return NULL;
@@ -1741,7 +1741,7 @@ void replace_item_core(gentity_t* ent, int item_id) {
     }
 }
 
-static PyObject* PyMinqlxtended_ReplaceItems(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_ReplaceItems(PyObject* self, PyObject* args) {
     PyObject *arg1, *arg2;
     int entity_id = 0, item_id = 0;
 #if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
@@ -1853,7 +1853,7 @@ static PyObject* PyMinqlxtended_ReplaceItems(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_DevPrintItems(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_DevPrintItems(PyObject* self, PyObject* args) {
     gentity_t* ent;
     char buffer[1024], temp_buffer[1024];
     int buffer_index = 0;
@@ -1902,7 +1902,7 @@ static PyObject* PyMinqlxtended_DevPrintItems(PyObject* self, PyObject* args) {
  * ================================================================
  */
 
-static PyObject* PyMinqlxtended_ForceWeaponRespawnTime(PyObject* self, PyObject* args) {
+static PyObject* PyMinqlxtism_ForceWeaponRespawnTime(PyObject* self, PyObject* args) {
     int respawn_time;
     gentity_t* ent;
 
@@ -1942,118 +1942,118 @@ static PyObject* PyMinqlxtended_ForceWeaponRespawnTime(PyObject* self, PyObject*
  * ================================================================
  */
 
-static PyMethodDef minqlxtendedMethods[] = {
-    {"player_info", PyMinqlxtended_PlayerInfo, METH_VARARGS,
+static PyMethodDef minqlxtismMethods[] = {
+    {"player_info", PyMinqlxtism_PlayerInfo, METH_VARARGS,
      "Returns a dictionary with information about a player by ID."},
-    {"players_info", PyMinqlxtended_PlayersInfo, METH_NOARGS,
+    {"players_info", PyMinqlxtism_PlayersInfo, METH_NOARGS,
      "Returns a list with dictionaries with information about all the players on the server."},
-    {"get_userinfo", PyMinqlxtended_GetUserinfo, METH_VARARGS,
+    {"get_userinfo", PyMinqlxtism_GetUserinfo, METH_VARARGS,
      "Returns a string with a player's userinfo."},
-    {"send_server_command", PyMinqlxtended_SendServerCommand, METH_VARARGS,
+    {"send_server_command", PyMinqlxtism_SendServerCommand, METH_VARARGS,
      "Sends a server command to either one specific client or all the clients."},
-    {"client_command", PyMinqlxtended_ClientCommand, METH_VARARGS,
+    {"client_command", PyMinqlxtism_ClientCommand, METH_VARARGS,
      "Tells the server to process a command from a specific client."},
-    {"console_command", PyMinqlxtended_ConsoleCommand, METH_VARARGS,
+    {"console_command", PyMinqlxtism_ConsoleCommand, METH_VARARGS,
      "Executes a command as if it was executed from the server console."},
-    {"get_cvar", PyMinqlxtended_GetCvar, METH_VARARGS,
+    {"get_cvar", PyMinqlxtism_GetCvar, METH_VARARGS,
      "Gets a cvar."},
-    {"set_cvar", PyMinqlxtended_SetCvar, METH_VARARGS,
+    {"set_cvar", PyMinqlxtism_SetCvar, METH_VARARGS,
      "Sets a cvar."},
-    {"set_cvar_limit", PyMinqlxtended_SetCvarLimit, METH_VARARGS,
+    {"set_cvar_limit", PyMinqlxtism_SetCvarLimit, METH_VARARGS,
      "Sets a non-string cvar with a minimum and maximum value."},
-    {"kick", PyMinqlxtended_Kick, METH_VARARGS,
+    {"kick", PyMinqlxtism_Kick, METH_VARARGS,
      "Kick a player and allowing the admin to supply a reason for it."},
-    {"console_print", PyMinqlxtended_ConsolePrint, METH_VARARGS,
+    {"console_print", PyMinqlxtism_ConsolePrint, METH_VARARGS,
      "Prints text on the console. If used during an RCON command, it will be printed in the player's console."},
-    {"get_configstring", PyMinqlxtended_GetConfigstring, METH_VARARGS,
+    {"get_configstring", PyMinqlxtism_GetConfigstring, METH_VARARGS,
      "Get a configstring."},
-    {"set_configstring", PyMinqlxtended_SetConfigstring, METH_VARARGS,
+    {"set_configstring", PyMinqlxtism_SetConfigstring, METH_VARARGS,
      "Sets a configstring and sends it to all the players on the server."},
-    {"force_vote", PyMinqlxtended_ForceVote, METH_VARARGS,
+    {"force_vote", PyMinqlxtism_ForceVote, METH_VARARGS,
      "Forces the current vote to either fail or pass."},
-    {"add_console_command", PyMinqlxtended_AddConsoleCommand, METH_VARARGS,
+    {"add_console_command", PyMinqlxtism_AddConsoleCommand, METH_VARARGS,
      "Adds a console command that will be handled by Python code."},
-    {"register_handler", PyMinqlxtended_RegisterHandler, METH_VARARGS,
+    {"register_handler", PyMinqlxtism_RegisterHandler, METH_VARARGS,
      "Register an event handler. Can be called more than once per event, but only the last one will work."},
-    {"player_state", PyMinqlxtended_PlayerState, METH_VARARGS,
+    {"player_state", PyMinqlxtism_PlayerState, METH_VARARGS,
      "Get information about the player's state in the game."},
-    {"player_stats", PyMinqlxtended_PlayerStats, METH_VARARGS,
+    {"player_stats", PyMinqlxtism_PlayerStats, METH_VARARGS,
      "Get some player stats."},
-    {"set_stats", PyMinqlxtended_SetStats, METH_VARARGS,
+    {"set_stats", PyMinqlxtism_SetStats, METH_VARARGS,
      "Set some player stats."},
-    {"set_position", PyMinqlxtended_SetPosition, METH_VARARGS,
+    {"set_position", PyMinqlxtism_SetPosition, METH_VARARGS,
      "Sets a player's position vector."},
-    {"set_velocity", PyMinqlxtended_SetVelocity, METH_VARARGS,
+    {"set_velocity", PyMinqlxtism_SetVelocity, METH_VARARGS,
      "Sets a player's velocity vector."},
-    {"noclip", PyMinqlxtended_NoClip, METH_VARARGS,
+    {"noclip", PyMinqlxtism_NoClip, METH_VARARGS,
      "Sets noclip for a player."},
-    {"god", PyMinqlxtended_God, METH_VARARGS,
+    {"god", PyMinqlxtism_God, METH_VARARGS,
      "Sets godmode for a player."},
-    {"notarget", PyMinqlxtended_NoTarget, METH_VARARGS,
+    {"notarget", PyMinqlxtism_NoTarget, METH_VARARGS,
      "Sets notarget for a player."},
-    {"set_flags", PyMinqlxtended_SetFlags, METH_VARARGS,
+    {"set_flags", PyMinqlxtism_SetFlags, METH_VARARGS,
      "Sets a player's entity flags."},
-    {"set_health", PyMinqlxtended_SetHealth, METH_VARARGS,
+    {"set_health", PyMinqlxtism_SetHealth, METH_VARARGS,
      "Sets a player's health."},
-    {"set_armor", PyMinqlxtended_SetArmor, METH_VARARGS,
+    {"set_armor", PyMinqlxtism_SetArmor, METH_VARARGS,
      "Sets a player's armor."},
-    {"set_speed", PyMinqlxtended_SetSpeed, METH_VARARGS,
+    {"set_speed", PyMinqlxtism_SetSpeed, METH_VARARGS,
      "Sets a player's speed. (for that frame, experimental)"},
-    {"set_gravity", PyMinqlxtended_SetGravity, METH_VARARGS,
+    {"set_gravity", PyMinqlxtism_SetGravity, METH_VARARGS,
      "Sets a player's gravity. (for that frame, experimental)"},
-    {"set_weapons", PyMinqlxtended_SetWeapons, METH_VARARGS,
+    {"set_weapons", PyMinqlxtism_SetWeapons, METH_VARARGS,
      "Sets a player's weapons."},
-    {"set_weapon", PyMinqlxtended_SetWeapon, METH_VARARGS,
+    {"set_weapon", PyMinqlxtism_SetWeapon, METH_VARARGS,
      "Sets a player's current weapon."},
-    {"set_ammo", PyMinqlxtended_SetAmmo, METH_VARARGS,
+    {"set_ammo", PyMinqlxtism_SetAmmo, METH_VARARGS,
      "Sets a player's ammo."},
-    {"set_powerups", PyMinqlxtended_SetPowerups, METH_VARARGS,
+    {"set_powerups", PyMinqlxtism_SetPowerups, METH_VARARGS,
      "Sets a player's powerups."},
-    {"set_holdable", PyMinqlxtended_SetHoldable, METH_VARARGS,
+    {"set_holdable", PyMinqlxtism_SetHoldable, METH_VARARGS,
      "Sets a player's holdable item."},
-    {"drop_holdable", PyMinqlxtended_DropHoldable, METH_VARARGS,
+    {"drop_holdable", PyMinqlxtism_DropHoldable, METH_VARARGS,
      "Drops player's holdable item."},
-    {"set_flight", PyMinqlxtended_SetFlight, METH_VARARGS,
+    {"set_flight", PyMinqlxtism_SetFlight, METH_VARARGS,
      "Sets a player's flight parameters, such as current fuel, max fuel and, so on."},
-    {"set_keys", PyMinqlxtended_SetKeys, METH_VARARGS,
+    {"set_keys", PyMinqlxtism_SetKeys, METH_VARARGS,
      "Sets a player's keys."},
-    {"set_invulnerability", PyMinqlxtended_SetInvulnerability, METH_VARARGS,
+    {"set_invulnerability", PyMinqlxtism_SetInvulnerability, METH_VARARGS,
      "Makes player invulnerable for limited time."},
-    {"set_score", PyMinqlxtended_SetScore, METH_VARARGS,
+    {"set_score", PyMinqlxtism_SetScore, METH_VARARGS,
      "Sets a player's score."},
-    {"callvote", PyMinqlxtended_Callvote, METH_VARARGS,
+    {"callvote", PyMinqlxtism_Callvote, METH_VARARGS,
      "Calls a vote as if started by the server and not a player."},
-    {"allow_single_player", PyMinqlxtended_AllowSinglePlayer, METH_VARARGS,
+    {"allow_single_player", PyMinqlxtism_AllowSinglePlayer, METH_VARARGS,
      "Allows or disallows a game with only a single player in it to go on without forfeiting. Useful for race."},
-    {"player_spawn", PyMinqlxtended_PlayerSpawn, METH_VARARGS,
+    {"player_spawn", PyMinqlxtism_PlayerSpawn, METH_VARARGS,
      "Forces the player to spawn in the map (no matter the team!)"},
-    {"set_privileges", PyMinqlxtended_SetPrivileges, METH_VARARGS,
+    {"set_privileges", PyMinqlxtism_SetPrivileges, METH_VARARGS,
      "Sets a player's privileges. Does not persist."},
-    {"destroy_kamikaze_timers", PyMinqlxtended_DestroyKamikazeTimers, METH_NOARGS,
+    {"destroy_kamikaze_timers", PyMinqlxtism_DestroyKamikazeTimers, METH_NOARGS,
      "Removes all current kamikaze timers."},
-    {"spawn_item", PyMinqlxtended_SpawnItem, METH_VARARGS,
+    {"spawn_item", PyMinqlxtism_SpawnItem, METH_VARARGS,
      "Spawns item with specified coordinates."},
-    {"remove_dropped_items", PyMinqlxtended_RemoveDroppedItems, METH_NOARGS,
+    {"remove_dropped_items", PyMinqlxtism_RemoveDroppedItems, METH_NOARGS,
      "Removes all dropped items."},
-    {"slay_with_mod", PyMinqlxtended_SlayWithMod, METH_VARARGS,
+    {"slay_with_mod", PyMinqlxtism_SlayWithMod, METH_VARARGS,
      "Slay player with mean of death."},
-    {"replace_items", PyMinqlxtended_ReplaceItems, METH_VARARGS,
+    {"replace_items", PyMinqlxtism_ReplaceItems, METH_VARARGS,
      "Replaces target entity's item with specified one."},
-    {"dev_print_items", PyMinqlxtended_DevPrintItems, METH_NOARGS,
+    {"dev_print_items", PyMinqlxtism_DevPrintItems, METH_NOARGS,
      "Prints all items and entity numbers to server console."},
-    {"force_weapon_respawn_time", PyMinqlxtended_ForceWeaponRespawnTime, METH_VARARGS,
+    {"force_weapon_respawn_time", PyMinqlxtism_ForceWeaponRespawnTime, METH_VARARGS,
      "Force all weapons to have a specified respawn time, overriding custom map respawn times set for them."},
     {NULL, NULL, 0, NULL}};
 
-static PyModuleDef minqlxtendedModule = {
-    PyModuleDef_HEAD_INIT, "minqlxtended", NULL, -1, minqlxtendedMethods,
+static PyModuleDef minqlxtismModule = {
+    PyModuleDef_HEAD_INIT, "minqlxtism", NULL, -1, minqlxtismMethods,
     NULL, NULL, NULL, NULL};
 
-static PyObject* PyMinqlxtended_InitModule(void) {
-    PyObject* module = PyModule_Create(&minqlxtendedModule);
+static PyObject* PyMinqlxtism_InitModule(void) {
+    PyObject* module = PyModule_Create(&minqlxtismModule);
 
-    // Set minqlxtended version.
-    PyModule_AddStringConstant(module, "__version__", MINQLXTENDED_VERSION);
+    // Set minqlxtism version.
+    PyModule_AddStringConstant(module, "__version__", MINQLXTISM_VERSION);
 
 // Set IS_DEBUG.
 #ifndef NDEBUG
@@ -2174,19 +2174,19 @@ static PyObject* PyMinqlxtended_InitModule(void) {
     return module;
 }
 
-int PyMinqlxtended_IsInitialized(void) {
+int PyMinqlxtism_IsInitialized(void) {
     return initialized;
 }
 
-PyMinqlxtended_InitStatus_t PyMinqlxtended_Initialize(void) {
-    if (PyMinqlxtended_IsInitialized()) {
+PyMinqlxtism_InitStatus_t PyMinqlxtism_Initialize(void) {
+    if (PyMinqlxtism_IsInitialized()) {
         DebugPrint("%s was called while already initialized!\n", __func__);
         return PYM_ALREADY_INITIALIZED;
     }
 
     DebugPrint("Initializing Python...\n");
     Py_SetProgramName(PYTHON_FILENAME);
-    PyImport_AppendInittab("_minqlxtended", &PyMinqlxtended_InitModule);
+    PyImport_AppendInittab("_minqlxtism", &PyMinqlxtism_InitModule);
     Py_Initialize();
 #if PY_VERSION_HEX < ((3 << 24) | (7 << 16))
     PyEval_InitThreads();
@@ -2195,7 +2195,7 @@ PyMinqlxtended_InitStatus_t PyMinqlxtended_Initialize(void) {
     // Add the main module.
     PyObject* main_module = PyImport_AddModule("__main__");
     PyObject* main_dict   = PyModule_GetDict(main_module);
-    // Run script to load pyminqlxtended.
+    // Run script to load pyminqlxtism.
     PyObject* res = PyRun_String(loader, Py_file_input, main_dict, main_dict);
     if (res == NULL) {
         DebugPrint("PyRun_String() returned NULL. Did you modify the loader?\n");
@@ -2218,8 +2218,8 @@ PyMinqlxtended_InitStatus_t PyMinqlxtended_Initialize(void) {
     return PYM_SUCCESS;
 }
 
-PyMinqlxtended_InitStatus_t PyMinqlxtended_Finalize(void) {
-    if (!PyMinqlxtended_IsInitialized()) {
+PyMinqlxtism_InitStatus_t PyMinqlxtism_Finalize(void) {
+    if (!PyMinqlxtism_IsInitialized()) {
         DebugPrint("%s was called before being initialized!\n", __func__);
         return PYM_NOT_INITIALIZED_ERROR;
     }

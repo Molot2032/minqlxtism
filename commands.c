@@ -10,7 +10,7 @@
 #include "quake_common.h"
 
 #ifndef NOPY
-#include "pyminqlxtended.h"
+#include "pyminqlxtism.h"
 #endif
 
 void __cdecl SendServerCommand(void) {
@@ -123,7 +123,7 @@ void __cdecl StopFollowing(void) {
 }
 
 #ifndef NOPY
-// Execute a pyminqlxtended command as if it were the owner executing it.
+// Execute a pyminqlxtism command as if it were the owner executing it.
 // Output will appear in the console.
 void __cdecl PyRcon(void) {
     RconDispatcher(Cmd_Args());
@@ -137,7 +137,7 @@ void __cdecl PyCommand(void) {
 
     PyObject* result = PyObject_CallFunction(custom_command_handler, "s", Cmd_Args());
     if (result == Py_False) {
-        Com_Printf("The command failed to be executed. pyminqlxtended found no handler.\n");
+        Com_Printf("The command failed to be executed. pyminqlxtism found no handler.\n");
     }
 
     Py_XDECREF(result);
@@ -146,11 +146,11 @@ void __cdecl PyCommand(void) {
 
 void __cdecl RestartPython(void) {
     Com_Printf("Restarting Python...\n");
-    if (PyMinqlxtended_IsInitialized()) {
-        PyMinqlxtended_Finalize();
+    if (PyMinqlxtism_IsInitialized()) {
+        PyMinqlxtism_Finalize();
     }
-    PyMinqlxtended_Initialize();
-    // minqlxtended initializes after the first new game starts, but since the game already
+    PyMinqlxtism_Initialize();
+    // minqlxtism initializes after the first new game starts, but since the game already
     // start, we manually trigger the event to make it initialize properly.
     NewGameDispatcher(0);
 }

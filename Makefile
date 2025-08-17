@@ -13,40 +13,40 @@ endif
 
 BINDIR = bin
 CC = gcc
-CFLAGS += -shared -std=gnu11
-LDFLAGS_NOPY += -ldl
-LDFLAGS += $(shell (python3-config --libs --embed || python3-config --libs) | grep lpython)
+CFLAGS += -shared -std=gnu11 -I$(HOME)/.local/include
+LDFLAGS_NOPY += -ldl -L$(HOME)/.local/lib -lextism
+LDFLAGS += $(shell (python3-config --libs --embed || python3-config --libs) | grep lpython) -L$(HOME)/.local/lib -lextism
 SOURCES_NOPY += dllmain.c commands.c simple_hook.c hooks.c misc.c maps_parser.c trampoline.c patches.c
 SOURCES += dllmain.c commands.c python_embed.c python_dispatchers.c simple_hook.c hooks.c misc.c maps_parser.c trampoline.c patches.c
 OBJS = $(SOURCES:.c=.o)
 OBJS_DEBUG = $(SOURCES:.c=.o)
 OBJS_NOPY = $(SOURCES_NOPY:.c=.o)
-OUTPUT = $(BINDIR)/minqlxtended$(SUFFIX).so
-OUTPUT_DEBUG = $(BINDIR)/minqlxtended$(SUFFIX)_debug.so
-OUTPUT_NOPY = $(BINDIR)/minqlxtended_nopy.so
-PYMODULE = $(BINDIR)/minqlxtended.zip
-PYMODULE_DEBUG = $(BINDIR)/minqlxtended_debug.zip
-PYFILES = $(wildcard python/minqlxtended/*.py)
+OUTPUT = $(BINDIR)/minqlxtism$(SUFFIX).so
+OUTPUT_DEBUG = $(BINDIR)/minqlxtism$(SUFFIX)_debug.so
+OUTPUT_NOPY = $(BINDIR)/minqlxtism_nopy.so
+PYMODULE = $(BINDIR)/minqlxtism.zip
+PYMODULE_DEBUG = $(BINDIR)/minqlxtism_debug.zip
+PYFILES = $(wildcard python/minqlxtism/*.py)
 
 .PHONY: depend clean
 
 all: CFLAGS += $(shell python3-config --includes)
-all: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py)\"
+all: VERSION := MINQLXTISM_VERSION=\"$(shell python3 python/version.py)\"
 all: $(OUTPUT) $(PYMODULE)
 	@echo Done!
 
 debug: CFLAGS += $(shell python3-config --includes) -gdwarf-2 -Wall -O0 -fvar-tracking -DDEBUG
-debug: VERSION := MINQLXTENDED_VERSION=\"$(shell python3 python/version.py -d)\"
+debug: VERSION := MINQLXTISM_VERSION=\"$(shell python3 python/version.py -d)\"
 debug: $(OUTPUT_DEBUG) $(PYMODULE_DEBUG)
 	@echo Done!
 
 nopy: CFLAGS += -Wall -DNOPY
-nopy: VERSION := MINQLXTENDED_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
+nopy: VERSION := MINQLXTISM_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
 nopy: $(OUTPUT_NOPY)
 	@echo Done!
 
 nopy_debug: CFLAGS += -gdwarf-2 -Wall -O0 -DNOPY
-nopy_debug: VERSION := MINQLXTENDED_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
+nopy_debug: VERSION := MINQLXTISM_VERSION=\"$(shell git describe --long --tags --dirty --always)-nopy\"
 nopy_debug: $(OUTPUT_NOPY)
 	@echo Done!
 
@@ -60,10 +60,10 @@ $(OUTPUT_NOPY): $(OBJS_NOPY)
 	$(CC) $(CFLAGS) -D$(VERSION) -o $(OUTPUT_NOPY) $(OBJS_NOPY) $(LDFLAGS_NOPY)
 
 $(PYMODULE): $(PYFILES)
-	@python3 -m zipfile -c $(PYMODULE) python/minqlxtended
+	@python3 -m zipfile -c $(PYMODULE) python/minqlxtism
 
 $(PYMODULE_DEBUG): $(PYFILES)
-	@python3 -m zipfile -c $(PYMODULE_DEBUG) python/minqlxtended
+	@python3 -m zipfile -c $(PYMODULE_DEBUG) python/minqlxtism
 
 .c.o:
 	$(CC) $(CFLAGS) -D$(VERSION) -c $< -o $@

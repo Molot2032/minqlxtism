@@ -1,12 +1,12 @@
-#ifndef PYMINQLXTENDED_H
-#define PYMINQLXTENDED_H
+#ifndef PYMINQLXTISM_H
+#define PYMINQLXTISM_H
 
 #define PYTHON_FILENAME L"python3"
 
 #if DEBUG
-#define CORE_MODULE "minqlxtended_debug.zip"
+#define CORE_MODULE "minqlxtism_debug.zip"
 #else
-#define CORE_MODULE "minqlxtended.zip"
+#define CORE_MODULE "minqlxtism.zip"
 #endif
 
 #include <Python.h>
@@ -20,7 +20,7 @@ typedef enum {
     PYM_MAIN_SCRIPT_ERROR,
     PYM_ALREADY_INITIALIZED,
     PYM_NOT_INITIALIZED_ERROR
-} PyMinqlxtended_InitStatus_t;
+} PyMinqlxtism_InitStatus_t;
 
 // Used primarily in Python, but defined here and added using PyModule_AddIntMacro().
 enum {
@@ -39,9 +39,9 @@ enum {
     PRI_LOWEST
 };
 
-int PyMinqlxtended_IsInitialized(void);
-PyMinqlxtended_InitStatus_t PyMinqlxtended_Initialize(void);
-PyMinqlxtended_InitStatus_t PyMinqlxtended_Finalize(void);
+int PyMinqlxtism_IsInitialized(void);
+PyMinqlxtism_InitStatus_t PyMinqlxtism_Initialize(void);
+PyMinqlxtism_InitStatus_t PyMinqlxtism_Finalize(void);
 
 /*
  * Event handlers. Note that we're using simple PyObject pointers, meaning it only supports
@@ -97,4 +97,4 @@ void ClientSpawnDispatcher(int client_id);
 void KamikazeUseDispatcher(int client_id);
 void KamikazeExplodeDispatcher(int client_id, int is_used_on_demand);
 
-#endif /* PYMINQLXTENDED_H */
+#endif /* PYMINQLXTISM_H */

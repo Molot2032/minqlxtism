@@ -6,12 +6,15 @@
 #include <string.h>
 #include <time.h>
 
+#include <extism.h>
+#include <unistd.h>
+
 #include "common.h"
 #include "maps_parser.h"
 #include "patterns.h"
 #include "quake_common.h"
 #ifndef NOPY
-#include "pyminqlxtended.h"
+#include "pyminqlxtism.h"
 #endif
 
 // For comparison with the dedi's executable name to avoid segfaulting
@@ -186,6 +189,38 @@ void SearchVmFunctions(void) {
     }
 }
 
+static ExtismPlugin* count_vowels_plugin = NULL;
+
+void extism_hello_world(void) {
+    const char* manifest = "{\"wasm\": [{\"url\": "
+                           "\"https://github.com/extism/plugins/releases/latest/"
+                           "download/count_vowels.wasm\"}]}";
+
+    char* errmsg        = NULL;
+    count_vowels_plugin = extism_plugin_new(
+        (const uint8_t*)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+    if (count_vowels_plugin == NULL) {
+        fprintf(stderr, "ERROR: %s\n", errmsg);
+        extism_plugin_new_error_free(errmsg);
+        exit(1);
+    }
+}
+
+void print_plugin_output(ExtismPlugin* plugin, int32_t rc) {
+    if (rc != EXTISM_SUCCESS) {
+        fprintf(stderr, "ERROR: %s\n", extism_plugin_error(plugin));
+        return;
+    }
+
+    size_t outlen      = extism_plugin_output_length(plugin);
+    const uint8_t* out = extism_plugin_output_data(plugin);
+    write(STDOUT_FILENO, out, outlen);
+}
+
+void __cdecl xtism_count_vowels(void) {
+    print_plugin_output(count_vowels_plugin, extism_plugin_call(count_vowels_plugin, "count_vowels", (const uint8_t*)Cmd_Args(), strlen(Cmd_Args())));
+}
+
 // Currently called by My_Cmd_AddCommand(), since it's called at a point where we
 // can safely do whatever we do below. It'll segfault if we do it at the entry
 // point, since functions like Cmd_AddCommand need initialization first.
@@ -210,12 +245,14 @@ void InitializeStatic(void) {
 
 #ifndef NOPY
     // Initialize Python and run the main script.
-    PyMinqlxtended_InitStatus_t res = PyMinqlxtended_Initialize();
+    PyMinqlxtism_InitStatus_t res = PyMinqlxtism_Initialize();
     if (res != PYM_SUCCESS) {
         DebugPrint("Python initialization failed: %d\n", res);
         exit(1);
     }
 #endif
+
+    Cmd_AddCommand("count_vowels", xtism_count_vowels);
 
     common_initialized = 1;
 }
@@ -248,6 +285,8 @@ __attribute__((constructor)) void EntryPoint(void) {
     if (strcmp(__progname, qzeroded)) {
         return;
     }
+
+    extism_hello_world(); // temporary for testing
 
     SearchFunctions();
 

@@ -1,4 +1,4 @@
-name: minqlxtended build
+name: minqlxtism build
 on:
   push:
     branches: [ master ]

@@ -13,7 +13,7 @@
 #include "simple_hook.h"
 
 #ifndef NOPY
-#include "pyminqlxtended.h"
+#include "pyminqlxtism.h"
 #endif
 
 // qagame module.
@@ -175,7 +175,7 @@ void __cdecl My_SV_SpawnServer(char* server, qboolean killBots) {
     skipFrameDispatcher = qfalse;
 
     // We call NewGameDispatcher here instead of G_InitGame when it's not just a map_restart,
-    // otherwise configstring 0 and such won't be initialized and we can't instantiate minqlxtended.Game.
+    // otherwise configstring 0 and such won't be initialized and we can't instantiate minqlxtism.Game.
     NewGameDispatcher(qfalse);
 }
 
@@ -383,7 +383,7 @@ void HookVm(void) {
 /////////////
 
 static void SetTag(void) {
-    // Add minqlxtended tag.
+    // Add minqlxtism tag.
     char tags[1024]; // Surely 1024 is enough?
     cvar_t* sv_tags = Cvar_FindVar("sv_tags");
     if (strlen(sv_tags->string) > 2) { // Does it already have tags?

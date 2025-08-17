@@ -1,27 +1,27 @@
-# minqlxtended - Extends Quake Live's dedicated server with extra functionality and scripting.
+# minqlxtism - Extends Quake Live's dedicated server with extra functionality and scripting.
 # Copyright (C) 2015 Mino <mino@minomino.org>
 
-# This file is part of minqlxtended.
+# This file is part of minqlxtism.
 
-# minqlxtended is free software: you can redistribute it and/or modify
+# minqlxtism is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# minqlxtended is distributed in the hope that it will be useful,
+# minqlxtism is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with minqlxtended. If not, see <http://www.gnu.org/licenses/>.
+# along with minqlxtism. If not, see <http://www.gnu.org/licenses/>.
 
 
 # Since this isn't the actual module, we define it here and export
-# it later so that it can be accessed with minqlxtended.__doc__ by Sphinx.
+# it later so that it can be accessed with minqlxtism.__doc__ by Sphinx.
 
-import minqlxtended
-import minqlxtended.database
+import minqlxtism
+import minqlxtism.database
 import collections
 import subprocess
 import threading
@@ -37,7 +37,7 @@ import os
 from logging.handlers import RotatingFileHandler
 
 if sys.version_info < (3, 9):
-    raise AssertionError("Only Python 3.9 and later is supported by minqlxtended")
+    raise AssertionError("Only Python 3.9 and later is supported by minqlxtism")
 
 # Team number -> string
 TEAMS = collections.OrderedDict(enumerate(("free", "red", "blue", "spectator")))
@@ -105,7 +105,7 @@ def parse_variables(infostring: str):
             res[vars[i]] = vars[i + 1]
     except IndexError:
         # Log and return incomplete dict.
-        logger = minqlxtended.get_logger()
+        logger = minqlxtism.get_logger()
         logger.warning("Uneven number of keys and values: {}".format(infostring))
 
     return res
@@ -133,29 +133,29 @@ def get_logger(plugin=None):
     as well as to a file.
 
     :param plugin: The plugin that is using the logger.
-    :type plugin: minqlxtended.Plugin
+    :type plugin: minqlxtism.Plugin
     :returns: logging.Logger -- The logger in question.
     """
     if plugin:
-        return logging.getLogger("minqlxtended." + str(plugin))
+        return logging.getLogger("minqlxtism." + str(plugin))
     else:
-        return logging.getLogger("minqlxtended")
+        return logging.getLogger("minqlxtism")
 
 
 def _configure_logger():
-    logger = logging.getLogger("minqlxtended")
+    logger = logging.getLogger("minqlxtism")
     logger.setLevel(logging.DEBUG)
 
     # File
-    file_path = os.path.join(minqlxtended.get_cvar("fs_homepath"), "minqlxtended.log")
-    maxlogs = minqlxtended.Plugin.get_cvar("qlx_logs", int)
-    maxlogsize = minqlxtended.Plugin.get_cvar("qlx_logsSize", int)
+    file_path = os.path.join(minqlxtism.get_cvar("fs_homepath"), "minqlxtism.log")
+    maxlogs = minqlxtism.Plugin.get_cvar("qlx_logs", int)
+    maxlogsize = minqlxtism.Plugin.get_cvar("qlx_logsSize", int)
     file_fmt = logging.Formatter("(%(asctime)s) [%(levelname)s @ %(name)s.%(funcName)s] %(message)s", "%H:%M:%S")
     file_handler = RotatingFileHandler(file_path, encoding="utf-8", maxBytes=maxlogsize, backupCount=maxlogs)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(file_fmt)
     logger.addHandler(file_handler)
-    logger.info("============================= minqlxtended run @ {} =============================".format(datetime.datetime.now()))
+    logger.info("============================= minqlxtism run @ {} =============================".format(datetime.datetime.now()))
 
     # Console
     console_fmt = logging.Formatter("[%(name)s.%(funcName)s] %(levelname)s: %(message)s", "%H:%M:%S")
@@ -170,7 +170,7 @@ def log_exception(plugin=None):
     Logs an exception using :func:`get_logger`. Call this in an except block.
 
     :param plugin: The plugin that is using the logger.
-    :type plugin: minqlxtended.Plugin
+    :type plugin: minqlxtism.Plugin
     """
     # TODO: Remove plugin arg and make it automatic.
     logger = get_logger(plugin)
@@ -203,12 +203,12 @@ def uptime():
 def owner():
     """Returns the SteamID64 of the owner. This is set in the config."""
     try:
-        sid = int(minqlxtended.get_cvar("qlx_owner"))
+        sid = int(minqlxtism.get_cvar("qlx_owner"))
         if sid == -1:
             raise RuntimeError
         return sid
     except:
-        logger = minqlxtended.get_logger()
+        logger = minqlxtism.get_logger()
         logger.error("Failed to parse the Owner Steam ID. Make sure it's in SteamID64 format.")
 
 
@@ -216,21 +216,21 @@ _stats = None
 
 
 def stats_listener():
-    """Returns the :class:`minqlxtended.StatsListener` instance used to listen for stats."""
+    """Returns the :class:`minqlxtism.StatsListener` instance used to listen for stats."""
     return _stats
 
 
 def set_cvar_once(name, value, flags=0):
-    if minqlxtended.get_cvar(name) is None:
-        minqlxtended.set_cvar(name, value, flags)
+    if minqlxtism.get_cvar(name) is None:
+        minqlxtism.set_cvar(name, value, flags)
         return True
 
     return False
 
 
 def set_cvar_limit_once(name, value, minimum, maximum, flags=0):
-    if minqlxtended.get_cvar(name) is None:
-        minqlxtended.set_cvar_limit(name, value, minimum, maximum, flags)
+    if minqlxtism.get_cvar(name) is None:
+        minqlxtism.set_cvar_limit(name, value, minimum, maximum, flags)
         return True
 
     return False
@@ -248,7 +248,7 @@ def set_plugins_version(path):
         p = subprocess.Popen(args_version, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=path, env=env)
         p.wait(timeout=1)
         if p.returncode != 0:
-            setattr(minqlxtended, "__plugins_version__", "NOT_SET")
+            setattr(minqlxtism, "__plugins_version__", "NOT_SET")
             return
 
         version = p.stdout.read().decode().strip()
@@ -257,33 +257,33 @@ def set_plugins_version(path):
         p = subprocess.Popen(args_branch, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=path, env=env)
         p.wait(timeout=1)
         if p.returncode != 0:
-            setattr(minqlxtended, "__plugins_version__", version)
+            setattr(minqlxtism, "__plugins_version__", version)
             return
 
         branch = p.stdout.read().decode().strip()
     except (FileNotFoundError, subprocess.TimeoutExpired):
-        setattr(minqlxtended, "__plugins_version__", "NOT_SET")
+        setattr(minqlxtism, "__plugins_version__", "NOT_SET")
         return
 
-    setattr(minqlxtended, "__plugins_version__", "{}-{}".format(version, branch))
+    setattr(minqlxtism, "__plugins_version__", "{}-{}".format(version, branch))
 
 
 def set_map_subtitles():
     # We save the actual values before setting them so that we can retrieve them in Game.
-    setattr(minqlxtended, "_map_title", minqlxtended.get_configstring(3))
-    setattr(minqlxtended, "_map_subtitle1", minqlxtended.get_configstring(678))
-    setattr(minqlxtended, "_map_subtitle2", minqlxtended.get_configstring(679))
+    setattr(minqlxtism, "_map_title", minqlxtism.get_configstring(3))
+    setattr(minqlxtism, "_map_subtitle1", minqlxtism.get_configstring(678))
+    setattr(minqlxtism, "_map_subtitle2", minqlxtism.get_configstring(679))
 
-    cs = minqlxtended.get_configstring(678)
+    cs = minqlxtism.get_configstring(678)
     if cs:
         cs += " - "
-    minqlxtended.set_configstring(
-        678, cs + "Running minqlxtended ^6{}^7 with plugins ^6{}^7.".format(minqlxtended.__version__, minqlxtended.__plugins_version__)
+    minqlxtism.set_configstring(
+        678, cs + "Running minqlxtism ^6{}^7 with plugins ^6{}^7.".format(minqlxtism.__version__, minqlxtism.__plugins_version__)
     )
-    cs = minqlxtended.get_configstring(679)
+    cs = minqlxtism.get_configstring(679)
     if cs:
         cs += " - "
-    minqlxtended.set_configstring(679, cs + "Check ^6http://github.com/tjone270/minqlxtended^7 for more details.")
+    minqlxtism.set_configstring(679, cs + "Check ^6http://github.com/tjone270/minqlxtism^7 for more details.")
 
 
 # ====================================================================
@@ -293,7 +293,7 @@ def set_map_subtitles():
 
 def next_frame(func):
     def f(*args, **kwargs):
-        minqlxtended.next_frame_tasks.append((func, args, kwargs))
+        minqlxtism.next_frame_tasks.append((func, args, kwargs))
 
     return f
 
@@ -315,7 +315,7 @@ def delay(time):
 
     def wrap(func):
         def f(*args, **kwargs):
-            minqlxtended.frame_tasks.enter(time, 0, func, args, kwargs)
+            minqlxtism.frame_tasks.enter(time, 0, func, args, kwargs)
 
         return f
 
@@ -323,7 +323,7 @@ def delay(time):
 
 
 _thread_count = 0
-_thread_name = "minqlxtendedthread"
+_thread_name = "minqlxtismthread"
 
 
 def thread(func, force=False):
@@ -372,7 +372,7 @@ class PluginUnloadError(Exception):
 
 def load_preset_plugins():
     plugins_temp = []
-    for p in minqlxtended.Plugin.get_cvar("qlx_plugins", list):
+    for p in minqlxtism.Plugin.get_cvar("qlx_plugins", list):
         if p == "DEFAULT":
             plugins_temp += list(DEFAULT_PLUGINS)
         else:
@@ -383,7 +383,7 @@ def load_preset_plugins():
         if p not in plugins:
             plugins.append(p)
 
-    plugins_path = os.path.abspath(minqlxtended.get_cvar("qlx_pluginsPath"))
+    plugins_path = os.path.abspath(minqlxtism.get_cvar("qlx_pluginsPath"))
     plugins_dir = os.path.basename(plugins_path)
 
     if os.path.isdir(plugins_path):
@@ -397,8 +397,8 @@ def load_preset_plugins():
 def load_plugin(plugin):
     logger = get_logger(None)
     logger.info("Loading plugin '{}'...".format(plugin))
-    plugins = minqlxtended.Plugin._loaded_plugins
-    plugins_path = os.path.abspath(minqlxtended.get_cvar("qlx_pluginsPath"))
+    plugins = minqlxtism.Plugin._loaded_plugins
+    plugins_path = os.path.abspath(minqlxtism.get_cvar("qlx_pluginsPath"))
     plugins_dir = os.path.basename(plugins_path)
 
     if not os.path.isfile(os.path.join(plugins_path, plugin + ".py")):
@@ -415,10 +415,10 @@ def load_plugin(plugin):
             raise (PluginLoadError("The plugin needs to have a class with the exact name as the file, minus the .py."))
 
         plugin_class = getattr(module, plugin)
-        if issubclass(plugin_class, minqlxtended.Plugin):
+        if issubclass(plugin_class, minqlxtism.Plugin):
             plugins[plugin] = plugin_class()
         else:
-            raise (PluginLoadError("Attempted to load a plugin that is not a subclass of 'minqlxtended.Plugin'."))
+            raise (PluginLoadError("Attempted to load a plugin that is not a subclass of 'minqlxtism.Plugin'."))
     except:
         log_exception(plugin)
         raise
@@ -427,10 +427,10 @@ def load_plugin(plugin):
 def unload_plugin(plugin):
     logger = get_logger(None)
     logger.info("Unloading plugin '{}'...".format(plugin))
-    plugins = minqlxtended.Plugin._loaded_plugins
+    plugins = minqlxtism.Plugin._loaded_plugins
     if plugin in plugins:
         try:
-            minqlxtended.EVENT_DISPATCHERS["unload"].dispatch(plugin)
+            minqlxtism.EVENT_DISPATCHERS["unload"].dispatch(plugin)
 
             # Unhook its hooks.
             for hook in plugins[plugin].hooks:
@@ -466,19 +466,19 @@ def reload_plugin(plugin):
 
 def initialize_cvars():
     # Core
-    minqlxtended.set_cvar_once("qlx_owner", "-1")
-    minqlxtended.set_cvar_once("qlx_plugins", ", ".join(DEFAULT_PLUGINS))
-    minqlxtended.set_cvar_once("qlx_pluginsPath", "minqlxtended-plugins")
-    minqlxtended.set_cvar_once("qlx_database", "Redis")
-    minqlxtended.set_cvar_once("qlx_commandPrefix", "!")
-    minqlxtended.set_cvar_once("qlx_logs", "2")
-    minqlxtended.set_cvar_once("qlx_logsSize", str(3 * 10**6))  # 3 MB
+    minqlxtism.set_cvar_once("qlx_owner", "-1")
+    minqlxtism.set_cvar_once("qlx_plugins", ", ".join(DEFAULT_PLUGINS))
+    minqlxtism.set_cvar_once("qlx_pluginsPath", "minqlxtism-plugins")
+    minqlxtism.set_cvar_once("qlx_database", "Redis")
+    minqlxtism.set_cvar_once("qlx_commandPrefix", "!")
+    minqlxtism.set_cvar_once("qlx_logs", "2")
+    minqlxtism.set_cvar_once("qlx_logsSize", str(3 * 10**6))  # 3 MB
     # Redis
-    minqlxtended.set_cvar_once("qlx_redisAddress", "127.0.0.1")
-    minqlxtended.set_cvar_once("qlx_redisDatabase", "0")
-    minqlxtended.set_cvar_once("qlx_redisProtocol", "3")
-    minqlxtended.set_cvar_once("qlx_redisUnixSocket", "0")
-    minqlxtended.set_cvar_once("qlx_redisPassword", "")
+    minqlxtism.set_cvar_once("qlx_redisAddress", "127.0.0.1")
+    minqlxtism.set_cvar_once("qlx_redisDatabase", "0")
+    minqlxtism.set_cvar_once("qlx_redisProtocol", "3")
+    minqlxtism.set_cvar_once("qlx_redisUnixSocket", "0")
+    minqlxtism.set_cvar_once("qlx_redisPassword", "")
 
 
 # ====================================================================
@@ -487,7 +487,7 @@ def initialize_cvars():
 
 
 def initialize():
-    minqlxtended.register_handlers()
+    minqlxtism.register_handlers()
 
 
 def late_init():
@@ -495,15 +495,15 @@ def late_init():
     its own initialization.
 
     """
-    minqlxtended.initialize_cvars()
+    minqlxtism.initialize_cvars()
 
     # Set the default database plugins should use.
     # TODO: Make Plugin.database setting generic.
-    if minqlxtended.get_cvar("qlx_database").lower() == "redis":
-        minqlxtended.Plugin.database = minqlxtended.database.Redis
+    if minqlxtism.get_cvar("qlx_database").lower() == "redis":
+        minqlxtism.Plugin.database = minqlxtism.database.Redis
 
-    # Get the plugins path and set minqlxtended.__plugins_version__.
-    plugins_path = os.path.abspath(minqlxtended.get_cvar("qlx_pluginsPath"))
+    # Get the plugins path and set minqlxtism.__plugins_version__.
+    plugins_path = os.path.abspath(minqlxtism.get_cvar("qlx_pluginsPath"))
     set_plugins_version(plugins_path)
 
     # Initialize the logger now that we have fs_basepath.
@@ -521,9 +521,9 @@ def late_init():
     logger.info("Loading preset plugins...")
     load_preset_plugins()
 
-    if bool(int(minqlxtended.get_cvar("zmq_stats_enable"))):
+    if bool(int(minqlxtism.get_cvar("zmq_stats_enable"))):
         global _stats
-        _stats = minqlxtended.StatsListener()
+        _stats = minqlxtism.StatsListener()
         logger.info("Stats listener started on {}.".format(_stats.address))
         # Start polling. Not blocking due to decorator magic. Aw yeah.
         _stats.keep_receiving()

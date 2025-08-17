@@ -1,22 +1,22 @@
-# minqlxtended - Extends Quake Live's dedicated server with extra functionality and scripting.
+# minqlxtism - Extends Quake Live's dedicated server with extra functionality and scripting.
 # Copyright (C) 2015 Mino <mino@minomino.org>
 
-# This file is part of minqlxtended.
+# This file is part of minqlxtism.
 
-# minqlxtended is free software: you can redistribute it and/or modify
+# minqlxtism is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# minqlxtended is distributed in the hope that it will be useful,
+# minqlxtism is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with minqlxtended. If not, see <http://www.gnu.org/licenses/>.
+# along with minqlxtism. If not, see <http://www.gnu.org/licenses/>.
 
-import minqlxtended
+import minqlxtism
 import re
 
 MAX_MSG_LENGTH = 1000
@@ -55,14 +55,14 @@ class Command:
         self.usage = usage
 
     def execute(self, player, msg, channel):
-        logger = minqlxtended.get_logger(self.plugin)
+        logger = minqlxtism.get_logger(self.plugin)
         logger.debug("{} executed: {} @ {} -> {}"
             .format(player.steam_id, self.name[0], self.plugin.name, channel))
         return self.handler(player, msg.split(), channel)
 
     def is_eligible_name(self, name):
         if self.prefix:
-            prefix = minqlxtended.get_cvar("qlx_commandPrefix")
+            prefix = minqlxtism.get_cvar("qlx_commandPrefix")
             if not name.startswith(prefix):
                 return False
             name = name[len(prefix):]
@@ -89,15 +89,15 @@ class Command:
         client_cmd_perm = self.client_cmd_perm
 
         if is_client_cmd:
-            cvar_client_cmd = minqlxtended.get_cvar("qlx_ccmd_perm_" + self.name[0])
+            cvar_client_cmd = minqlxtism.get_cvar("qlx_ccmd_perm_" + self.name[0])
             if cvar_client_cmd:
                 client_cmd_perm = int(cvar_client_cmd)
         else:
-            cvar = minqlxtended.get_cvar("qlx_perm_" + self.name[0])
+            cvar = minqlxtism.get_cvar("qlx_perm_" + self.name[0])
             if cvar:
                 perm = int(cvar)
 
-        if (player.steam_id == minqlxtended.owner() or
+        if (player.steam_id == minqlxtism.owner() or
             (not is_client_cmd and perm == 0) or
             (is_client_cmd and client_cmd_perm == 0)):
             return True
@@ -169,21 +169,21 @@ class CommandInvoker:
                         pass_through = cmd.client_cmd_pass
 
                     # Dispatch "command" and allow people to stop it from being executed.
-                    if minqlxtended.EVENT_DISPATCHERS["command"].dispatch(player, cmd, msg) is False:
+                    if minqlxtism.EVENT_DISPATCHERS["command"].dispatch(player, cmd, msg) is False:
                         return True
 
                     res = cmd.execute(player, msg, channel)
-                    if res == minqlxtended.RET_STOP:
+                    if res == minqlxtism.RET_STOP:
                         return
-                    elif res == minqlxtended.RET_STOP_EVENT:
+                    elif res == minqlxtism.RET_STOP_EVENT:
                         pass_through = False
-                    elif res == minqlxtended.RET_STOP_ALL:
+                    elif res == minqlxtism.RET_STOP_ALL:
                         # C-level dispatchers expect False if it shouldn't go to the engine.
                         return False
-                    elif res == minqlxtended.RET_USAGE and cmd.usage:
+                    elif res == minqlxtism.RET_USAGE and cmd.usage:
                         channel.reply("^7Usage: ^6{} {}".format(name, cmd.usage))
-                    elif res is not None and res != minqlxtended.RET_NONE:
-                        logger = minqlxtended.get_logger(None)
+                    elif res is not None and res != minqlxtism.RET_NONE:
+                        logger = minqlxtism.get_logger(None)
                         logger.warning("Command '{}' with handler '{}' returned an unknown return value: {}"
                             .format(cmd.name, cmd.handler.__name__, res))
 
@@ -274,7 +274,7 @@ class ChatChannel(AbstractChannel):
         self.fmt = "print \"{}\n\"\n"
         self.team = "all"
 
-    @minqlxtended.next_frame
+    @minqlxtism.next_frame
     def reply(self, msg, limit=100, delimiter=" "):
         # We convert whatever we got to a string and replace all double quotes
         # to single quotes, since the engine doesn't support escaping them.
@@ -284,14 +284,14 @@ class ChatChannel(AbstractChannel):
         last_color = ""
         targets = None
 
-        if isinstance(self, minqlxtended.TellChannel):
-            cid = minqlxtended.Plugin.client_id(self.recipient)
+        if isinstance(self, minqlxtism.TellChannel):
+            cid = minqlxtism.Plugin.client_id(self.recipient)
             if cid is None:
                 raise ValueError("Invalid recipient.")
             targets = [cid]
         elif self.team != "all":
             targets = []
-            for p in minqlxtended.Player.all_players():
+            for p in minqlxtism.Player.all_players():
                 if p.team == self.team:
                     targets.append(p.id)
 
@@ -311,10 +311,10 @@ class ChatChannel(AbstractChannel):
 
         for s in joined_msgs:
             if not targets:
-                minqlxtended.send_server_command(None, self.fmt.format(last_color + s))
+                minqlxtism.send_server_command(None, self.fmt.format(last_color + s))
             else:
                 for cid in targets:
-                    minqlxtended.send_server_command(cid, self.fmt.format(last_color + s))
+                    minqlxtism.send_server_command(cid, self.fmt.format(last_color + s))
 
             find = re_color_tag.findall(s)
             if find:
@@ -359,7 +359,7 @@ class TellChannel(ChatChannel):
         self.recipient = player
 
     def __repr__(self):
-        return "tell {}".format(minqlxtended.Plugin.player(self.recipient).steam_id)
+        return "tell {}".format(minqlxtism.Plugin.player(self.recipient).steam_id)
 
 class ConsoleChannel(AbstractChannel):
     """A channel that prints to the console."""
@@ -367,7 +367,7 @@ class ConsoleChannel(AbstractChannel):
         super().__init__("console")
 
     def reply(self, msg):
-        minqlxtended.console_print(str(msg))
+        minqlxtism.console_print(str(msg))
 
 class ClientCommandChannel(AbstractChannel):
     """Wraps a TellChannel, but with its own name."""
@@ -377,7 +377,7 @@ class ClientCommandChannel(AbstractChannel):
         self.tell_channel = TellChannel(player)
 
     def __repr__(self):
-        return "client_command {}".format(minqlxtended.Plugin.player(self.recipient).id)
+        return "client_command {}".format(minqlxtism.Plugin.player(self.recipient).id)
 
     def reply(self, msg, limit=100, delimiter=" "):
         self.tell_channel.reply(msg, limit, delimiter)

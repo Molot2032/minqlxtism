@@ -1,6 +1,6 @@
 #include <Python.h>
 
-#include "pyminqlxtended.h"
+#include "pyminqlxtism.h"
 #include "quake_common.h"
 
 int allow_free_client = -1;
@@ -87,7 +87,7 @@ char* ClientConnectDispatcher(int client_id, int is_bot) {
 
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // Tell PyMinqlxtended_PlayerInfo it's OK to get player info for someone with CS_FREE.
+    // Tell PyMinqlxtism_PlayerInfo it's OK to get player info for someone with CS_FREE.
     allow_free_client = client_id;
     PyObject* result  = PyObject_CallFunction(client_connect_handler, "iO", client_id, is_bot ? Py_True : Py_False);
     allow_free_client = -1;
@@ -115,7 +115,7 @@ void ClientDisconnectDispatcher(int client_id, const char* reason) {
 
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // Tell PyMinqlxtended_PlayerInfo it's OK to get player info for someone with CS_FREE.
+    // Tell PyMinqlxtism_PlayerInfo it's OK to get player info for someone with CS_FREE.
     allow_free_client = client_id;
     PyObject* result  = PyObject_CallFunction(client_disconnect_handler, "is", client_id, reason);
     allow_free_client = -1;

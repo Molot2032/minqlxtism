@@ -1,26 +1,26 @@
-# minqlxtended - Extends Quake Live's dedicated server with extra functionality and scripting.
+# minqlxtism - Extends Quake Live's dedicated server with extra functionality and scripting.
 # Copyright (C) 2015 Mino <mino@minomino.org>
 
-# This file is part of minqlxtended.
+# This file is part of minqlxtism.
 
-# minqlxtended is free software: you can redistribute it and/or modify
+# minqlxtism is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# minqlxtended is distributed in the hope that it will be useful,
+# minqlxtism is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with minqlxtended. If not, see <http://www.gnu.org/licenses/>.
+# along with minqlxtism. If not, see <http://www.gnu.org/licenses/>.
 
 
 # Since this isn't the actual module, we define it here and export
-# it later so that it can be accessed with minqlxtended.__doc__ by Sphinx.
+# it later so that it can be accessed with minqlxtism.__doc__ by Sphinx.
 
-import minqlxtended
+import minqlxtism
 
 class NonexistentGameError(Exception):
     """An exception raised when accessing properties on an invalid game."""
@@ -33,7 +33,7 @@ class Game():
     def __init__(self, cached=True):
         self.cached = cached
         self._valid = True
-        cs = minqlxtended.get_configstring(0)
+        cs = minqlxtism.get_configstring(0)
         if not cs:
             self._valid = False
             raise NonexistentGameError("Tried to instantiate a game while no game is active.")
@@ -51,21 +51,21 @@ class Game():
             return "Invalid game"
 
     def __contains__(self, key):
-        cs = minqlxtended.get_configstring(0)
+        cs = minqlxtism.get_configstring(0)
         if not cs:
             self._valid = False
             raise NonexistentGameError("Invalid game. Is the server loading a new map?")
             
-        cvars = minqlxtended.parse_variables(cs)
+        cvars = minqlxtism.parse_variables(cs)
         return key in cvars
 
     def __getitem__(self, key):
-        cs = minqlxtended.get_configstring(0)
+        cs = minqlxtism.get_configstring(0)
         if not cs:
             self._valid = False
             raise NonexistentGameError("Invalid game. Is the server loading a new map?")
 
-        cvars = minqlxtended.parse_variables(cs)
+        cvars = minqlxtism.parse_variables(cs)
         return cvars[key]
 
     @property
@@ -74,15 +74,15 @@ class Game():
         cvars might not have attributes on this class, this could be useful.
 
         """
-        return minqlxtended.parse_variables(minqlxtended.get_configstring(0))
+        return minqlxtism.parse_variables(minqlxtism.get_configstring(0))
 
     @property
     def type(self):
-        return minqlxtended.GAMETYPES[int(self["g_gametype"])]
+        return minqlxtism.GAMETYPES[int(self["g_gametype"])]
 
     @property
     def type_short(self):
-        return minqlxtended.GAMETYPES_SHORT[int(self["g_gametype"])]
+        return minqlxtism.GAMETYPES_SHORT[int(self["g_gametype"])]
 
     @property
     def map(self):
@@ -91,30 +91,30 @@ class Game():
 
     @map.setter
     def map(self, value):
-        minqlxtended.console_command("map {}".format(value))
+        minqlxtism.console_command("map {}".format(value))
 
     @property
     def map_title(self):
         """The full name of the map. Ex.: ``Longest Yard``."""
-        return minqlxtended._map_title
+        return minqlxtism._map_title
 
     @property
     def map_subtitle1(self):
         """The map's subtitle. Usually either empty or has the author's name."""
-        return minqlxtended._map_subtitle1
+        return minqlxtism._map_subtitle1
 
     @property
     def map_subtitle2(self):
         """The map's second subtitle. Usually either empty or has the author's name."""
-        return minqlxtended._map_subtitle2
+        return minqlxtism._map_subtitle2
 
     @property
     def red_score(self):
-        return int(minqlxtended.get_configstring(6))
+        return int(minqlxtism.get_configstring(6))
 
     @property
     def blue_score(self):
-        return int(minqlxtended.get_configstring(7))
+        return int(minqlxtism.get_configstring(7))
 
     @property
     def state(self):
@@ -134,7 +134,7 @@ class Game():
         elif s == "IN_PROGRESS":
             return "in_progress"
         else:
-            logger = minqlxtended.get_logger()
+            logger = minqlxtism.get_logger()
             logger.warning("Got unknown game state: {}".format(s))
             return s
 
@@ -144,7 +144,7 @@ class Game():
 
     @factory.setter
     def factory(self, value):
-        minqlxtended.console_command("map {} {}".format(self.map, value))
+        minqlxtism.console_command("map {} {}".format(self.map, value))
 
     @property
     def factory_title(self):
@@ -156,7 +156,7 @@ class Game():
 
     @hostname.setter
     def hostname(self, value):
-        minqlxtended.set_cvar("sv_hostname", str(value))
+        minqlxtism.set_cvar("sv_hostname", str(value))
 
     @property
     def instagib(self):
@@ -165,9 +165,9 @@ class Game():
     @instagib.setter
     def instagib(self, value):
         if isinstance(value, bool):
-            minqlxtended.set_cvar("g_instaGib", str(int(value)))
+            minqlxtism.set_cvar("g_instaGib", str(int(value)))
         elif value == 0 or value == 1:
-            minqlxtended.set_cvar("g_instaGib", str(value))
+            minqlxtism.set_cvar("g_instaGib", str(value))
         else:
             raise ValueError("instagib needs to be 0, 1, or a bool.")
 
@@ -178,9 +178,9 @@ class Game():
     @loadout.setter
     def loadout(self, value):
         if isinstance(value, bool):
-            minqlxtended.set_cvar("g_loadout", str(int(value)))
+            minqlxtism.set_cvar("g_loadout", str(int(value)))
         elif value == 0 or value == 1:
-            minqlxtended.set_cvar("g_loadout", str(value))
+            minqlxtism.set_cvar("g_loadout", str(value))
         else:
             raise ValueError("loadout needs to be 0, 1, or a bool.")
 
@@ -190,7 +190,7 @@ class Game():
 
     @maxclients.setter
     def maxclients(self, new_limit):
-        minqlxtended.set_cvar("sv_maxclients", str(new_limit))
+        minqlxtism.set_cvar("sv_maxclients", str(new_limit))
 
     @property
     def timelimit(self):
@@ -198,7 +198,7 @@ class Game():
 
     @timelimit.setter
     def timelimit(self, new_limit):
-        minqlxtended.set_cvar("timelimit", str(new_limit))
+        minqlxtism.set_cvar("timelimit", str(new_limit))
 
     @property
     def fraglimit(self):
@@ -206,7 +206,7 @@ class Game():
 
     @fraglimit.setter
     def fraglimit(self, new_limit):
-        minqlxtended.set_cvar("fraglimit", str(new_limit))
+        minqlxtism.set_cvar("fraglimit", str(new_limit))
 
     @property
     def roundlimit(self):
@@ -214,7 +214,7 @@ class Game():
 
     @roundlimit.setter
     def roundlimit(self, new_limit):
-        minqlxtended.set_cvar("roundlimit", str(new_limit))
+        minqlxtism.set_cvar("roundlimit", str(new_limit))
 
     @property
     def roundtimelimit(self):
@@ -222,7 +222,7 @@ class Game():
 
     @roundtimelimit.setter
     def roundtimelimit(self, new_limit):
-        minqlxtended.set_cvar("roundtimelimit", str(new_limit))
+        minqlxtism.set_cvar("roundtimelimit", str(new_limit))
 
     @property
     def scorelimit(self):
@@ -230,7 +230,7 @@ class Game():
 
     @scorelimit.setter
     def scorelimit(self, new_limit):
-        minqlxtended.set_cvar("scorelimit", str(new_limit))
+        minqlxtism.set_cvar("scorelimit", str(new_limit))
 
     @property
     def capturelimit(self):
@@ -238,7 +238,7 @@ class Game():
 
     @capturelimit.setter
     def capturelimit(self, new_limit):
-        minqlxtended.set_cvar("capturelimit", str(new_limit))
+        minqlxtism.set_cvar("capturelimit", str(new_limit))
 
     @property
     def teamsize(self):
@@ -246,35 +246,35 @@ class Game():
 
     @teamsize.setter
     def teamsize(self, new_size):
-        minqlxtended.set_cvar("teamsize", str(new_size))
+        minqlxtism.set_cvar("teamsize", str(new_size))
 
     @property
     def tags(self):
-        return minqlxtended.get_cvar("sv_tags").split(",")
+        return minqlxtism.get_cvar("sv_tags").split(",")
 
     @tags.setter
     def tags(self, new_tags):
         if isinstance(new_tags, str):
-            minqlxtended.set_cvar("sv_tags", new_tags)
+            minqlxtism.set_cvar("sv_tags", new_tags)
         elif hasattr(new_tags, "__iter__"):
-            minqlxtended.set_cvar("sv_tags", ",".join(new_tags))
+            minqlxtism.set_cvar("sv_tags", ",".join(new_tags))
         else:
             raise ValueError("tags need to be a string or an iterable returning strings.")
 
     @property
     def workshop_items(self):
-        return [int(i) for i in minqlxtended.get_configstring(715).split()]
+        return [int(i) for i in minqlxtism.get_configstring(715).split()]
 
     @workshop_items.setter
     def workshop_items(self, new_items):
         if hasattr(new_items, "__iter__"):
-            minqlxtended.set_configstring(715, " ".join([str(i) for i in new_items]) + " ")
+            minqlxtism.set_configstring(715, " ".join([str(i) for i in new_items]) + " ")
         else:
             raise ValueError("The value needs to be an iterable.")
 
     @classmethod
     def shuffle(cls):
-        minqlxtended.console_command("forceshuffle")
+        minqlxtism.console_command("forceshuffle")
 
     # ====================================================================
     #                         ADMIN COMMANDS
@@ -282,140 +282,140 @@ class Game():
 
     @classmethod
     def timeout(cls):
-        return minqlxtended.console_command("timeout")
+        return minqlxtism.console_command("timeout")
 
     @classmethod
     def timein(cls):
-        return minqlxtended.console_command("timein")
+        return minqlxtism.console_command("timein")
 
     @classmethod
     def allready(cls):
-        return minqlxtended.console_command("allready")
+        return minqlxtism.console_command("allready")
 
     @classmethod
     def pause(cls):
-        return minqlxtended.console_command("pause")
+        return minqlxtism.console_command("pause")
 
     @classmethod
     def unpause(cls):
-        return minqlxtended.console_command("unpause")
+        return minqlxtism.console_command("unpause")
 
     @classmethod
     def lock(cls, team=None):
         if team is None:
-            return minqlxtended.console_command("lock")
-        elif team.lower() not in minqlxtended.TEAMS.values():
+            return minqlxtism.console_command("lock")
+        elif team.lower() not in minqlxtism.TEAMS.values():
             raise ValueError("Invalid team.")
         
-        return minqlxtended.console_command("lock {}".format(team.lower()))
+        return minqlxtism.console_command("lock {}".format(team.lower()))
 
     @classmethod
     def unlock(cls, team=None):
         if team is None:
-            return minqlxtended.console_command("unlock")
-        elif team.lower() not in minqlxtended.TEAMS.values():
+            return minqlxtism.console_command("unlock")
+        elif team.lower() not in minqlxtism.TEAMS.values():
             raise ValueError("Invalid team.")
 
-        return minqlxtended.console_command("unlock {}".format(team.lower()))
+        return minqlxtism.console_command("unlock {}".format(team.lower()))
 
     @classmethod
     def put(cls, player, team):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
-        elif team.lower() not in minqlxtended.TEAMS.values():
+        elif team.lower() not in minqlxtism.TEAMS.values():
             raise ValueError("Invalid team.")
 
-        return minqlxtended.console_command("put {} {}"
+        return minqlxtism.console_command("put {} {}"
             .format(cid, team.lower()))
 
     @classmethod
     def mute(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("mute {}".format(cid))
+        return minqlxtism.console_command("mute {}".format(cid))
 
     @classmethod
     def unmute(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("unmute {}".format(cid))
+        return minqlxtism.console_command("unmute {}".format(cid))
 
     @classmethod
     def tempban(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("tempban {}".format(cid))
+        return minqlxtism.console_command("tempban {}".format(cid))
 
     @classmethod
     def ban(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("ban {}".format(cid))
+        return minqlxtism.console_command("ban {}".format(cid))
 
     @classmethod
     def unban(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("unban {}".format(cid))
+        return minqlxtism.console_command("unban {}".format(cid))
 
     @classmethod
     def opsay(cls, msg):
-        return minqlxtended.console_command("opsay {}".format(msg))
+        return minqlxtism.console_command("opsay {}".format(msg))
 
     @classmethod
     def addadmin(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("addadmin {}".format(cid))
+        return minqlxtism.console_command("addadmin {}".format(cid))
 
     @classmethod
     def addmod(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("addmod {}".format(cid))
+        return minqlxtism.console_command("addmod {}".format(cid))
 
     @classmethod
     def demote(cls, player):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("demote {}".format(cid))
+        return minqlxtism.console_command("demote {}".format(cid))
 
     @classmethod
     def abort(cls):
-        return minqlxtended.console_command("map_restart")
+        return minqlxtism.console_command("map_restart")
 
     @classmethod
     def addscore(cls, player, score):
-        cid = minqlxtended.Plugin.client_id(player)
+        cid = minqlxtism.Plugin.client_id(player)
         if cid is None:
             raise ValueError("Invalid player.")
 
-        return minqlxtended.console_command("addscore {} {}".format(cid, score))
+        return minqlxtism.console_command("addscore {} {}".format(cid, score))
 
     @classmethod
     def addteamscore(cls, team, score):
-        if team.lower() not in minqlxtended.TEAMS.values():
+        if team.lower() not in minqlxtism.TEAMS.values():
             raise ValueError("Invalid team.")
 
-        return minqlxtended.console_command("addteamscore {} {}".format(team.lower(), score))
+        return minqlxtism.console_command("addteamscore {} {}".format(team.lower(), score))
 
     @classmethod
     def setmatchtime(cls, time):
-        return minqlxtended.console_command("setmatchtime {}".format(time))
+        return minqlxtism.console_command("setmatchtime {}".format(time))

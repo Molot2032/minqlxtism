@@ -1,22 +1,22 @@
-# minqlxtended - Extends Quake Live's dedicated server with extra functionality and scripting.
+# minqlxtism - Extends Quake Live's dedicated server with extra functionality and scripting.
 # Copyright (C) 2015 Mino <mino@minomino.org>
 
-# This file is part of minqlxtended.
+# This file is part of minqlxtism.
 
-# minqlxtended is free software: you can redistribute it and/or modify
+# minqlxtism is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-# minqlxtended is distributed in the hope that it will be useful,
+# minqlxtism is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with minqlxtended. If not, see <http://www.gnu.org/licenses/>.
+# along with minqlxtism. If not, see <http://www.gnu.org/licenses/>.
 
-import minqlxtended
+import minqlxtism
 import collections
 
 
@@ -25,7 +25,7 @@ class Plugin:
 
     Every plugin must inherit this or a subclass of this. It does not support any database
     by itself, but it has a *database* static variable that must be a subclass of the
-    abstract class :class:`minqlxtended.database.AbstractDatabase`. This abstract class requires
+    abstract class :class:`minqlxtism.database.AbstractDatabase`. This abstract class requires
     a few methods that deal with permissions. This will make sure that simple plugins that
     only care about permissions can work on any database. Abstraction beyond that is hard,
     so any use of the database past that point will be uncharted territory, meaning the
@@ -39,7 +39,7 @@ class Plugin:
     .. warning::
         I/O is the bane of single-threaded applications. You do **not** want blocking operations
         in code called by commands or events. That could make players lag. Helper decorators
-        like :func:`minqlxtended.thread` can be useful.
+        like :func:`minqlxtism.thread` can be useful.
 
     """
 
@@ -96,29 +96,29 @@ class Plugin:
     def game(self):
         """A Game instance."""
         try:
-            return minqlxtended.Game()
-        except minqlxtended.NonexistentGameError:
+            return minqlxtism.Game()
+        except minqlxtism.NonexistentGameError:
             return None
 
     @property
     def logger(self):
         """An instance of :class:`logging.Logger`, but initialized for this plugin."""
-        return minqlxtended.get_logger(self)
+        return minqlxtism.get_logger(self)
 
     # TODO: Document plugin methods.
-    def add_hook(self, event, handler, priority=minqlxtended.PRI_NORMAL):
+    def add_hook(self, event, handler, priority=minqlxtism.PRI_NORMAL):
         if not hasattr(self, "_hooks"):
             self._hooks = []
 
         self._hooks.append((event, handler, priority))
-        minqlxtended.EVENT_DISPATCHERS[event].add_hook(self.name, handler, priority)
+        minqlxtism.EVENT_DISPATCHERS[event].add_hook(self.name, handler, priority)
 
-    def remove_hook(self, event, handler, priority=minqlxtended.PRI_NORMAL):
+    def remove_hook(self, event, handler, priority=minqlxtism.PRI_NORMAL):
         if not hasattr(self, "_hooks"):
             self._hooks = []
             return
 
-        minqlxtended.EVENT_DISPATCHERS[event].remove_hook(self.name, handler, priority)
+        minqlxtism.EVENT_DISPATCHERS[event].remove_hook(self.name, handler, priority)
         self._hooks.remove((event, handler, priority))
 
     def add_command(
@@ -128,7 +128,7 @@ class Plugin:
         permission=0,
         channels=None,
         exclude_channels=(),
-        priority=minqlxtended.PRI_NORMAL,
+        priority=minqlxtism.PRI_NORMAL,
         client_cmd_pass=False,
         client_cmd_perm=5,
         prefix=True,
@@ -137,9 +137,9 @@ class Plugin:
         if not hasattr(self, "_commands"):
             self._commands = []
 
-        cmd = minqlxtended.Command(self, name, handler, permission, channels, exclude_channels, client_cmd_pass, client_cmd_perm, prefix, usage)
+        cmd = minqlxtism.Command(self, name, handler, permission, channels, exclude_channels, client_cmd_pass, client_cmd_perm, prefix, usage)
         self._commands.append(cmd)
-        minqlxtended.COMMANDS.add_command(cmd, priority)
+        minqlxtism.COMMANDS.add_command(cmd, priority)
 
     def remove_command(self, name, handler):
         if not hasattr(self, "_commands"):
@@ -148,7 +148,7 @@ class Plugin:
 
         for cmd in self._commands:
             if cmd.name == name and cmd.handler == handler:
-                minqlxtended.COMMANDS.remove_command(cmd)
+                minqlxtism.COMMANDS.remove_command(cmd)
 
     @classmethod
     def get_cvar(cls, name, return_type=str):
@@ -160,7 +160,7 @@ class Plugin:
             Supported types: str, int, float, bool, list, tuple
 
         """
-        res = minqlxtended.get_cvar(name)
+        res = minqlxtism.get_cvar(name)
         if return_type == str:
             return res
         elif return_type == int:
@@ -194,10 +194,10 @@ class Plugin:
 
         """
         if cls.get_cvar(name) is None:
-            minqlxtended.set_cvar(name, value, flags)
+            minqlxtism.set_cvar(name, value, flags)
             return True
         else:
-            minqlxtended.console_command('{} "{}"'.format(name, value))
+            minqlxtism.console_command('{} "{}"'.format(name, value))
             return False
 
     @classmethod
@@ -220,10 +220,10 @@ class Plugin:
 
         """
         if cls.get_cvar(name) is None:
-            minqlxtended.set_cvar(name, value, flags)
+            minqlxtism.set_cvar(name, value, flags)
             return True
         else:
-            minqlxtended.console_command('{} "{}"'.format(name, value))
+            minqlxtism.console_command('{} "{}"'.format(name, value))
             return False
 
     @classmethod
@@ -240,7 +240,7 @@ class Plugin:
         :rtype: bool
 
         """
-        return minqlxtended.set_cvar_once(name, value, flags)
+        return minqlxtism.set_cvar_once(name, value, flags)
 
     @classmethod
     def set_cvar_limit_once(cls, name, value, minimum, maximum, flags=0):
@@ -260,12 +260,12 @@ class Plugin:
         :rtype: bool
 
         """
-        return minqlxtended.set_cvar_limit_once(name, value, minimum, maximum, flags)
+        return minqlxtism.set_cvar_limit_once(name, value, minimum, maximum, flags)
 
     @classmethod
     def players(cls):
         """Get a list of all the players on the server."""
-        return minqlxtended.Player.all_players()
+        return minqlxtism.Player.all_players()
 
     @classmethod
     def player(cls, name, player_list=None):
@@ -275,10 +275,10 @@ class Plugin:
 
         """
         # In case 'name' isn't a string.
-        if isinstance(name, minqlxtended.Player):
+        if isinstance(name, minqlxtism.Player):
             return name
         elif isinstance(name, int) and 0 <= name < 64:
-            return minqlxtended.Player(name)
+            return minqlxtism.Player(name)
 
         if not player_list:
             players = cls.players()
@@ -301,33 +301,33 @@ class Plugin:
     @classmethod
     def msg(cls, msg, chat_channel="chat", **kwargs):
         """Send a message to the chat, or any other channel."""
-        if isinstance(chat_channel, minqlxtended.AbstractChannel):
+        if isinstance(chat_channel, minqlxtism.AbstractChannel):
             chat_channel.reply(msg, **kwargs)
-        elif chat_channel == minqlxtended.CHAT_CHANNEL:
-            minqlxtended.CHAT_CHANNEL.reply(msg, **kwargs)
-        elif chat_channel == minqlxtended.RED_TEAM_CHAT_CHANNEL:
-            minqlxtended.RED_TEAM_CHAT_CHANNEL.reply(msg, **kwargs)
-        elif chat_channel == minqlxtended.BLUE_TEAM_CHAT_CHANNEL:
-            minqlxtended.BLUE_TEAM_CHAT_CHANNEL.reply(msg, **kwargs)
-        elif chat_channel == minqlxtended.CONSOLE_CHANNEL:
-            minqlxtended.CONSOLE_CHANNEL.reply(msg, **kwargs)
+        elif chat_channel == minqlxtism.CHAT_CHANNEL:
+            minqlxtism.CHAT_CHANNEL.reply(msg, **kwargs)
+        elif chat_channel == minqlxtism.RED_TEAM_CHAT_CHANNEL:
+            minqlxtism.RED_TEAM_CHAT_CHANNEL.reply(msg, **kwargs)
+        elif chat_channel == minqlxtism.BLUE_TEAM_CHAT_CHANNEL:
+            minqlxtism.BLUE_TEAM_CHAT_CHANNEL.reply(msg, **kwargs)
+        elif chat_channel == minqlxtism.CONSOLE_CHANNEL:
+            minqlxtism.CONSOLE_CHANNEL.reply(msg, **kwargs)
         else:
             raise ValueError("Invalid channel.")
 
     @classmethod
     def console(cls, text):
         """Prints text in the console."""
-        minqlxtended.console_print(str(text))
+        minqlxtism.console_print(str(text))
 
     @classmethod
     def clean_text(cls, text):
         """Removes color tags from text."""
-        return minqlxtended.re_color_tag.sub("", text)
+        return minqlxtism.re_color_tag.sub("", text)
 
     @classmethod
     def colored_name(cls, name, player_list=None):
         """Get the colored name of a decolored name."""
-        if isinstance(name, minqlxtended.Player):
+        if isinstance(name, minqlxtism.Player):
             return name.name
 
         if not player_list:
@@ -351,7 +351,7 @@ class Plugin:
         """
         if isinstance(name, int) and 0 <= name < 64:
             return name
-        elif isinstance(name, minqlxtended.Player):
+        elif isinstance(name, minqlxtism.Player):
             return name.id
 
         if not player_list:
@@ -404,7 +404,7 @@ class Plugin:
         else:
             players = player_list
 
-        res = collections.OrderedDict.fromkeys(minqlxtended.TEAMS.values())
+        res = collections.OrderedDict.fromkeys(minqlxtism.TEAMS.values())
         for key in res:
             res[key] = []
 
@@ -418,7 +418,7 @@ class Plugin:
         if recipient:
             recipient = cls.client_id(recipient)
 
-        minqlxtended.send_server_command(recipient, 'cp "{}"'.format(msg))
+        minqlxtism.send_server_command(recipient, 'cp "{}"'.format(msg))
 
     @classmethod
     def tell(cls, msg, recipient, **kwargs):
@@ -427,23 +427,23 @@ class Plugin:
         :param msg: The message to be sent.
         :type msg: str
         :param recipient: The player that should receive the message.
-        :type recipient: str/int/minqlxtended.Player
+        :type recipient: str/int/minqlxtism.Player
         :returns: bool -- True if succeeded, False otherwise.
         :raises: ValueError
         """
-        minqlxtended.TellChannel(recipient).reply(msg, **kwargs)
+        minqlxtism.TellChannel(recipient).reply(msg, **kwargs)
 
     @classmethod
     def is_vote_active(cls):
-        if minqlxtended.get_configstring(9):
+        if minqlxtism.get_configstring(9):
             return True
         else:
             return False
 
     @classmethod
     def current_vote_count(cls):
-        yes = minqlxtended.get_configstring(10)
-        no = minqlxtended.get_configstring(11)
+        yes = minqlxtism.get_configstring(10)
+        no = minqlxtism.get_configstring(11)
         if yes and no:
             return int(yes), int(no)
         else:
@@ -452,8 +452,8 @@ class Plugin:
     @classmethod
     def callvote(cls, vote, display, caller=None, time=30):
         if not cls.is_vote_active():
-            minqlxtended.EVENT_DISPATCHERS["vote_started"].caller(caller)
-            minqlxtended.callvote(vote, display, time)
+            minqlxtism.EVENT_DISPATCHERS["vote_started"].caller(caller)
+            minqlxtism.callvote(vote, display, time)
             return True
 
         return False
@@ -461,13 +461,13 @@ class Plugin:
     @classmethod
     def force_vote(cls, pass_it):
         if pass_it is True or pass_it is False:
-            return minqlxtended.force_vote(pass_it)
+            return minqlxtism.force_vote(pass_it)
 
         raise ValueError("pass_it must be either True or False.")
 
     @classmethod
     def teamsize(cls, size):
-        minqlxtended.Game().teamsize = size
+        minqlxtism.Game().teamsize = size
 
     @classmethod
     def kick(cls, player, reason=""):
@@ -476,13 +476,13 @@ class Plugin:
             raise ValueError("Invalid player.")
 
         if not reason:
-            minqlxtended.kick(cid, None)
+            minqlxtism.kick(cid, None)
         else:
-            minqlxtended.kick(cid, reason)
+            minqlxtism.kick(cid, reason)
 
     @classmethod
     def shuffle(cls):
-        minqlxtended.Game().shuffle()
+        minqlxtism.Game().shuffle()
 
     @classmethod
     def cointoss(cls):
@@ -492,9 +492,9 @@ class Plugin:
     @classmethod
     def change_map(cls, new_map, factory=None):
         if not factory:
-            minqlxtended.Game().map = new_map
+            minqlxtism.Game().map = new_map
         else:
-            minqlxtended.console_command("map {} {}".format(new_map, factory))
+            minqlxtism.console_command("map {} {}".format(new_map, factory))
 
     @classmethod
     def switch(cls, player, other_player):
@@ -521,9 +521,9 @@ class Plugin:
             return False
 
         if player:
-            minqlxtended.send_server_command(player.id, "playSound {}".format(sound_path))
+            minqlxtism.send_server_command(player.id, "playSound {}".format(sound_path))
         else:
-            minqlxtended.send_server_command(None, "playSound {}".format(sound_path))
+            minqlxtism.send_server_command(None, "playSound {}".format(sound_path))
         return True
 
     @classmethod
@@ -532,18 +532,18 @@ class Plugin:
             return False
 
         if player:
-            minqlxtended.send_server_command(player.id, "playMusic {}".format(music_path))
+            minqlxtism.send_server_command(player.id, "playMusic {}".format(music_path))
         else:
-            minqlxtended.send_server_command(None, "playMusic {}".format(music_path))
+            minqlxtism.send_server_command(None, "playMusic {}".format(music_path))
         return True
 
     @classmethod
     def stop_sound(cls, player=None):
-        minqlxtended.send_server_command(player.id if player else None, "clearSounds")
+        minqlxtism.send_server_command(player.id if player else None, "clearSounds")
 
     @classmethod
     def stop_music(cls, player=None):
-        minqlxtended.send_server_command(player.id if player else None, "stopMusic")
+        minqlxtism.send_server_command(player.id if player else None, "stopMusic")
 
     @classmethod
     def slap(cls, player, damage=0):
@@ -551,7 +551,7 @@ class Plugin:
         if cid is None:
             raise ValueError("Invalid player.")
 
-        minqlxtended.console_command("slap {} {}".format(cid, damage))
+        minqlxtism.console_command("slap {} {}".format(cid, damage))
 
     @classmethod
     def slay(cls, player):
@@ -559,7 +559,7 @@ class Plugin:
         if cid is None:
             raise ValueError("Invalid player.")
 
-        minqlxtended.console_command("slay {}".format(cid))
+        minqlxtism.console_command("slay {}".format(cid))
 
     # ====================================================================
     #                         ADMIN COMMANDS
@@ -567,85 +567,85 @@ class Plugin:
 
     @classmethod
     def timeout(cls):
-        return minqlxtended.Game.timeout()
+        return minqlxtism.Game.timeout()
 
     @classmethod
     def timein(cls):
-        return minqlxtended.Game.timein()
+        return minqlxtism.Game.timein()
 
     @classmethod
     def allready(cls):
-        return minqlxtended.Game.allready()
+        return minqlxtism.Game.allready()
 
     @classmethod
     def pause(cls):
-        return minqlxtended.Game.pause()
+        return minqlxtism.Game.pause()
 
     @classmethod
     def unpause(cls):
-        return minqlxtended.Game.unpause()
+        return minqlxtism.Game.unpause()
 
     @classmethod
     def lock(cls, team=None):
-        return minqlxtended.Game.lock(team)
+        return minqlxtism.Game.lock(team)
 
     @classmethod
     def unlock(cls, team=None):
-        return minqlxtended.Game.unlock(team)
+        return minqlxtism.Game.unlock(team)
 
     @classmethod
     def put(cls, player, team):
-        return minqlxtended.Game.put(player, team)
+        return minqlxtism.Game.put(player, team)
 
     @classmethod
     def mute(cls, player):
-        return minqlxtended.Game.mute(player)
+        return minqlxtism.Game.mute(player)
 
     @classmethod
     def unmute(cls, player):
-        return minqlxtended.Game.unmute(player)
+        return minqlxtism.Game.unmute(player)
 
     @classmethod
     def tempban(cls, player):
         # TODO: Add an optional reason to tempban.
-        return minqlxtended.Game.tempban(player)
+        return minqlxtism.Game.tempban(player)
 
     @classmethod
     def ban(cls, player):
-        return minqlxtended.Game.ban(player)
+        return minqlxtism.Game.ban(player)
 
     @classmethod
     def unban(cls, player):
-        return minqlxtended.Game.unban(player)
+        return minqlxtism.Game.unban(player)
 
     @classmethod
     def opsay(cls, msg):
-        return minqlxtended.Game.opsay(msg)
+        return minqlxtism.Game.opsay(msg)
 
     @classmethod
     def addadmin(cls, player):
-        return minqlxtended.Game.addadmin(player)
+        return minqlxtism.Game.addadmin(player)
 
     @classmethod
     def addmod(cls, player):
-        return minqlxtended.Game.addmod(player)
+        return minqlxtism.Game.addmod(player)
 
     @classmethod
     def demote(cls, player):
-        return minqlxtended.Game.demote(player)
+        return minqlxtism.Game.demote(player)
 
     @classmethod
     def abort(cls):
-        return minqlxtended.Game.abort()
+        return minqlxtism.Game.abort()
 
     @classmethod
     def addscore(cls, player, score):
-        return minqlxtended.Game.addscore(player, score)
+        return minqlxtism.Game.addscore(player, score)
 
     @classmethod
     def addteamscore(cls, team, score):
-        return minqlxtended.Game.addteamscore(team, score)
+        return minqlxtism.Game.addteamscore(team, score)
 
     @classmethod
     def setmatchtime(cls, time):
-        return minqlxtended.Game.setmatchtime(time)
+        return minqlxtism.Game.setmatchtime(time)
