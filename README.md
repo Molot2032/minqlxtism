@@ -2,6 +2,16 @@ minqlxtism
 ======
 minqlxtism is a modification of [minqlx](https://github.com/MinoMino/minqlx) that provides support for WASM plugins via [Extism](https://extism.org/docs/overview). Forked from the fantastic and [more actively maintained fork](https://github.com/MinoMino/minqlx/compare/master...tjone270:minqlxtended:master) of minqlx, [minqlxtism](https://github.com/tjone270/minqlxtended).
 
+**🚧 Work in progress, nothing interesting here yet! 🚧**
+
+Status
+======
+- [X] Hello WASM🌏!
+- [ ] Plugin Manager
+- [ ] Feature parity with minqlx's core API
+- [ ] Reimplementation of base minqlx plugins. (MAYBE: py2wasm?)
+
+
 Setup
 ============
 1. Ensure the system is completely up-to-date:
