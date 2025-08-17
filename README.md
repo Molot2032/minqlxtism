@@ -1,6 +1,6 @@
 minqlxtism
 ======
-minqlxtism is a modification of [minqlx](https://github.com/MinoMino/minqlx) that provides support for WASM plugins via [Extism](https://extism.org/docs/overview). Forked from the fantastic and [more actively maintained fork](https://github.com/MinoMino/minqlx/compare/master...tjone270:minqlxtended:master) of minqlx, [minqlxtism](https://github.com/tjone270/minqlxtended).
+minqlxtism is a modification of [minqlx](https://github.com/MinoMino/minqlx) that provides support for WASM plugins via [Extism](https://extism.org/docs/overview). Forked from the fantastic and [more actively maintained fork](https://github.com/MinoMino/minqlx/compare/master...tjone270:minqlxtended:master) of minqlx, [minqlxtended](https://github.com/tjone270/minqlxtended).
 
 **🚧 Work in progress, nothing interesting here yet! 🚧**
 
